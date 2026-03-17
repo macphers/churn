@@ -4,460 +4,155 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Osaka — Rewards Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0c0d12;
-  --surface: #16181f;
-  --surface-2: #1e2028;
-  --border: #282a36;
-  --text: #f0f0f3;
-  --text-muted: #6b6e80;
-  --accent: #3b82f6;
-  --accent-light: #60a5fa;
-  --accent-glow: rgba(59,130,246,0.2);
-  --danger: #ff4d6a;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --airline-color: #38bdf8;
-  --hotel-color: #c084fc;
-  --card-color: #fb923c;
-  --other-color: #6b6e80;
-  --radius: 14px;
-  --radius-sm: 8px;
+  --bg: #0c0d12; --surface: #16181f; --surface-2: #1e2028; --border: #282a36;
+  --text: #f0f0f3; --text-muted: #6b6e80; --accent: #3b82f6; --accent-light: #60a5fa;
+  --accent-glow: rgba(59,130,246,0.2); --danger: #ff4d6a; --success: #34d399;
+  --warning: #fbbf24; --airline-color: #38bdf8; --hotel-color: #c084fc;
+  --card-color: #fb923c; --other-color: #6b6e80; --radius: 14px; --radius-sm: 8px;
   --error-bg: rgba(255,77,106,0.08);
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding-bottom: 88px;
-  -webkit-font-smoothing: antialiased;
-}
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 88px; -webkit-font-smoothing: antialiased; }
 
-/* Animations */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes toastIn { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100px); opacity: 0; } }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-@keyframes countUp {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes checkmark {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
-
-.animate-in {
-  animation: fadeInUp 0.3s ease-out forwards;
-}
-
+.animate-in { animation: fadeInUp 0.3s ease-out forwards; }
 .animate-in:nth-child(2) { animation-delay: 40ms; }
 .animate-in:nth-child(3) { animation-delay: 80ms; }
 .animate-in:nth-child(4) { animation-delay: 120ms; }
 .animate-in:nth-child(5) { animation-delay: 160ms; }
-.animate-in:nth-child(6) { animation-delay: 200ms; }
 
-/* Header */
-header {
-  padding: 24px 20px 16px;
-  position: relative;
-}
-
-header h1 {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-  color: var(--text);
-}
-
+header { padding: 24px 20px 16px; }
+header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; }
 header p { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
 
-/* Navigation */
-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(22,24,31,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-nav button {
-  flex: 1;
-  padding: 10px 8px 8px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  transition: color 0.25s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
+nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(22,24,31,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+nav button { flex: 1; padding: 10px 8px 8px; background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 500; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: color 0.25s, transform 0.15s; -webkit-tap-highlight-color: transparent; }
 nav button.active { color: var(--accent-light); }
 nav button:active { transform: scale(0.92); }
 nav button .icon { font-size: 22px; }
 
-/* Views */
 .view { display: none; padding: 8px 16px 16px; max-width: 600px; margin: 0 auto; }
 .view.active { display: block; animation: fadeIn 0.2s ease; }
 
-/* Summary Hero */
-.hero {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px 20px;
-  margin-bottom: 16px;
-}
+.hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 20px; margin-bottom: 16px; }
+.hero .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.hero .value { font-size: 40px; font-weight: 800; letter-spacing: -2px; margin-top: 4px; }
+.hero .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
-.hero .label {
-  font-size: 12px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 600;
-}
-
-.hero .value {
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  color: var(--text);
-  margin-top: 4px;
-}
-
-.hero .subtitle {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-/* Error banner */
-.error-banner {
-  background: var(--error-bg);
-  border: 1px solid var(--danger);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: var(--danger);
-  display: none;
-}
+.error-banner { background: var(--error-bg); border: 1px solid var(--danger); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: var(--danger); display: none; }
 .error-banner.visible { display: block; }
+.success-banner { background: rgba(52,211,153,0.08); border: 1px solid var(--success); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: var(--success); display: none; }
+.success-banner.visible { display: block; }
 
-.field-error { border-color: var(--danger) !important; }
-.field-error-msg { color: var(--danger); font-size: 11px; margin-top: 3px; display: none; }
-.field-error-msg.visible { display: block; }
-
-/* Category pills */
-.category-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 2px 0;
-}
-
+.category-row { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 2px 0; }
 .category-row::-webkit-scrollbar { display: none; }
-
-.category-pill {
-  flex-shrink: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 18px;
-  min-width: 120px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.category-pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-}
-
+.category-pill { flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; min-width: 120px; transition: transform 0.2s, box-shadow 0.2s; }
+.category-pill:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 .category-pill .pill-icon { font-size: 20px; }
 .category-pill .pill-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 .category-pill .pill-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* Cards */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 10px;
-  transition: transform 0.15s, box-shadow 0.2s;
-}
-
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 10px; transition: transform 0.15s, box-shadow 0.2s; }
 .card:active { transform: scale(0.98); }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.card-program {
-  font-size: 16px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.type-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.card-program { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.type-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .type-dot.airline { background: var(--airline-color); }
 .type-dot.hotel { background: var(--hotel-color); }
 .type-dot.credit_card { background: var(--card-color); }
 .type-dot.other { background: var(--other-color); }
+.type-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.card-balance { font-size: 30px; font-weight: 800; letter-spacing: -1.5px; }
+.card-currency { font-size: 13px; color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+.card-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+.stale-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(251,191,36,0.15); color: var(--warning); font-weight: 600; }
+.card-actions { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 
-.type-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-
-.card-balance {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-}
-
-.card-currency {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 400;
-  margin-left: 4px;
-}
-
-.card-meta {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stale-badge {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(251,191,36,0.15);
-  color: var(--warning);
-  font-weight: 600;
-}
-
-.card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-
-/* Benefits */
-.benefit-urgency {
-  font-size: 11px;
-  padding: 3px 10px;
-  border-radius: 99px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-
+.benefit-urgency { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 700; letter-spacing: 0.3px; }
 .urgency-green { background: rgba(52,211,153,0.12); color: var(--success); }
 .urgency-yellow { background: rgba(251,191,36,0.12); color: var(--warning); }
 .urgency-red { background: rgba(255,77,106,0.12); color: var(--danger); animation: pulse 2s ease-in-out infinite; }
 .urgency-gray { background: rgba(107,110,128,0.15); color: var(--text-muted); text-decoration: line-through; }
 .urgency-used { background: rgba(52,211,153,0.12); color: var(--success); }
+.benefit-linked { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-.benefit-linked {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-/* Buttons */
-.btn {
-  padding: 9px 16px;
-  border-radius: var(--radius-sm);
-  border: none;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-
+.btn { padding: 9px 16px; border-radius: var(--radius-sm); border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
 .btn:active { transform: scale(0.95); }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-light); }
 .btn-danger { background: transparent; color: var(--danger); }
 .btn-ghost { background: transparent; color: var(--text-muted); }
 .btn-ghost:hover { color: var(--text); }
-
-.btn-add {
-  width: 100%;
-  padding: 16px;
-  background: var(--surface);
-  border: 2px dashed var(--border);
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 12px;
-}
-
+.btn-add { width: 100%; padding: 16px; background: var(--surface); border: 2px dashed var(--border); border-radius: var(--radius); color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
 .btn-add:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
 
-/* Modal */
-.modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
-  z-index: 200;
-  align-items: flex-end;
-  justify-content: center;
-}
-
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: flex-end; justify-content: center; }
 .modal-backdrop.active { display: flex; }
-
-.modal {
-  background: var(--surface-2);
-  border-radius: 20px 20px 0 0;
-  padding: 28px 20px;
-  width: 100%;
-  max-width: 600px;
-  max-height: 85vh;
-  overflow-y: auto;
-  animation: slideUp 0.3s ease-out;
-}
-
+.modal { background: var(--surface-2); border-radius: 20px 20px 0 0; padding: 28px 20px; width: 100%; max-width: 600px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s ease-out; }
 .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-
 .form-group { margin-bottom: 16px; }
-.form-group label {
-  display: block;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 12px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-size: 15px;
-  font-family: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 24px;
-}
-
+.form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-family: inherit; transition: border-color 0.2s, box-shadow 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.form-actions { display: flex; gap: 10px; margin-top: 24px; }
 .form-actions .btn { flex: 1; padding: 14px; font-size: 15px; }
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 56px 20px;
-  color: var(--text-muted);
-}
-
+.empty-state { text-align: center; padding: 56px 20px; color: var(--text-muted); }
 .empty-state .emoji { font-size: 56px; margin-bottom: 16px; }
 .empty-state h3 { font-size: 18px; color: var(--text); font-weight: 700; margin-bottom: 6px; }
 .empty-state p { font-size: 14px; line-height: 1.5; }
-
-/* Section Header */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-  padding: 4px 0;
-}
-
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 4px 0; }
 .section-header h2 { font-size: 20px; font-weight: 700; }
-.section-label { font-size: 14px; font-weight: 700; color: var(--text-muted); margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 10px; }
+.profile-card .pf-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px; }
+.profile-card .pf-value { font-size: 16px; font-weight: 600; }
+.profile-card .pf-value.empty { color: var(--text-muted); font-style: italic; font-weight: 400; }
+.profile-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.profile-tag { font-size: 12px; padding: 4px 10px; background: rgba(59,130,246,0.1); border-radius: 99px; color: var(--accent-light); font-weight: 500; }
+.cb-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.cb-group label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 400; cursor: pointer; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); transition: border-color 0.2s; }
+.cb-group label:has(input:checked) { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+.cb-group input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+
+/* Undo toast */
+.undo-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; display: flex; align-items: center; gap: 12px; z-index: 300; animation: toastIn 0.3s ease-out; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.undo-toast.leaving { animation: toastOut 0.3s ease-in forwards; }
+.undo-toast .toast-msg { font-size: 14px; }
+.undo-toast .toast-timer { font-size: 12px; color: var(--text-muted); min-width: 20px; }
+.undo-toast .btn { padding: 6px 14px; font-size: 13px; }
+
+/* Data management buttons */
+.data-actions { display: flex; gap: 8px; margin-top: 16px; }
+.data-actions .btn { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; }
+.import-input { display: none; }
+.storage-meter { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-top: 16px; }
+.storage-meter .meter-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px; }
+.meter-track { height: 10px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.3s; }
+.meter-fill.warn { background: var(--warning); }
+.meter-fill.danger { background: var(--danger); }
+.meter-text { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Osaka</h1>
-  <p>Your rewards, beautifully organized</p>
-</header>
+<header><h1>Osaka</h1><p>Your rewards, beautifully organized</p></header>
 
 <section id="view-dashboard" class="view active">
   <div id="error-banner" class="error-banner"></div>
+  <div id="success-banner" class="success-banner"></div>
   <div id="hero-card"></div>
   <div id="category-pills" class="category-row"></div>
   <div class="section-header"><h2>Recent</h2></div>
@@ -476,613 +171,334 @@ nav button .icon { font-size: 22px; }
   <div id="benefits-list"></div>
 </section>
 
+<section id="view-profile" class="view">
+  <div class="section-header"><h2>Travel Profile</h2><button class="btn btn-ghost" onclick="openProfileModal()">Edit</button></div>
+  <div id="profile-display"></div>
+  <div class="data-actions">
+    <button class="btn btn-ghost" onclick="exportData()">Export Data</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()">Import Data</button>
+    <input type="file" id="import-file" class="import-input" accept=".json" onchange="importData(event)">
+  </div>
+  <div id="storage-meter"></div>
+</section>
+
 <nav>
-  <button class="active" onclick="switchTab('dashboard')" data-tab="dashboard">
-    <span class="icon">📊</span>Dashboard
-  </button>
-  <button onclick="switchTab('accounts')" data-tab="accounts">
-    <span class="icon">💳</span>Accounts
-  </button>
-  <button onclick="switchTab('benefits')" data-tab="benefits">
-    <span class="icon">🎁</span>Benefits
-  </button>
+  <button class="active" onclick="switchTab('dashboard')" data-tab="dashboard"><span class="icon">📊</span>Dashboard</button>
+  <button onclick="switchTab('accounts')" data-tab="accounts"><span class="icon">💳</span>Accounts</button>
+  <button onclick="switchTab('benefits')" data-tab="benefits"><span class="icon">🎁</span>Benefits</button>
+  <button onclick="switchTab('profile')" data-tab="profile"><span class="icon">👤</span>Profile</button>
 </nav>
 
-<!-- Account Modal -->
-<div id="account-modal" class="modal-backdrop" onclick="closeModal(event,'account-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2 id="account-modal-title">Add Account</h2>
-    <form id="account-form" onsubmit="saveAccount(event)">
-      <input type="hidden" id="account-id">
-      <div class="form-group">
-        <label>Program Name</label>
-        <input type="text" id="account-program" required placeholder="e.g., Chase Ultimate Rewards">
-      </div>
-      <div class="form-group">
-        <label>Type</label>
-        <select id="account-type">
-          <option value="airline">✈️ Airline</option>
-          <option value="hotel">🏨 Hotel</option>
-          <option value="credit_card">💳 Credit Card</option>
-          <option value="other">📦 Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Account Number</label>
-        <input type="text" id="account-number" placeholder="e.g., xxxx-1234">
-      </div>
-      <div class="form-group">
-        <label>Balance</label>
-        <input type="number" id="account-balance" required min="0" step="1" placeholder="85000">
-      </div>
-      <div class="form-group">
-        <label>Currency</label>
-        <select id="account-currency">
-          <option value="points">Points</option>
-          <option value="miles">Miles</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Notes</label>
-        <textarea id="account-notes" rows="2" placeholder="Optional..."></textarea>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-ghost" onclick="closeModalById('account-modal')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div id="undo-container"></div>
 
-<!-- Benefit Modal -->
-<div id="benefit-modal" class="modal-backdrop" onclick="closeModal(event,'benefit-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2 id="benefit-modal-title">Add Benefit</h2>
-    <form id="benefit-form" onsubmit="saveBenefit(event)">
-      <input type="hidden" id="benefit-id">
-      <div class="form-group">
-        <label>Linked Account</label>
-        <select id="benefit-card" required></select>
-      </div>
-      <div class="form-group">
-        <label>Benefit Name</label>
-        <input type="text" id="benefit-name" required placeholder="e.g., Global Entry Credit">
-      </div>
-      <div class="form-group">
-        <label>Value</label>
-        <input type="text" id="benefit-value" placeholder="e.g., $100">
-      </div>
-      <div class="form-group">
-        <label>Renewal Date</label>
-        <input type="date" id="benefit-renewal">
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="benefit-used">
-          <option value="false">Unused</option>
-          <option value="true">Used</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Notes</label>
-        <textarea id="benefit-notes" rows="2" placeholder="Optional..."></textarea>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-ghost" onclick="closeModalById('benefit-modal')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div id="account-modal" class="modal-backdrop" onclick="closeModal(event,'account-modal')"><div class="modal" onclick="event.stopPropagation()"><h2 id="account-modal-title">Add Account</h2><form id="account-form" onsubmit="saveAccount(event)"><input type="hidden" id="account-id"><div class="form-group"><label>Program Name</label><input type="text" id="account-program" required placeholder="e.g., Chase Ultimate Rewards" maxlength="100"></div><div class="form-group"><label>Type</label><select id="account-type"><option value="airline">Airline</option><option value="hotel">Hotel</option><option value="credit_card">Credit Card</option><option value="other">Other</option></select></div><div class="form-group"><label>Account Number</label><input type="text" id="account-number" placeholder="e.g., xxxx-1234" maxlength="50"></div><div class="form-group"><label>Balance</label><input type="number" id="account-balance" required min="0" max="999999999" step="1" placeholder="85000"></div><div class="form-group"><label>Currency</label><select id="account-currency"><option value="points">Points</option><option value="miles">Miles</option></select></div><div class="form-group"><label>Notes</label><textarea id="account-notes" rows="2" placeholder="Optional..." maxlength="500"></textarea></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModalById('account-modal')">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
+
+<div id="benefit-modal" class="modal-backdrop" onclick="closeModal(event,'benefit-modal')"><div class="modal" onclick="event.stopPropagation()"><h2 id="benefit-modal-title">Add Benefit</h2><form id="benefit-form" onsubmit="saveBenefit(event)"><input type="hidden" id="benefit-id"><div class="form-group"><label>Linked Account</label><select id="benefit-card" required></select></div><div class="form-group"><label>Benefit Name</label><input type="text" id="benefit-name" required placeholder="e.g., Global Entry Credit" maxlength="100"></div><div class="form-group"><label>Value</label><input type="text" id="benefit-value" placeholder="e.g., $100" maxlength="20"></div><div class="form-group"><label>Renewal Date</label><input type="date" id="benefit-renewal"></div><div class="form-group"><label>Status</label><select id="benefit-used"><option value="false">Unused</option><option value="true">Used</option></select></div><div class="form-group"><label>Notes</label><textarea id="benefit-notes" rows="2" placeholder="Optional..." maxlength="500"></textarea></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModalById('benefit-modal')">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
+
+<div id="profile-modal" class="modal-backdrop" onclick="closeModal(event,'profile-modal')"><div class="modal" onclick="event.stopPropagation()"><h2>Edit Travel Profile</h2><form id="profile-form" onsubmit="saveProfile(event)"><div class="form-group"><label>Home Airport (IATA)</label><input type="text" id="profile-airport" placeholder="e.g., SFO" maxlength="4" style="text-transform:uppercase"></div><div class="form-group"><label>Preferred Alliances</label><div class="cb-group" id="alliance-group"><label><input type="checkbox" value="oneworld"> oneworld</label><label><input type="checkbox" value="Star Alliance"> Star Alliance</label><label><input type="checkbox" value="SkyTeam"> SkyTeam</label></div></div><div class="form-group"><label>Preferred Cabin</label><select id="profile-class"><option value="economy">Economy</option><option value="premium_economy">Premium Economy</option><option value="business">Business</option><option value="first">First</option></select></div><div class="form-group"><label>Preferred Regions</label><div class="cb-group" id="region-group"><label><input type="checkbox" value="Asia"> Asia</label><label><input type="checkbox" value="Europe"> Europe</label><label><input type="checkbox" value="North America"> N. America</label><label><input type="checkbox" value="South America"> S. America</label><label><input type="checkbox" value="Africa"> Africa</label><label><input type="checkbox" value="Oceania"> Oceania</label></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModalById('profile-modal')">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
 
 <script>
 'use strict';
+var STORAGE_KEY='osaka_data',SCHEMA_VERSION=2,VALID_TYPES=['airline','hotel','credit_card','other'],VALID_CURRENCIES=['points','miles'],MAX_TEXT=100,MAX_NOTES=500,MAX_BALANCE=999999999;
 
-const STORAGE_KEY = 'osaka_data';
-const SCHEMA_VERSION = 1;
-const VALID_TYPES = ['airline', 'hotel', 'credit_card', 'other'];
-const VALID_CURRENCIES = ['points', 'miles'];
+function sanitize(str,maxLen){if(typeof str!=='string')return'';return str.replace(/<[^>]*>/g,'').trim().slice(0,maxLen||MAX_TEXT)}
+function validateType(t){return VALID_TYPES.includes(t)?t:'other'}
+function validateCurrency(c){return VALID_CURRENCIES.includes(c)?c:'points'}
+function validateBalance(v){var n=Number(v);if(isNaN(n)||!isFinite(n)||n<0)return 0;return Math.min(Math.floor(n),MAX_BALANCE)}
 
-function defaultData() { return { _version: SCHEMA_VERSION, accounts: [], benefits: [] }; }
+function defaultData(){return{_version:SCHEMA_VERSION,accounts:[],benefits:[],profile:{homeAirport:'',preferredAlliances:[],travelPreferences:{regions:[],classPreference:'economy'}}}}
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultData();
-    const d = JSON.parse(raw);
-    if (typeof d !== 'object' || d === null) return defaultData();
-    if (!Array.isArray(d.accounts)) d.accounts = [];
-    if (!Array.isArray(d.benefits)) d.benefits = [];
-    // Clean orphaned benefits
-    const ids = new Set(d.accounts.map(a => a.id));
-    d.benefits = d.benefits.filter(b => ids.has(b.cardId));
-    d._version = SCHEMA_VERSION;
+function loadData(){
+  try{
+    var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return defaultData();
+    var d=JSON.parse(raw);if(typeof d!=='object'||d===null)return defaultData();
+    if(!Array.isArray(d.accounts))d.accounts=[];
+    if(!Array.isArray(d.benefits))d.benefits=[];
+    if(!d.profile||typeof d.profile!=='object')d.profile=defaultData().profile;
+    if(!d.profile.travelPreferences)d.profile.travelPreferences=defaultData().profile.travelPreferences;
+    if(!Array.isArray(d.profile.preferredAlliances))d.profile.preferredAlliances=[];
+    if(!Array.isArray(d.profile.travelPreferences.regions))d.profile.travelPreferences.regions=[];
+    var ids=new Set(d.accounts.map(function(a){return a.id}));
+    d.benefits=d.benefits.filter(function(b){return ids.has(b.cardId)});
     return d;
-  } catch {
-    showError('Data was corrupted. Starting fresh.');
-    return defaultData();
-  }
+  }catch(e){showError('Data was corrupted. Starting fresh.');return defaultData()}
 }
 
-function saveData(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return true;
-  } catch (e) {
-    if (e.name === 'QuotaExceededError' || e.code === 22) {
-      showError('Storage full. Delete some accounts to free space.');
-    } else {
-      showError('Failed to save: ' + (e.message || 'Unknown error'));
-    }
+function saveData(data){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));updateStorageMeter();return true}
+  catch(e){
+    if(e.name==='QuotaExceededError'||e.code===22)showError('Storage full. Delete some accounts or export and clear data.');
+    else showError('Failed to save: '+(e.message||'Unknown error'));
     return false;
   }
 }
 
-function showError(msg) {
-  const el = document.getElementById('error-banner');
-  if (el) { el.textContent = msg; el.classList.add('visible'); setTimeout(() => el.classList.remove('visible'), 6000); }
+function showError(msg){var el=document.getElementById('error-banner');if(el){el.textContent=msg;el.classList.add('visible');setTimeout(function(){el.classList.remove('visible')},6000)}}
+function showSuccess(msg){var el=document.getElementById('success-banner');if(el){el.textContent=msg;el.classList.add('visible');setTimeout(function(){el.classList.remove('visible')},4000)}}
+function genId(){try{return crypto.randomUUID()}catch(e){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}}
+function fmt(n){return Number(n).toLocaleString()}
+function timeAgo(d){if(!d)return'';var days=Math.floor((Date.now()-new Date(d).getTime())/86400000);if(days<0)return'just now';if(days===0)return'today';if(days===1)return'yesterday';if(days<7)return days+'d ago';if(days<30)return Math.floor(days/7)+'w ago';return Math.floor(days/30)+'mo ago'}
+function daysUntil(d){if(!d)return Infinity;return Math.ceil((new Date(d).getTime()-Date.now())/86400000)}
+function typeIcon(t){return{airline:'\u2708\uFE0F',hotel:'\uD83C\uDFE8',credit_card:'\uD83D\uDCB3',other:'\uD83D\uDCE6'}[t]||'\uD83D\uDCE6'}
+
+/* === UNDO SYSTEM === */
+var undoQueue=[];
+function showUndo(msg,undoFn){
+  var container=document.getElementById('undo-container');
+  var seconds=5;
+  var toast=document.createElement('div');toast.className='undo-toast';
+  var msgEl=document.createElement('span');msgEl.className='toast-msg';msgEl.textContent=msg;
+  var timerEl=document.createElement('span');timerEl.className='toast-timer';timerEl.textContent=seconds+'s';
+  var undoBtn=document.createElement('button');undoBtn.className='btn btn-primary';undoBtn.textContent='Undo';
+  toast.appendChild(msgEl);toast.appendChild(timerEl);toast.appendChild(undoBtn);
+  container.appendChild(toast);
+  var interval=setInterval(function(){seconds--;timerEl.textContent=seconds+'s';if(seconds<=0){clearInterval(interval);removeToast()}},1000);
+  function removeToast(){clearInterval(interval);toast.classList.add('leaving');setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},300)}
+  undoBtn.onclick=function(){clearInterval(interval);undoFn();removeToast();render()};
+  undoQueue.push({toast:toast,interval:interval});
 }
 
-function genId() {
-  try { return crypto.randomUUID(); }
-  catch { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
+/* === EXPORT / IMPORT === */
+function exportData(){
+  var data=loadData();
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='osaka-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showSuccess('Data exported successfully.');
 }
 
-function fmt(n) { return Number(n).toLocaleString(); }
-
-function timeAgo(d) {
-  if (!d) return '';
-  const days = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
-  if (days < 0) return 'just now';
-  if (days === 0) return 'today';
-  if (days === 1) return 'yesterday';
-  if (days < 7) return days + 'd ago';
-  if (days < 30) return Math.floor(days / 7) + 'w ago';
-  return Math.floor(days / 30) + 'mo ago';
+function importData(event){
+  var file=event.target.files[0];if(!file)return;
+  event.target.value='';
+  if(file.size>1024*1024){showError('Import file too large (max 1MB).');return}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var imported=JSON.parse(e.target.result);
+      var errors=validateImport(imported);
+      if(errors.length>0){showError('Invalid import: '+errors[0]);return}
+      if(!confirm('Import will replace all current data. Continue?'))return;
+      imported._version=SCHEMA_VERSION;
+      if(saveData(imported)){showSuccess('Data imported successfully ('+imported.accounts.length+' accounts, '+imported.benefits.length+' benefits).');render()}
+    }catch(err){showError('Invalid JSON file.')}
+  };
+  reader.onerror=function(){showError('Failed to read file.')};
+  reader.readAsText(file);
 }
 
-function daysUntil(d) {
-  if (!d) return Infinity;
-  return Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
+function validateImport(d){
+  var errors=[];
+  if(typeof d!=='object'||d===null)return['Not a valid JSON object'];
+  if(!Array.isArray(d.accounts))errors.push('Missing or invalid accounts array');
+  if(!Array.isArray(d.benefits))errors.push('Missing or invalid benefits array');
+  if(errors.length>0)return errors;
+  d.accounts.forEach(function(a,i){
+    if(!a.id||typeof a.id!=='string')errors.push('Account '+i+': missing id');
+    if(!a.program||typeof a.program!=='string')errors.push('Account '+i+': missing program name');
+    if(typeof a.balance!=='number'||a.balance<0)errors.push('Account '+i+': invalid balance');
+    a.type=validateType(a.type);a.currency=validateCurrency(a.currency);
+    a.program=sanitize(a.program,MAX_TEXT);a.accountNumber=sanitize(a.accountNumber||'',50);
+    a.notes=sanitize(a.notes||'',MAX_NOTES);a.balance=validateBalance(a.balance);
+  });
+  d.benefits.forEach(function(b,i){
+    if(!b.id||typeof b.id!=='string')errors.push('Benefit '+i+': missing id');
+    if(!b.name||typeof b.name!=='string')errors.push('Benefit '+i+': missing name');
+    b.name=sanitize(b.name,MAX_TEXT);b.value=sanitize(b.value||'',20);
+    b.notes=sanitize(b.notes||'',MAX_NOTES);b.used=!!b.used;
+  });
+  if(!d.profile||typeof d.profile!=='object')d.profile=defaultData().profile;
+  return errors;
 }
 
-function typeIcon(t) {
-  return { airline: '✈️', hotel: '🏨', credit_card: '💳', other: '📦' }[t] || '📦';
+/* === STORAGE METER === */
+function updateStorageMeter(){
+  var el=document.getElementById('storage-meter');if(!el)return;
+  try{
+    var used=new Blob([localStorage.getItem(STORAGE_KEY)||'']).size;
+    var limit=5*1024*1024;
+    var pct=Math.round((used/limit)*100);
+    var cls='';if(pct>80)cls=' danger';else if(pct>60)cls=' warn';
+    var usedKB=(used/1024).toFixed(1);
+    el.innerHTML='<div class="storage-meter"><div class="meter-label">Local Storage</div><div class="meter-track"><div class="meter-fill'+cls+'" style="width:'+Math.min(pct,100)+'%"></div></div><div class="meter-text">'+usedKB+'KB used (~'+pct+'%)</div></div>';
+  }catch(e){el.innerHTML=''}
 }
 
-/* === TABS === */
-
-function switchTab(tab) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + tab).classList.add('active');
-  document.querySelector(`nav button[data-tab="${tab}"]`).classList.add('active');
+function switchTab(tab){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+  document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active')});
+  var view=document.getElementById('view-'+tab);if(view)view.classList.add('active');
+  var btn=document.querySelector('nav button[data-tab="'+tab+'"]');if(btn)btn.classList.add('active');
   render();
 }
 
-/* === RENDER === */
-
-function renderDashboard() {
-  const data = loadData();
-  const { accounts, benefits } = data;
-
-  // Hero
-  const heroEl = document.getElementById('hero-card');
-  const total = accounts.reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
-  heroEl.innerHTML = `<div class="hero animate-in">
-    <div class="label">Total Rewards</div>
-    <div class="value">${fmt(total)}</div>
-    <div class="subtitle">${accounts.length} account${accounts.length !== 1 ? 's' : ''} · ${benefits.length} benefit${benefits.length !== 1 ? 's' : ''}</div>
-  </div>`;
-
-  // Category pills
-  const pillsEl = document.getElementById('category-pills');
-  pillsEl.innerHTML = '';
-  const cats = [
-    { key: 'airline', label: 'Airlines', icon: '✈️', color: 'var(--airline-color)' },
-    { key: 'hotel', label: 'Hotels', icon: '🏨', color: 'var(--hotel-color)' },
-    { key: 'credit_card', label: 'Cards', icon: '💳', color: 'var(--card-color)' },
-    { key: 'other', label: 'Other', icon: '📦', color: 'var(--other-color)' }
-  ];
-
-  cats.forEach((c, i) => {
-    const bal = accounts.filter(a => a.type === c.key).reduce((s, a) => s + (Number(a.balance) || 0), 0);
-    if (bal > 0) {
-      const pill = document.createElement('div');
-      pill.className = 'category-pill animate-in';
-      pill.style.animationDelay = (i * 60) + 'ms';
-      pill.innerHTML = `<div class="pill-icon">${c.icon}</div><div class="pill-label">${c.label}</div><div class="pill-value" style="color:${c.color}">${fmt(bal)}</div>`;
-      pillsEl.appendChild(pill);
-    }
+function renderDashboard(){
+  var data=loadData(),accounts=data.accounts,benefits=data.benefits;
+  var heroEl=document.getElementById('hero-card');
+  var total=accounts.reduce(function(sum,a){return sum+(Number(a.balance)||0)},0);
+  heroEl.innerHTML='<div class="hero animate-in"><div class="label">Total Rewards</div><div class="value">'+fmt(total)+'</div><div class="subtitle">'+accounts.length+' account'+(accounts.length!==1?'s':'')+' \u00B7 '+benefits.length+' benefit'+(benefits.length!==1?'s':'')+'</div></div>';
+  var pillsEl=document.getElementById('category-pills');pillsEl.innerHTML='';
+  [{key:'airline',label:'Airlines',icon:'\u2708\uFE0F',color:'var(--airline-color)'},{key:'hotel',label:'Hotels',icon:'\uD83C\uDFE8',color:'var(--hotel-color)'},{key:'credit_card',label:'Cards',icon:'\uD83D\uDCB3',color:'var(--card-color)'},{key:'other',label:'Other',icon:'\uD83D\uDCE6',color:'var(--other-color)'}].forEach(function(c,i){
+    var bal=accounts.filter(function(a){return a.type===c.key}).reduce(function(s,a){return s+(Number(a.balance)||0)},0);
+    if(bal>0){var pill=document.createElement('div');pill.className='category-pill animate-in';pill.style.animationDelay=(i*60)+'ms';pill.innerHTML='<div class="pill-icon">'+c.icon+'</div><div class="pill-label">'+c.label+'</div><div class="pill-value" style="color:'+c.color+'">'+fmt(bal)+'</div>';pillsEl.appendChild(pill)}
   });
-
-  // Recent accounts
-  const listEl = document.getElementById('dashboard-list');
-  listEl.innerHTML = '';
-
-  if (accounts.length === 0) {
-    listEl.innerHTML = `<div class="empty-state animate-in">
-      <div class="emoji">🗺️</div>
-      <h3>Your journey starts here</h3>
-      <p>Add your first rewards account and watch<br>your points come together in one place.</p>
-    </div>`;
-    return;
-  }
-
-  const sorted = [...accounts].sort((a, b) => (b.balance || 0) - (a.balance || 0));
-  sorted.forEach((a, i) => {
-    const card = document.createElement('div');
-    card.className = 'card animate-in';
-    card.style.animationDelay = (i * 60) + 'ms';
-
-    const isStale = a.lastUpdated && daysUntil(a.lastUpdated) < -30;
-
-    const programSpan = document.createElement('span');
-    programSpan.textContent = a.program;
-
-    const header = document.createElement('div');
-    header.className = 'card-header';
-    const left = document.createElement('div');
-    left.className = 'card-program';
-    const dot = document.createElement('span');
-    dot.className = 'type-dot ' + a.type;
-    left.appendChild(dot);
-    left.appendChild(programSpan);
-    const right = document.createElement('span');
-    right.className = 'type-label';
-    right.textContent = a.type.replace('_', ' ');
-    header.appendChild(left);
-    header.appendChild(right);
-
-    const balDiv = document.createElement('div');
-    balDiv.className = 'card-balance';
-    balDiv.textContent = fmt(a.balance);
-    const currSpan = document.createElement('span');
-    currSpan.className = 'card-currency';
-    currSpan.textContent = a.currency || 'points';
-    balDiv.appendChild(currSpan);
-
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
-    const metaText = document.createElement('span');
-    metaText.textContent = (a.accountNumber ? a.accountNumber + ' · ' : '') + 'Updated ' + timeAgo(a.lastUpdated);
-    meta.appendChild(metaText);
-    if (isStale) {
-      const badge = document.createElement('span');
-      badge.className = 'stale-badge';
-      badge.textContent = 'STALE';
-      meta.appendChild(badge);
-    }
-
-    card.appendChild(header);
-    card.appendChild(balDiv);
-    card.appendChild(meta);
-    listEl.appendChild(card);
+  var listEl=document.getElementById('dashboard-list');listEl.innerHTML='';
+  if(accounts.length===0){listEl.innerHTML='<div class="empty-state animate-in"><div class="emoji">\uD83D\uDDFA\uFE0F</div><h3>Your journey starts here</h3><p>Add your first rewards account and watch<br>your points come together in one place.</p></div>';return}
+  accounts.slice().sort(function(a,b){return(b.balance||0)-(a.balance||0)}).forEach(function(a,i){
+    var card=document.createElement('div');card.className='card animate-in';card.style.animationDelay=(i*60)+'ms';
+    var isStale=a.lastUpdated&&daysUntil(a.lastUpdated)<-30;
+    var ps=document.createElement('span');ps.textContent=a.program;
+    var hdr=document.createElement('div');hdr.className='card-header';var left=document.createElement('div');left.className='card-program';var dot=document.createElement('span');dot.className='type-dot '+a.type;left.appendChild(dot);left.appendChild(ps);
+    var right=document.createElement('span');right.className='type-label';right.textContent=(a.type||'').replace('_',' ');hdr.appendChild(left);hdr.appendChild(right);
+    var balDiv=document.createElement('div');balDiv.className='card-balance';balDiv.textContent=fmt(a.balance);
+    var cs=document.createElement('span');cs.className='card-currency';cs.textContent=a.currency||'points';balDiv.appendChild(cs);
+    var meta=document.createElement('div');meta.className='card-meta';var mt=document.createElement('span');mt.textContent=(a.accountNumber?a.accountNumber+' \u00B7 ':'')+'Updated '+timeAgo(a.lastUpdated);meta.appendChild(mt);
+    if(isStale){var badge=document.createElement('span');badge.className='stale-badge';badge.textContent='STALE';meta.appendChild(badge)}
+    card.appendChild(hdr);card.appendChild(balDiv);card.appendChild(meta);listEl.appendChild(card);
   });
 }
 
-function renderAccounts() {
-  const data = loadData();
-  const listEl = document.getElementById('accounts-list');
-  listEl.innerHTML = '';
-
-  if (data.accounts.length === 0) {
-    listEl.innerHTML = `<div class="empty-state animate-in">
-      <div class="emoji">✨</div>
-      <h3>No accounts yet</h3>
-      <p>Add your airline miles, hotel points,<br>and credit card rewards.</p>
-    </div>`;
-    return;
-  }
-
-  data.accounts.forEach((a, i) => {
-    const card = document.createElement('div');
-    card.className = 'card animate-in';
-    card.style.animationDelay = (i * 50) + 'ms';
-
-    const header = document.createElement('div');
-    header.className = 'card-header';
-    const prog = document.createElement('div');
-    prog.className = 'card-program';
-    prog.textContent = typeIcon(a.type) + ' ' + a.program;
-    const label = document.createElement('span');
-    label.className = 'type-label';
-    label.textContent = a.type.replace('_', ' ');
-    header.appendChild(prog);
-    header.appendChild(label);
-
-    const bal = document.createElement('div');
-    bal.className = 'card-balance';
-    bal.textContent = fmt(a.balance) + ' ' + (a.currency || 'points');
-
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
-    const parts = [];
-    if (a.accountNumber) parts.push(a.accountNumber);
-    parts.push('Updated ' + timeAgo(a.lastUpdated));
-    meta.textContent = parts.join(' · ');
-
-    card.appendChild(header);
-    card.appendChild(bal);
-    card.appendChild(meta);
-
-    if (a.notes) {
-      const notes = document.createElement('div');
-      notes.className = 'card-meta';
-      notes.textContent = a.notes;
-      card.appendChild(notes);
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'card-actions';
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-ghost';
-    editBtn.textContent = 'Edit';
-    editBtn.onclick = () => openAccountModal(a.id);
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-danger';
-    delBtn.textContent = 'Delete';
-    delBtn.onclick = () => deleteAccount(a.id);
-    actions.appendChild(editBtn);
-    actions.appendChild(delBtn);
-    card.appendChild(actions);
-    listEl.appendChild(card);
+function renderAccounts(){
+  var data=loadData(),listEl=document.getElementById('accounts-list');listEl.innerHTML='';
+  if(data.accounts.length===0){listEl.innerHTML='<div class="empty-state animate-in"><div class="emoji">\u2728</div><h3>No accounts yet</h3><p>Add your airline miles, hotel points,<br>and credit card rewards.</p></div>';return}
+  data.accounts.forEach(function(a,i){
+    var card=document.createElement('div');card.className='card animate-in';card.style.animationDelay=(i*50)+'ms';
+    var hdr=document.createElement('div');hdr.className='card-header';var prog=document.createElement('div');prog.className='card-program';prog.textContent=typeIcon(a.type)+' '+a.program;var label=document.createElement('span');label.className='type-label';label.textContent=(a.type||'').replace('_',' ');hdr.appendChild(prog);hdr.appendChild(label);
+    var bal=document.createElement('div');bal.className='card-balance';bal.textContent=fmt(a.balance)+' '+(a.currency||'points');
+    var meta=document.createElement('div');meta.className='card-meta';var parts=[];if(a.accountNumber)parts.push(a.accountNumber);parts.push('Updated '+timeAgo(a.lastUpdated));meta.textContent=parts.join(' \u00B7 ');
+    card.appendChild(hdr);card.appendChild(bal);card.appendChild(meta);
+    if(a.notes){var n=document.createElement('div');n.className='card-meta';n.textContent=a.notes;card.appendChild(n)}
+    var actions=document.createElement('div');actions.className='card-actions';
+    var eb=document.createElement('button');eb.className='btn btn-ghost';eb.textContent='Edit';eb.onclick=(function(id){return function(){openAccountModal(id)}})(a.id);
+    var db=document.createElement('button');db.className='btn btn-danger';db.textContent='Delete';db.onclick=(function(id){return function(){deleteAccount(id)}})(a.id);
+    actions.appendChild(eb);actions.appendChild(db);card.appendChild(actions);listEl.appendChild(card);
   });
 }
 
-function renderBenefits() {
-  const data = loadData();
-  const listEl = document.getElementById('benefits-list');
-  listEl.innerHTML = '';
-
-  if (data.benefits.length === 0) {
-    listEl.innerHTML = `<div class="empty-state animate-in">
-      <div class="emoji">🎁</div>
-      <h3>No benefits tracked</h3>
-      <p>Don't let card perks go to waste.<br>Track lounge access, credits, and more.</p>
-    </div>`;
-    return;
-  }
-
-  const acctMap = {};
-  data.accounts.forEach(a => { acctMap[a.id] = a.program; });
-
-  // Sort: urgent first, then unused, then used
-  const sorted = [...data.benefits].sort((a, b) => {
-    if (a.used !== b.used) return a.used ? 1 : -1;
-    return daysUntil(a.renewalDate) - daysUntil(b.renewalDate);
-  });
-
-  sorted.forEach((b, i) => {
-    const card = document.createElement('div');
-    card.className = 'card animate-in';
-    card.style.animationDelay = (i * 50) + 'ms';
-
-    const header = document.createElement('div');
-    header.className = 'card-header';
-    const title = document.createElement('div');
-    title.className = 'card-program';
-    title.textContent = b.name;
-
-    // Urgency badge
-    const days = daysUntil(b.renewalDate);
-    let urgClass, urgText;
-    if (b.used) { urgClass = 'urgency-used'; urgText = '✓ Used'; }
-    else if (days < 0) { urgClass = 'urgency-gray'; urgText = 'Expired'; }
-    else if (days <= 7) { urgClass = 'urgency-red'; urgText = days + 'd left'; }
-    else if (days <= 30) { urgClass = 'urgency-yellow'; urgText = days + 'd left'; }
-    else if (days < Infinity) { urgClass = 'urgency-green'; urgText = days + 'd left'; }
-    else { urgClass = 'urgency-green'; urgText = 'Active'; }
-
-    const badge = document.createElement('span');
-    badge.className = 'benefit-urgency ' + urgClass;
-    badge.textContent = urgText;
-    header.appendChild(title);
-    header.appendChild(badge);
-
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
-    const parts = [];
-    if (b.value) parts.push(b.value);
-    if (b.renewalDate) parts.push('Renews ' + new Date(b.renewalDate).toLocaleDateString());
-    meta.textContent = parts.join(' · ');
-
-    const linked = document.createElement('div');
-    linked.className = 'benefit-linked';
-    linked.textContent = acctMap[b.cardId] ? '🔗 ' + acctMap[b.cardId] : '';
-
-    card.appendChild(header);
-    card.appendChild(meta);
-    card.appendChild(linked);
-
-    if (b.notes) {
-      const notes = document.createElement('div');
-      notes.className = 'card-meta';
-      notes.textContent = b.notes;
-      card.appendChild(notes);
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'card-actions';
-
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'btn btn-ghost';
-    toggleBtn.textContent = b.used ? 'Mark Unused' : '✓ Mark Used';
-    toggleBtn.onclick = () => toggleUsed(b.id);
-
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-ghost';
-    editBtn.textContent = 'Edit';
-    editBtn.onclick = () => openBenefitModal(b.id);
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-danger';
-    delBtn.textContent = 'Delete';
-    delBtn.onclick = () => deleteBenefit(b.id);
-
-    actions.appendChild(toggleBtn);
-    actions.appendChild(editBtn);
-    actions.appendChild(delBtn);
-    card.appendChild(actions);
-    listEl.appendChild(card);
+function renderBenefits(){
+  var data=loadData(),listEl=document.getElementById('benefits-list');listEl.innerHTML='';
+  if(data.benefits.length===0){listEl.innerHTML='<div class="empty-state animate-in"><div class="emoji">\uD83C\uDF81</div><h3>No benefits tracked</h3><p>Don\'t let card perks go to waste.<br>Track lounge access, credits, and more.</p></div>';return}
+  var acctMap={};data.accounts.forEach(function(a){acctMap[a.id]=a.program});
+  data.benefits.slice().sort(function(a,b){if(a.used!==b.used)return a.used?1:-1;return daysUntil(a.renewalDate)-daysUntil(b.renewalDate)}).forEach(function(b,i){
+    var card=document.createElement('div');card.className='card animate-in';card.style.animationDelay=(i*50)+'ms';
+    var hdr=document.createElement('div');hdr.className='card-header';var title=document.createElement('div');title.className='card-program';title.textContent=b.name;
+    var days=daysUntil(b.renewalDate),urgClass,urgText;
+    if(b.used){urgClass='urgency-used';urgText='\u2713 Used'}else if(days<0){urgClass='urgency-gray';urgText='Expired'}else if(days<=7){urgClass='urgency-red';urgText=days+'d left'}else if(days<=30){urgClass='urgency-yellow';urgText=days+'d left'}else if(days<Infinity){urgClass='urgency-green';urgText=days+'d left'}else{urgClass='urgency-green';urgText='Active'}
+    var badge=document.createElement('span');badge.className='benefit-urgency '+urgClass;badge.textContent=urgText;hdr.appendChild(title);hdr.appendChild(badge);
+    var meta=document.createElement('div');meta.className='card-meta';var mp=[];if(b.value)mp.push(b.value);if(b.renewalDate)mp.push('Renews '+new Date(b.renewalDate).toLocaleDateString());meta.textContent=mp.join(' \u00B7 ');
+    var linked=document.createElement('div');linked.className='benefit-linked';linked.textContent=acctMap[b.cardId]?'\uD83D\uDD17 '+acctMap[b.cardId]:'';
+    card.appendChild(hdr);card.appendChild(meta);card.appendChild(linked);
+    if(b.notes){var n=document.createElement('div');n.className='card-meta';n.textContent=b.notes;card.appendChild(n)}
+    var actions=document.createElement('div');actions.className='card-actions';
+    var tb=document.createElement('button');tb.className='btn btn-ghost';tb.textContent=b.used?'Mark Unused':'\u2713 Mark Used';tb.onclick=(function(id){return function(){toggleUsed(id)}})(b.id);
+    var eb=document.createElement('button');eb.className='btn btn-ghost';eb.textContent='Edit';eb.onclick=(function(id){return function(){openBenefitModal(id)}})(b.id);
+    var db=document.createElement('button');db.className='btn btn-danger';db.textContent='Delete';db.onclick=(function(id){return function(){deleteBenefit(id)}})(b.id);
+    actions.appendChild(tb);actions.appendChild(eb);actions.appendChild(db);card.appendChild(actions);listEl.appendChild(card);
   });
 }
 
-function render() { renderDashboard(); renderAccounts(); renderBenefits(); }
+function renderProfile(){
+  var data=loadData(),p=data.profile,el=document.getElementById('profile-display');
+  if(!p.homeAirport&&p.preferredAlliances.length===0&&p.travelPreferences.regions.length===0){el.innerHTML='<div class="empty-state animate-in"><div class="emoji">\u2708\uFE0F</div><h3>Set up your travel profile</h3><p>Tell us your home airport and preferences<br>so your AI agent can find the best trips.</p><button class="btn btn-primary" onclick="openProfileModal()" style="margin-top:16px">Set Up Profile</button></div>';return}
+  var html='';
+  html+='<div class="profile-card animate-in"><div class="pf-label">Home Airport</div><div class="pf-value'+(p.homeAirport?'':' empty')+'">'+(p.homeAirport||'Not set')+'</div></div>';
+  html+='<div class="profile-card animate-in"><div class="pf-label">Preferred Alliances</div>';
+  html+='<div id="c-alliance-display"></div></div>';
+  html+='<div class="profile-card animate-in"><div class="pf-label">Cabin Preference</div><div class="pf-value">'+(p.travelPreferences.classPreference||'economy').replace('_',' ')+'</div></div>';
+  html+='<div class="profile-card animate-in"><div class="pf-label">Preferred Regions</div>';
+  html+='<div id="c-region-display"></div></div>';
+  el.innerHTML=html;
+  var allianceEl=document.getElementById('c-alliance-display');
+  if(p.preferredAlliances.length>0){var tags=document.createElement('div');tags.className='profile-tags';p.preferredAlliances.forEach(function(a){var s=document.createElement('span');s.className='profile-tag';s.textContent=a;tags.appendChild(s)});allianceEl.appendChild(tags)}else allianceEl.innerHTML='<div class="pf-value empty">None selected</div>';
+  var regionEl=document.getElementById('c-region-display');
+  if(p.travelPreferences.regions.length>0){var rtags=document.createElement('div');rtags.className='profile-tags';p.travelPreferences.regions.forEach(function(r){var s=document.createElement('span');s.className='profile-tag';s.textContent=r;rtags.appendChild(s)});regionEl.appendChild(rtags)}else regionEl.innerHTML='<div class="pf-value empty">None selected</div>';
+  updateStorageMeter();
+}
 
-/* === MODALS === */
+function render(){renderDashboard();renderAccounts();renderBenefits();renderProfile()}
 
-function openAccountModal(id) {
-  const form = document.getElementById('account-form');
-  form.reset();
-  document.getElementById('account-id').value = '';
-  if (id) {
-    const a = loadData().accounts.find(x => x.id === id);
-    if (a) {
-      document.getElementById('account-modal-title').textContent = 'Edit Account';
-      document.getElementById('account-id').value = a.id;
-      document.getElementById('account-program').value = a.program;
-      document.getElementById('account-type').value = a.type;
-      document.getElementById('account-number').value = a.accountNumber || '';
-      document.getElementById('account-balance').value = a.balance;
-      document.getElementById('account-currency').value = a.currency || 'points';
-      document.getElementById('account-notes').value = a.notes || '';
-    }
-  } else {
-    document.getElementById('account-modal-title').textContent = 'Add Account';
-  }
+function openAccountModal(id){
+  var form=document.getElementById('account-form');form.reset();document.getElementById('account-id').value='';
+  if(id){var a=loadData().accounts.find(function(x){return x.id===id});if(a){document.getElementById('account-modal-title').textContent='Edit Account';document.getElementById('account-id').value=a.id;document.getElementById('account-program').value=a.program;document.getElementById('account-type').value=a.type;document.getElementById('account-number').value=a.accountNumber||'';document.getElementById('account-balance').value=a.balance;document.getElementById('account-currency').value=a.currency||'points';document.getElementById('account-notes').value=a.notes||''}}
+  else document.getElementById('account-modal-title').textContent='Add Account';
   document.getElementById('account-modal').classList.add('active');
 }
 
-function openBenefitModal(id) {
-  const form = document.getElementById('benefit-form');
-  form.reset();
-  document.getElementById('benefit-id').value = '';
-  const data = loadData();
-  const sel = document.getElementById('benefit-card');
-  sel.innerHTML = '';
-  if (data.accounts.length === 0) {
-    const opt = document.createElement('option');
-    opt.textContent = 'Add an account first';
-    opt.disabled = true;
-    sel.appendChild(opt);
-  } else {
-    data.accounts.forEach(a => {
-      const opt = document.createElement('option');
-      opt.value = a.id;
-      opt.textContent = typeIcon(a.type) + ' ' + a.program;
-      sel.appendChild(opt);
-    });
-  }
-  if (id) {
-    const b = data.benefits.find(x => x.id === id);
-    if (b) {
-      document.getElementById('benefit-modal-title').textContent = 'Edit Benefit';
-      document.getElementById('benefit-id').value = b.id;
-      document.getElementById('benefit-card').value = b.cardId;
-      document.getElementById('benefit-name').value = b.name;
-      document.getElementById('benefit-value').value = b.value || '';
-      document.getElementById('benefit-renewal').value = b.renewalDate || '';
-      document.getElementById('benefit-used').value = String(b.used);
-      document.getElementById('benefit-notes').value = b.notes || '';
-    }
-  } else {
-    document.getElementById('benefit-modal-title').textContent = 'Add Benefit';
-  }
+function openBenefitModal(id){
+  var form=document.getElementById('benefit-form');form.reset();document.getElementById('benefit-id').value='';
+  var data=loadData(),sel=document.getElementById('benefit-card');sel.innerHTML='';
+  if(data.accounts.length===0){var opt=document.createElement('option');opt.textContent='Add an account first';opt.disabled=true;sel.appendChild(opt)}
+  else data.accounts.forEach(function(a){var opt=document.createElement('option');opt.value=a.id;opt.textContent=typeIcon(a.type)+' '+a.program;sel.appendChild(opt)});
+  if(id){var b=data.benefits.find(function(x){return x.id===id});if(b){document.getElementById('benefit-modal-title').textContent='Edit Benefit';document.getElementById('benefit-id').value=b.id;document.getElementById('benefit-card').value=b.cardId;document.getElementById('benefit-name').value=b.name;document.getElementById('benefit-value').value=b.value||'';document.getElementById('benefit-renewal').value=b.renewalDate||'';document.getElementById('benefit-used').value=String(b.used);document.getElementById('benefit-notes').value=b.notes||''}}
+  else document.getElementById('benefit-modal-title').textContent='Add Benefit';
   document.getElementById('benefit-modal').classList.add('active');
 }
 
-function closeModal(e, id) { if (e.target === e.currentTarget) document.getElementById(id).classList.remove('active'); }
-function closeModalById(id) { document.getElementById(id).classList.remove('active'); }
+function openProfileModal(){
+  var data=loadData(),p=data.profile;
+  document.getElementById('profile-airport').value=p.homeAirport||'';
+  document.querySelectorAll('#alliance-group input').forEach(function(cb){cb.checked=p.preferredAlliances.includes(cb.value)});
+  document.getElementById('profile-class').value=p.travelPreferences.classPreference||'economy';
+  document.querySelectorAll('#region-group input').forEach(function(cb){cb.checked=p.travelPreferences.regions.includes(cb.value)});
+  document.getElementById('profile-modal').classList.add('active');
+}
 
-/* === CRUD === */
+function closeModal(e,id){if(e.target===e.currentTarget)document.getElementById(id).classList.remove('active')}
+function closeModalById(id){document.getElementById(id).classList.remove('active')}
 
-function saveAccount(e) {
+function saveAccount(e){
   e.preventDefault();
-  const program = document.getElementById('account-program').value.trim();
-  const balanceRaw = document.getElementById('account-balance').value;
-  const balance = Number(balanceRaw);
-  if (!program) { showError('Program name is required.'); return; }
-  if (!balanceRaw || isNaN(balance) || !Number.isFinite(balance) || balance < 0) { showError('Balance must be a non-negative number.'); return; }
-
-  const data = loadData();
-  const id = document.getElementById('account-id').value;
-  const acct = {
-    id: id || genId(),
-    type: document.getElementById('account-type').value,
-    program,
-    accountNumber: document.getElementById('account-number').value.trim(),
-    balance,
-    currency: document.getElementById('account-currency').value,
-    lastUpdated: new Date().toISOString().split('T')[0],
-    notes: document.getElementById('account-notes').value.trim()
-  };
-
-  if (id) {
-    const idx = data.accounts.findIndex(a => a.id === id);
-    if (idx !== -1) data.accounts[idx] = acct;
-  } else {
-    data.accounts.push(acct);
-  }
-  saveData(data);
-  closeModalById('account-modal');
-  render();
+  var program=sanitize(document.getElementById('account-program').value,MAX_TEXT);
+  var balance=validateBalance(document.getElementById('account-balance').value);
+  if(!program){showError('Program name is required.');return}
+  var data=loadData(),id=document.getElementById('account-id').value;
+  var acct={id:id||genId(),type:validateType(document.getElementById('account-type').value),program:program,accountNumber:sanitize(document.getElementById('account-number').value,50),balance:balance,currency:validateCurrency(document.getElementById('account-currency').value),lastUpdated:new Date().toISOString().split('T')[0],notes:sanitize(document.getElementById('account-notes').value,MAX_NOTES)};
+  if(id){var idx=data.accounts.findIndex(function(a){return a.id===id});if(idx!==-1)data.accounts[idx]=acct}else data.accounts.push(acct);
+  saveData(data);closeModalById('account-modal');render();
 }
 
-function deleteAccount(id) {
-  const data = loadData();
-  const linked = data.benefits.filter(b => b.cardId === id).length;
-  if (!confirm(linked ? `Delete account and ${linked} linked benefit(s)?` : 'Delete this account?')) return;
-  data.accounts = data.accounts.filter(a => a.id !== id);
-  data.benefits = data.benefits.filter(b => b.cardId !== id);
-  saveData(data);
-  render();
+function deleteAccount(id){
+  var data=loadData();
+  var acct=data.accounts.find(function(a){return a.id===id});if(!acct)return;
+  var linkedBenefits=data.benefits.filter(function(b){return b.cardId===id});
+  var snapshot=JSON.parse(JSON.stringify(data));
+  data.accounts=data.accounts.filter(function(a){return a.id!==id});
+  data.benefits=data.benefits.filter(function(b){return b.cardId!==id});
+  saveData(data);render();
+  showUndo('Deleted "'+acct.program+'"'+(linkedBenefits.length?' and '+linkedBenefits.length+' benefit(s)':''),function(){saveData(snapshot);});
 }
 
-function saveBenefit(e) {
+function saveBenefit(e){
   e.preventDefault();
-  const name = document.getElementById('benefit-name').value.trim();
-  const cardId = document.getElementById('benefit-card').value;
-  if (!name || !cardId) return;
-
-  const data = loadData();
-  const id = document.getElementById('benefit-id').value;
-  const ben = {
-    id: id || genId(),
-    cardId,
-    name,
-    value: document.getElementById('benefit-value').value.trim(),
-    renewalDate: document.getElementById('benefit-renewal').value || '',
-    used: document.getElementById('benefit-used').value === 'true',
-    notes: document.getElementById('benefit-notes').value.trim()
-  };
-
-  if (id) {
-    const idx = data.benefits.findIndex(b => b.id === id);
-    if (idx !== -1) data.benefits[idx] = ben;
-  } else {
-    data.benefits.push(ben);
-  }
-  saveData(data);
-  closeModalById('benefit-modal');
-  render();
+  var name=sanitize(document.getElementById('benefit-name').value,MAX_TEXT);
+  var cardId=document.getElementById('benefit-card').value;
+  if(!name||!cardId)return;
+  var data=loadData(),id=document.getElementById('benefit-id').value;
+  var ben={id:id||genId(),cardId:cardId,name:name,value:sanitize(document.getElementById('benefit-value').value,20),renewalDate:document.getElementById('benefit-renewal').value||'',used:document.getElementById('benefit-used').value==='true',notes:sanitize(document.getElementById('benefit-notes').value,MAX_NOTES)};
+  if(id){var idx=data.benefits.findIndex(function(b){return b.id===id});if(idx!==-1)data.benefits[idx]=ben}else data.benefits.push(ben);
+  saveData(data);closeModalById('benefit-modal');render();
 }
 
-function deleteBenefit(id) {
-  if (!confirm('Delete this benefit?')) return;
-  const data = loadData();
-  data.benefits = data.benefits.filter(b => b.id !== id);
-  saveData(data);
-  render();
+function deleteBenefit(id){
+  var data=loadData();
+  var ben=data.benefits.find(function(b){return b.id===id});if(!ben)return;
+  var snapshot=JSON.parse(JSON.stringify(data));
+  data.benefits=data.benefits.filter(function(b){return b.id!==id});
+  saveData(data);render();
+  showUndo('Deleted "'+ben.name+'"',function(){saveData(snapshot)});
 }
 
-function toggleUsed(id) {
-  const data = loadData();
-  const b = data.benefits.find(x => x.id === id);
-  if (b) { b.used = !b.used; saveData(data); render(); }
+function toggleUsed(id){var data=loadData(),b=data.benefits.find(function(x){return x.id===id});if(b){b.used=!b.used;saveData(data);render()}}
+
+function saveProfile(e){
+  e.preventDefault();var data=loadData();
+  var alliances=[],regions=[];
+  document.querySelectorAll('#alliance-group input:checked').forEach(function(cb){alliances.push(cb.value)});
+  document.querySelectorAll('#region-group input:checked').forEach(function(cb){regions.push(cb.value)});
+  data.profile={homeAirport:sanitize(document.getElementById('profile-airport').value,4).toUpperCase(),preferredAlliances:alliances,travelPreferences:{regions:regions,classPreference:document.getElementById('profile-class').value||'economy'}};
+  saveData(data);closeModalById('profile-modal');render();
 }
 
-/* === INIT === */
 render();
 </script>
 </body>
