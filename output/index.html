@@ -161,6 +161,14 @@ nav button .icon { font-size: 22px; }
 .card-balance[contenteditable]:focus { background: rgba(59,130,246,0.1); box-shadow: 0 0 0 2px var(--accent-glow); }
 .save-flash { animation: flashGreen 0.6s ease; }
 @keyframes flashGreen { 0% { background: rgba(52,211,153,0.3); } 100% { background: transparent; } }
+
+/* Benefit summary */
+.benefit-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px; }
+.benefit-summary .bs-row { display: flex; justify-content: space-between; align-items: center; }
+.benefit-summary .bs-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.benefit-summary .bs-value { font-size: 16px; font-weight: 700; }
+.benefit-summary .bs-detail { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.benefit-summary .bs-upcoming { color: var(--warning); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -173,6 +181,7 @@ nav button .icon { font-size: 22px; }
   <div id="hero-card"></div>
   <div id="category-pills" class="category-row"></div>
   <div id="points-chart"></div>
+  <div id="benefit-summary"></div>
   <div class="section-header"><h2>Recent</h2></div>
   <div id="dashboard-list"></div>
 </section>
@@ -337,6 +346,9 @@ function sanitizeImport(d){
     b.name=sanitize(b.name,MAX_TEXT);b.value=sanitize(b.value||'',20);
     b.notes=sanitize(b.notes||'',MAX_NOTES);b.used=!!b.used;
   });
+  /* Remove orphaned benefits (cardId not in accounts) */
+  var acctIds=new Set(clean.accounts.map(function(a){return a.id}));
+  clean.benefits=clean.benefits.filter(function(b){return acctIds.has(b.cardId)});
   if(!clean.profile||typeof clean.profile!=='object')clean.profile=defaultData().profile;
   return clean;
 }
@@ -379,6 +391,19 @@ function renderPointsChart(){
     html+='<div class="chart-bar-track"><div class="chart-bar-fill" style="width:'+r.pct+'%;background:'+r.color+'"><span>'+r.pct+'%</span></div></div>';
     html+='<div class="chart-bar-value">'+fmt(r.balance)+'</div></div>';
   });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+/* === BENEFIT SUMMARY === */
+function renderBenefitSummary(){
+  var el=document.getElementById('benefit-summary');if(!el)return;
+  var data=loadData(),benefits=data.benefits;
+  if(benefits.length===0){el.innerHTML='';return}
+  var used=benefits.filter(function(b){return b.used}).length;
+  var upcoming=benefits.filter(function(b){if(b.used)return false;var d=daysUntil(b.renewalDate);return d>=0&&d<=30}).length;
+  var html='<div class="benefit-summary"><div class="bs-row"><div><div class="bs-label">Benefits</div><div class="bs-detail">'+used+' of '+benefits.length+' used</div></div><div class="bs-value">'+Math.round((used/benefits.length)*100)+'%</div></div>';
+  if(upcoming>0)html+='<div class="bs-detail bs-upcoming" style="margin-top:8px">'+upcoming+' benefit'+(upcoming>1?'s':'')+' expiring within 30 days</div>';
   html+='</div>';
   el.innerHTML=html;
 }
@@ -428,6 +453,7 @@ function renderDashboard(){
     if(bal>0){var pill=document.createElement('div');pill.className='category-pill animate-in';pill.style.animationDelay=(i*60)+'ms';pill.innerHTML='<div class="pill-icon">'+c.icon+'</div><div class="pill-label">'+c.label+'</div><div class="pill-value" style="color:'+c.color+'">'+fmt(bal)+'</div>';pillsEl.appendChild(pill)}
   });
   renderPointsChart();
+  renderBenefitSummary();
   var listEl=document.getElementById('dashboard-list');listEl.innerHTML='';
   if(accounts.length===0){listEl.innerHTML='<div class="empty-state animate-in"><div class="emoji">\uD83D\uDDFA\uFE0F</div><h3>Your journey starts here</h3><p>Add your first rewards account and watch<br>your points come together in one place.</p></div>';return}
   accounts.slice().sort(function(a,b){return(b.balance||0)-(a.balance||0)}).forEach(function(a,i){
