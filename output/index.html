@@ -14,9 +14,9 @@
   --border: #282a36;
   --text: #f0f0f3;
   --text-muted: #6b6e80;
-  --accent: #7c5cff;
-  --accent-light: #a78bfa;
-  --accent-glow: rgba(124,92,255,0.2);
+  --accent: #3b82f6;
+  --accent-light: #60a5fa;
+  --accent-glow: rgba(59,130,246,0.2);
   --danger: #ff4d6a;
   --success: #34d399;
   --warning: #fbbf24;
@@ -26,6 +26,7 @@
   --other-color: #6b6e80;
   --radius: 14px;
   --radius-sm: 8px;
+  --error-bg: rgba(255,77,106,0.08);
 }
 
 body {
@@ -70,15 +71,14 @@ body {
 }
 
 .animate-in {
-  animation: fadeInUp 0.35s ease-out both;
+  animation: fadeInUp 0.3s ease-out forwards;
 }
 
-.animate-in:nth-child(1) { animation-delay: 0ms; }
-.animate-in:nth-child(2) { animation-delay: 60ms; }
-.animate-in:nth-child(3) { animation-delay: 120ms; }
-.animate-in:nth-child(4) { animation-delay: 180ms; }
-.animate-in:nth-child(5) { animation-delay: 240ms; }
-.animate-in:nth-child(6) { animation-delay: 300ms; }
+.animate-in:nth-child(2) { animation-delay: 40ms; }
+.animate-in:nth-child(3) { animation-delay: 80ms; }
+.animate-in:nth-child(4) { animation-delay: 120ms; }
+.animate-in:nth-child(5) { animation-delay: 160ms; }
+.animate-in:nth-child(6) { animation-delay: 200ms; }
 
 /* Header */
 header {
@@ -90,9 +90,7 @@ header h1 {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.8px;
-  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text);
 }
 
 header p { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
@@ -139,28 +137,16 @@ nav button .icon { font-size: 22px; }
 
 /* Summary Hero */
 .hero {
-  background: linear-gradient(135deg, #7c5cff 0%, #5b21b6 50%, #4c1d95 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px 20px;
   margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -30%;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-  border-radius: 50%;
 }
 
 .hero .label {
-  font-size: 13px;
-  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
@@ -170,16 +156,32 @@ nav button .icon { font-size: 22px; }
   font-size: 40px;
   font-weight: 800;
   letter-spacing: -2px;
-  color: #fff;
+  color: var(--text);
   margin-top: 4px;
-  animation: countUp 0.4s ease-out;
 }
 
 .hero .subtitle {
   font-size: 13px;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-muted);
   margin-top: 4px;
 }
+
+/* Error banner */
+.error-banner {
+  background: var(--error-bg);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--danger);
+  display: none;
+}
+.error-banner.visible { display: block; }
+
+.field-error { border-color: var(--danger) !important; }
+.field-error-msg { color: var(--danger); font-size: 11px; margin-top: 3px; display: none; }
+.field-error-msg.visible { display: block; }
 
 /* Category pills */
 .category-row {
@@ -455,6 +457,7 @@ nav button .icon { font-size: 22px; }
 </header>
 
 <section id="view-dashboard" class="view active">
+  <div id="error-banner" class="error-banner"></div>
   <div id="hero-card"></div>
   <div id="category-pills" class="category-row"></div>
   <div class="section-header"><h2>Recent</h2></div>
@@ -573,28 +576,56 @@ nav button .icon { font-size: 22px; }
 </div>
 
 <script>
-const STORAGE_KEY = 'osaka_data';
+'use strict';
 
-function defaultData() { return { accounts: [], benefits: [] }; }
+const STORAGE_KEY = 'osaka_data';
+const SCHEMA_VERSION = 1;
+const VALID_TYPES = ['airline', 'hotel', 'credit_card', 'other'];
+const VALID_CURRENCIES = ['points', 'miles'];
+
+function defaultData() { return { _version: SCHEMA_VERSION, accounts: [], benefits: [] }; }
 
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultData();
     const d = JSON.parse(raw);
+    if (typeof d !== 'object' || d === null) return defaultData();
     if (!Array.isArray(d.accounts)) d.accounts = [];
     if (!Array.isArray(d.benefits)) d.benefits = [];
+    // Clean orphaned benefits
+    const ids = new Set(d.accounts.map(a => a.id));
+    d.benefits = d.benefits.filter(b => ids.has(b.cardId));
+    d._version = SCHEMA_VERSION;
     return d;
-  } catch { return defaultData(); }
+  } catch {
+    showError('Data was corrupted. Starting fresh.');
+    return defaultData();
+  }
 }
 
 function saveData(data) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-  catch { alert('Storage full — cannot save.'); }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      showError('Storage full. Delete some accounts to free space.');
+    } else {
+      showError('Failed to save: ' + (e.message || 'Unknown error'));
+    }
+    return false;
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  if (el) { el.textContent = msg; el.classList.add('visible'); setTimeout(() => el.classList.remove('visible'), 6000); }
 }
 
 function genId() {
-  return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  try { return crypto.randomUUID(); }
+  catch { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
 }
 
 function fmt(n) { return Number(n).toLocaleString(); }
@@ -969,8 +1000,10 @@ function closeModalById(id) { document.getElementById(id).classList.remove('acti
 function saveAccount(e) {
   e.preventDefault();
   const program = document.getElementById('account-program').value.trim();
-  const balance = Number(document.getElementById('account-balance').value);
-  if (!program || isNaN(balance) || balance < 0) return;
+  const balanceRaw = document.getElementById('account-balance').value;
+  const balance = Number(balanceRaw);
+  if (!program) { showError('Program name is required.'); return; }
+  if (!balanceRaw || isNaN(balance) || !Number.isFinite(balance) || balance < 0) { showError('Balance must be a non-negative number.'); return; }
 
   const data = loadData();
   const id = document.getElementById('account-id').value;
