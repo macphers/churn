@@ -144,6 +144,17 @@ nav button .icon { font-size: 22px; }
 .meter-fill.warn { background: var(--warning); }
 .meter-fill.danger { background: var(--danger); }
 .meter-text { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+/* Points distribution chart */
+.points-chart { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.points-chart .chart-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 14px; }
+.chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.chart-bar-row:last-child { margin-bottom: 0; }
+.chart-bar-label { font-size: 12px; font-weight: 600; min-width: 70px; white-space: nowrap; }
+.chart-bar-track { flex: 1; height: 24px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+.chart-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; min-width: 32px; }
+.chart-bar-fill span { font-size: 11px; font-weight: 700; color: #fff; }
+.chart-bar-value { font-size: 13px; font-weight: 700; min-width: 60px; text-align: right; }
 </style>
 </head>
 <body>
@@ -155,6 +166,7 @@ nav button .icon { font-size: 22px; }
   <div id="success-banner" class="success-banner"></div>
   <div id="hero-card"></div>
   <div id="category-pills" class="category-row"></div>
+  <div id="points-chart"></div>
   <div class="section-header"><h2>Recent</h2></div>
   <div id="dashboard-list"></div>
 </section>
@@ -279,14 +291,16 @@ function importData(event){
       var errors=validateImport(imported);
       if(errors.length>0){showError('Invalid import: '+errors[0]);return}
       if(!confirm('Import will replace all current data. Continue?'))return;
-      imported._version=SCHEMA_VERSION;
-      if(saveData(imported)){showSuccess('Data imported successfully ('+imported.accounts.length+' accounts, '+imported.benefits.length+' benefits).');render()}
+      var clean=sanitizeImport(imported);
+      clean._version=SCHEMA_VERSION;
+      if(saveData(clean)){showSuccess('Data imported successfully ('+clean.accounts.length+' accounts, '+clean.benefits.length+' benefits).');render()}
     }catch(err){showError('Invalid JSON file.')}
   };
   reader.onerror=function(){showError('Failed to read file.')};
   reader.readAsText(file);
 }
 
+/* Pure validation — checks structure without mutating input */
 function validateImport(d){
   var errors=[];
   if(typeof d!=='object'||d===null)return['Not a valid JSON object'];
@@ -297,18 +311,28 @@ function validateImport(d){
     if(!a.id||typeof a.id!=='string')errors.push('Account '+i+': missing id');
     if(!a.program||typeof a.program!=='string')errors.push('Account '+i+': missing program name');
     if(typeof a.balance!=='number'||a.balance<0)errors.push('Account '+i+': invalid balance');
-    a.type=validateType(a.type);a.currency=validateCurrency(a.currency);
-    a.program=sanitize(a.program,MAX_TEXT);a.accountNumber=sanitize(a.accountNumber||'',50);
-    a.notes=sanitize(a.notes||'',MAX_NOTES);a.balance=validateBalance(a.balance);
   });
   d.benefits.forEach(function(b,i){
     if(!b.id||typeof b.id!=='string')errors.push('Benefit '+i+': missing id');
     if(!b.name||typeof b.name!=='string')errors.push('Benefit '+i+': missing name');
+  });
+  return errors;
+}
+
+/* Sanitize — applies type/balance/text sanitization to a validated import */
+function sanitizeImport(d){
+  var clean=JSON.parse(JSON.stringify(d));
+  clean.accounts.forEach(function(a){
+    a.type=validateType(a.type);a.currency=validateCurrency(a.currency);
+    a.program=sanitize(a.program,MAX_TEXT);a.accountNumber=sanitize(a.accountNumber||'',50);
+    a.notes=sanitize(a.notes||'',MAX_NOTES);a.balance=validateBalance(a.balance);
+  });
+  clean.benefits.forEach(function(b){
     b.name=sanitize(b.name,MAX_TEXT);b.value=sanitize(b.value||'',20);
     b.notes=sanitize(b.notes||'',MAX_NOTES);b.used=!!b.used;
   });
-  if(!d.profile||typeof d.profile!=='object')d.profile=defaultData().profile;
-  return errors;
+  if(!clean.profile||typeof clean.profile!=='object')clean.profile=defaultData().profile;
+  return clean;
 }
 
 /* === STORAGE METER === */
@@ -322,6 +346,35 @@ function updateStorageMeter(){
     var usedKB=(used/1024).toFixed(1);
     el.innerHTML='<div class="storage-meter"><div class="meter-label">Local Storage</div><div class="meter-track"><div class="meter-fill'+cls+'" style="width:'+Math.min(pct,100)+'%"></div></div><div class="meter-text">'+usedKB+'KB used (~'+pct+'%)</div></div>';
   }catch(e){el.innerHTML=''}
+}
+
+/* === POINTS DISTRIBUTION CHART === */
+function renderPointsChart(){
+  var el=document.getElementById('points-chart');if(!el)return;
+  var data=loadData(),accounts=data.accounts;
+  if(accounts.length===0){el.innerHTML='';return}
+  var total=accounts.reduce(function(s,a){return s+(Number(a.balance)||0)},0);
+  if(total===0){el.innerHTML='';return}
+  var types=[
+    {key:'airline',label:'Airlines',icon:'\u2708\uFE0F',color:'var(--airline-color)'},
+    {key:'hotel',label:'Hotels',icon:'\uD83C\uDFE8',color:'var(--hotel-color)'},
+    {key:'credit_card',label:'Cards',icon:'\uD83D\uDCB3',color:'var(--card-color)'},
+    {key:'other',label:'Other',icon:'\uD83D\uDCE6',color:'var(--other-color)'}
+  ];
+  var rows=[];
+  types.forEach(function(t){
+    var bal=accounts.filter(function(a){return a.type===t.key}).reduce(function(s,a){return s+(Number(a.balance)||0)},0);
+    if(bal>0)rows.push({label:t.icon+' '+t.label,color:t.color,balance:bal,pct:Math.round((bal/total)*100)});
+  });
+  if(rows.length===0){el.innerHTML='';return}
+  var html='<div class="points-chart"><div class="chart-title">Points Distribution</div>';
+  rows.forEach(function(r){
+    html+='<div class="chart-bar-row"><div class="chart-bar-label">'+r.label+'</div>';
+    html+='<div class="chart-bar-track"><div class="chart-bar-fill" style="width:'+r.pct+'%;background:'+r.color+'"><span>'+r.pct+'%</span></div></div>';
+    html+='<div class="chart-bar-value">'+fmt(r.balance)+'</div></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
 }
 
 function switchTab(tab){
@@ -342,6 +395,7 @@ function renderDashboard(){
     var bal=accounts.filter(function(a){return a.type===c.key}).reduce(function(s,a){return s+(Number(a.balance)||0)},0);
     if(bal>0){var pill=document.createElement('div');pill.className='category-pill animate-in';pill.style.animationDelay=(i*60)+'ms';pill.innerHTML='<div class="pill-icon">'+c.icon+'</div><div class="pill-label">'+c.label+'</div><div class="pill-value" style="color:'+c.color+'">'+fmt(bal)+'</div>';pillsEl.appendChild(pill)}
   });
+  renderPointsChart();
   var listEl=document.getElementById('dashboard-list');listEl.innerHTML='';
   if(accounts.length===0){listEl.innerHTML='<div class="empty-state animate-in"><div class="emoji">\uD83D\uDDFA\uFE0F</div><h3>Your journey starts here</h3><p>Add your first rewards account and watch<br>your points come together in one place.</p></div>';return}
   accounts.slice().sort(function(a,b){return(b.balance||0)-(a.balance||0)}).forEach(function(a,i){

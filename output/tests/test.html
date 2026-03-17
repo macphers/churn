@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Osaka Tests — Run C</title>
+<style>
+body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+h1 { margin-bottom: 10px; }
+.pass { color: #34d399; }
+.fail { color: #ff4d6a; }
+.summary { margin-top: 20px; font-size: 18px; font-weight: bold; padding: 10px; border-radius: 6px; }
+.summary.all-pass { background: rgba(52,211,153,0.15); color: #34d399; }
+.summary.has-fail { background: rgba(255,77,106,0.15); color: #ff4d6a; }
+.test { padding: 4px 0; }
+</style>
+</head>
+<body>
+<h1>Osaka Test Suite — Run C</h1>
+<div id="results"></div>
+<div id="summary"></div>
+<script>
+'use strict';
+
+var passed = 0, failed = 0, results = [];
+function assert(name, condition) {
+  if (condition) { passed++; results.push('<div class="test pass">✓ ' + name + '</div>'); }
+  else { failed++; results.push('<div class="test fail">✗ ' + name + '</div>'); }
+}
+function assertEqual(name, actual, expected) {
+  assert(name, actual === expected);
+  if (actual !== expected) results[results.length-1] += ' (got: ' + JSON.stringify(actual) + ', expected: ' + JSON.stringify(expected) + ')';
+}
+
+var MAX_TEXT = 100, MAX_NOTES = 500, MAX_BALANCE = 999999999;
+var VALID_TYPES = ['airline', 'hotel', 'credit_card', 'other'];
+var VALID_CURRENCIES = ['points', 'miles'];
+
+function sanitize(str, maxLen) { if (typeof str !== 'string') return ''; return str.replace(/<[^>]*>/g, '').trim().slice(0, maxLen || MAX_TEXT); }
+function validateType(t) { return VALID_TYPES.includes(t) ? t : 'other'; }
+function validateCurrency(c) { return VALID_CURRENCIES.includes(c) ? c : 'points'; }
+function validateBalance(v) { var n = Number(v); if (isNaN(n) || !isFinite(n) || n < 0) return 0; return Math.min(Math.floor(n), MAX_BALANCE); }
+function defaultData() { return { _version: 2, accounts: [], benefits: [], profile: { homeAirport: '', preferredAlliances: [], travelPreferences: { regions: [], classPreference: 'economy' } } }; }
+
+// Pure validation (matches refactored validateImport)
+function validateImport(d) {
+  var errors = [];
+  if (typeof d !== 'object' || d === null) return ['Not a valid JSON object'];
+  if (!Array.isArray(d.accounts)) errors.push('Missing or invalid accounts array');
+  if (!Array.isArray(d.benefits)) errors.push('Missing or invalid benefits array');
+  if (errors.length > 0) return errors;
+  d.accounts.forEach(function(a, i) {
+    if (!a.id || typeof a.id !== 'string') errors.push('Account ' + i + ': missing id');
+    if (!a.program || typeof a.program !== 'string') errors.push('Account ' + i + ': missing program name');
+    if (typeof a.balance !== 'number' || a.balance < 0) errors.push('Account ' + i + ': invalid balance');
+  });
+  d.benefits.forEach(function(b, i) {
+    if (!b.id || typeof b.id !== 'string') errors.push('Benefit ' + i + ': missing id');
+    if (!b.name || typeof b.name !== 'string') errors.push('Benefit ' + i + ': missing name');
+  });
+  return errors;
+}
+
+function sanitizeImport(d) {
+  var clean = JSON.parse(JSON.stringify(d));
+  clean.accounts.forEach(function(a) {
+    a.type = validateType(a.type); a.currency = validateCurrency(a.currency);
+    a.program = sanitize(a.program, MAX_TEXT); a.accountNumber = sanitize(a.accountNumber || '', 50);
+    a.notes = sanitize(a.notes || '', MAX_NOTES); a.balance = validateBalance(a.balance);
+  });
+  clean.benefits.forEach(function(b) {
+    b.name = sanitize(b.name, MAX_TEXT); b.value = sanitize(b.value || '', 20);
+    b.notes = sanitize(b.notes || '', MAX_NOTES); b.used = !!b.used;
+  });
+  if (!clean.profile || typeof clean.profile !== 'object') clean.profile = defaultData().profile;
+  return clean;
+}
+
+// === SANITIZATION TESTS ===
+// 1
+assertEqual('XSS: script tag stripped', sanitize('<scr' + 'ipt>alert("xss")<' + '/script>'), 'alert("xss")');
+// 2
+assertEqual('XSS: img onerror stripped', sanitize('<im' + 'g onerror="alert(1)" src=x>'), '');
+// 3
+assertEqual('XSS: nested tags stripped', sanitize('Hello <' + 'b><' + 'i>world<' + '/i><' + '/b>!'), 'Hello world!');
+// 4
+assertEqual('sanitize: truncates to maxLen', sanitize('a'.repeat(200), 100).length, 100);
+// 5
+assertEqual('sanitize: null input', sanitize(null), '');
+// 6
+assertEqual('sanitize: number input', sanitize(42), '');
+
+// === TYPE/CURRENCY VALIDATION ===
+// 7
+assertEqual('validateType: airline', validateType('airline'), 'airline');
+// 8
+assertEqual('validateType: invalid → other', validateType('crypto'), 'other');
+// 9
+assertEqual('validateCurrency: miles', validateCurrency('miles'), 'miles');
+// 10
+assertEqual('validateCurrency: invalid → points', validateCurrency('gold'), 'points');
+
+// === BALANCE VALIDATION ===
+// 11
+assertEqual('balance: normal', validateBalance(85000), 85000);
+// 12
+assertEqual('balance: negative → 0', validateBalance(-100), 0);
+// 13
+assertEqual('balance: NaN → 0', validateBalance('abc'), 0);
+// 14
+assertEqual('balance: Infinity → 0', validateBalance(Infinity), 0);
+// 15
+assertEqual('balance: max clamp', validateBalance(9999999999), MAX_BALANCE);
+// 16
+assertEqual('balance: floors decimal', validateBalance(100.9), 100);
+
+// === IMPORT VALIDATION (PURE — no mutation) ===
+// 17
+var importInput = { accounts: [{ id: 'a1', program: '<' + 'b>XSS<' + '/b>', type: 'airline', balance: 5000, currency: 'miles', notes: '<scr' + 'ipt>x<' + '/script>' }], benefits: [], profile: defaultData().profile };
+var importCopy = JSON.parse(JSON.stringify(importInput));
+var importErrors = validateImport(importCopy);
+assertEqual('validateImport: valid input returns no errors', importErrors.length, 0);
+assertEqual('validateImport: does NOT mutate program', importCopy.accounts[0].program, '<' + 'b>XSS<' + '/b>');
+
+// 18
+var sanitized = sanitizeImport(importInput);
+assertEqual('sanitizeImport: strips XSS from program', sanitized.accounts[0].program, 'XSS');
+assertEqual('sanitizeImport: strips XSS from notes', sanitized.accounts[0].notes, 'x');
+
+// 19 — Import rejects missing accounts
+var bad1 = { benefits: [] };
+assert('import rejects missing accounts', validateImport(bad1).length > 0);
+
+// 20 — Import rejects non-object
+assert('import rejects null', validateImport(null).length > 0);
+assert('import rejects string', validateImport('hello').length > 0);
+
+// 21 — Import rejects bad account fields
+var bad2 = { accounts: [{ id: '', program: '', type: 'airline', balance: -1, currency: 'miles' }], benefits: [] };
+assert('import rejects empty id/program', validateImport(bad2).length >= 2);
+
+// === LOCALSTORAGE ROUND-TRIP ===
+// 22
+var KEY = 'osaka_test_c_' + Date.now();
+var testData = defaultData();
+testData.accounts.push({ id: 'rt-1', program: 'United MileagePlus', type: 'airline', balance: 75000, currency: 'miles', accountNumber: 'XX-1234', lastUpdated: '2026-03-01', notes: 'Premier Gold' });
+testData.benefits.push({ id: 'rt-b1', cardId: 'rt-1', name: 'Lounge Access', value: '$0', renewalDate: '2026-12-31', used: false, notes: '' });
+localStorage.setItem(KEY, JSON.stringify(testData));
+var loaded = JSON.parse(localStorage.getItem(KEY));
+assertEqual('round-trip: account preserved', loaded.accounts[0].program, 'United MileagePlus');
+assertEqual('round-trip: benefit preserved', loaded.benefits[0].name, 'Lounge Access');
+assertEqual('round-trip: balance preserved', loaded.accounts[0].balance, 75000);
+
+// 23 — Export/import round-trip simulation
+var exported = JSON.stringify(loaded);
+var reimported = JSON.parse(exported);
+var reErrors = validateImport(reimported);
+assertEqual('export-import round-trip: no errors', reErrors.length, 0);
+var reSanitized = sanitizeImport(reimported);
+assertEqual('export-import round-trip: data intact', reSanitized.accounts[0].program, 'United MileagePlus');
+localStorage.removeItem(KEY);
+
+// 24 — Schema version
+assert('defaultData has schema v2', defaultData()._version === 2);
+
+// === Render results ===
+document.getElementById('results').innerHTML = results.join('');
+var total = passed + failed;
+var sumEl = document.getElementById('summary');
+sumEl.className = 'summary ' + (failed === 0 ? 'all-pass' : 'has-fail');
+sumEl.textContent = passed + '/' + total + ' tests passed' + (failed > 0 ? ' (' + failed + ' failed)' : ' — ALL GREEN');
+</script>
+</body>
+</html>
