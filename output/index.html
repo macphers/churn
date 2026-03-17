@@ -155,6 +155,12 @@ nav button .icon { font-size: 22px; }
 .chart-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; min-width: 32px; }
 .chart-bar-fill span { font-size: 11px; font-weight: 700; color: #fff; }
 .chart-bar-value { font-size: 13px; font-weight: 700; min-width: 60px; text-align: right; }
+
+/* Inline edit + save flash */
+.card-balance[contenteditable] { cursor: text; outline: none; border-radius: 4px; padding: 2px 4px; margin: -2px -4px; transition: background 0.2s; }
+.card-balance[contenteditable]:focus { background: rgba(59,130,246,0.1); box-shadow: 0 0 0 2px var(--accent-glow); }
+.save-flash { animation: flashGreen 0.6s ease; }
+@keyframes flashGreen { 0% { background: rgba(52,211,153,0.3); } 100% { background: transparent; } }
 </style>
 </head>
 <body>
@@ -377,6 +383,32 @@ function renderPointsChart(){
   el.innerHTML=html;
 }
 
+/* === INLINE BALANCE EDITING === */
+function handleInlineEdit(balDiv,accountId,oldBalance){
+  var currSpan=balDiv.querySelector('.card-currency');
+  if(currSpan)currSpan.style.display='none';
+  balDiv.textContent=String(oldBalance);
+  balDiv.setAttribute('contenteditable','true');
+  balDiv.focus();
+  var range=document.createRange();range.selectNodeContents(balDiv);
+  var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+  var handled=false;
+  function onBlur(){
+    if(handled)return;handled=true;
+    balDiv.removeAttribute('contenteditable');
+    var raw=balDiv.textContent.replace(/[^0-9]/g,'');
+    var newBal=validateBalance(raw);
+    if(newBal===oldBalance){renderDashboard();return}
+    var data=loadData();
+    var acct=data.accounts.find(function(a){return a.id===accountId});
+    if(acct){acct.balance=newBal;acct.lastUpdated=new Date().toISOString().split('T')[0];saveData(data)}
+    var card=balDiv.closest('.card');
+    if(card){card.classList.add('save-flash');setTimeout(function(){card.classList.remove('save-flash');renderDashboard()},600)}
+  }
+  balDiv.addEventListener('blur',onBlur,{once:true});
+  balDiv.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();balDiv.blur()}if(e.key==='Escape'){handled=true;balDiv.removeAttribute('contenteditable');renderDashboard()}});
+}
+
 function switchTab(tab){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active')});
@@ -405,6 +437,8 @@ function renderDashboard(){
     var hdr=document.createElement('div');hdr.className='card-header';var left=document.createElement('div');left.className='card-program';var dot=document.createElement('span');dot.className='type-dot '+a.type;left.appendChild(dot);left.appendChild(ps);
     var right=document.createElement('span');right.className='type-label';right.textContent=(a.type||'').replace('_',' ');hdr.appendChild(left);hdr.appendChild(right);
     var balDiv=document.createElement('div');balDiv.className='card-balance';balDiv.textContent=fmt(a.balance);
+    balDiv.style.cursor='pointer';balDiv.title='Tap to edit';
+    (function(el,id,bal){el.addEventListener('click',function(){handleInlineEdit(el,id,bal)})})(balDiv,a.id,a.balance);
     var cs=document.createElement('span');cs.className='card-currency';cs.textContent=a.currency||'points';balDiv.appendChild(cs);
     var meta=document.createElement('div');meta.className='card-meta';var mt=document.createElement('span');mt.textContent=(a.accountNumber?a.accountNumber+' \u00B7 ':'')+'Updated '+timeAgo(a.lastUpdated);meta.appendChild(mt);
     if(isStale){var badge=document.createElement('span');badge.className='stale-badge';badge.textContent='STALE';meta.appendChild(badge)}

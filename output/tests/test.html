@@ -162,6 +162,24 @@ localStorage.removeItem(KEY);
 // 24 — Schema version
 assert('defaultData has schema v2', defaultData()._version === 2);
 
+// === INLINE EDIT VALUE HANDLING ===
+// 25 — Non-numeric input stripped
+var inlineRaw1 = '85,000 points';
+assertEqual('inline edit: strip non-numeric', inlineRaw1.replace(/[^0-9]/g, ''), '85000');
+
+// 26 — Empty input → 0
+assertEqual('inline edit: empty → 0', validateBalance(''), 0);
+
+// 27 — Paste with XSS
+var inlineRaw2 = '500<scr' + 'ipt>alert(1)<' + '/script>';
+assertEqual('inline edit: XSS in paste → number only', validateBalance(inlineRaw2.replace(/[^0-9]/g, '')), 5001);
+
+// 28 — Negative in raw text
+assertEqual('inline edit: negative text → 0', validateBalance('-100'.replace(/[^0-9]/g, '')), 100);
+
+// 29 — Max balance via inline
+assertEqual('inline edit: over max clamped', validateBalance('9999999999'), MAX_BALANCE);
+
 // === Render results ===
 document.getElementById('results').innerHTML = results.join('');
 var total = passed + failed;
