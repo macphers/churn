@@ -1,0 +1,57 @@
+# Pattaya Pipeline Configuration
+
+# Number of parallel runs. Override from invocation prompt: "run with N=5"
+parallel_runs: 3
+
+# Number of sequential rounds. Each round runs N parallel attempts,
+# auto-selects the winner, commits it, and feeds it into the next round.
+# Override from invocation prompt: "run 5 rounds"
+rounds: 7
+
+# When true, the highest-scoring run is automatically selected as the
+# winner after each round. When false (and rounds=1), the user picks
+# via the dashboard. Ignored when rounds > 1 (auto-accept is implied).
+auto_accept_winner: true
+
+# Style inspiration — name a legendary engineer whose coding philosophy
+# should guide implementation, review, and scoring. Looks for a matching
+# file in pipeline/styles/{name}.md. Leave blank for the default style.
+# Available: carmack, antirez, abramov, metz, holowaychuk, majors, marlinspike
+style: "marlinspike"
+
+# Maximum bug-fix cycles before forced scoring (phases 07-11 loop)
+max_fix_cycles: 3
+
+# Design review: run design audit + fix phases on HTML output.
+# Set to false to skip phases 12-13. Auto-skipped when output has no HTML.
+design_review: true
+
+# Design style inspiration — name a design philosophy that should guide
+# the design review and fix phases. Looks for a matching file in
+# pipeline/design-styles/{name}.md. Leave blank for the default style.
+# Available: dieter-rams, brutalist, playful
+design_style: ""
+
+# Scoring dimensions (must match rubric.md)
+# design_quality is added automatically when design review runs.
+scoring_dimensions:
+  - functionality
+  - code_quality
+  - test_coverage
+  - ux_polish
+  - spec_adherence
+  - design_quality
+
+# Score penalty for exhausting max_fix_cycles without clearing bugs
+unresolved_bugs_penalty: 2.0
+
+# Email notification configuration
+# Set method to "file-only" to skip email and just save results to disk.
+email:
+  to: ""
+  method: "file-only"
+  smtp:
+    host: "smtp.gmail.com"
+    port: 587
+    username: "$PATTAYA_SMTP_USER"
+    password: "$PATTAYA_SMTP_PASS"

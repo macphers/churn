@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Points Value Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+:root {
+  --bg: #0c0d12; --surface: #16181f; --surface-2: #1e2028; --border: #282a36;
+  --text: #f0f0f3; --text-muted: #6b6e80; --accent: #3b82f6; --accent-light: #60a5fa;
+  --accent-glow: rgba(59,130,246,0.2); --danger: #ff4d6a; --success: #34d399;
+  --warning: #fbbf24; --airline-color: #38bdf8; --hotel-color: #c084fc;
+  --card-color: #fb923c; --other-color: #6b6e80; --radius: 14px; --radius-sm: 8px;
+  --gold: #f59e0b; --gold-glow: rgba(245,158,11,0.15);
+}
+
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5; padding: 0 0 32px; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .animate-in { animation: none !important; } }
+
+.animate-in { animation: fadeInUp 0.3s ease-out forwards; }
+.animate-in:nth-child(2) { animation-delay: 40ms; }
+.animate-in:nth-child(3) { animation-delay: 80ms; }
+.animate-in:nth-child(4) { animation-delay: 120ms; }
+.animate-in:nth-child(5) { animation-delay: 160ms; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+header { padding: 24px 16px 8px; max-width: 640px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
+header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; }
+header p { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
+.back-link { font-size: 13px; color: var(--accent-light); text-decoration: none; font-weight: 600; padding: 8px 0; }
+.back-link:hover { text-decoration: underline; }
+
+/* Hero portfolio value */
+.hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 20px; margin-bottom: 16px; }
+.hero .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.hero .value { font-size: 44px; font-weight: 800; letter-spacing: -2px; margin-top: 4px; }
+.hero .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.hero .value-toggle { display: inline-flex; background: var(--bg); border-radius: 8px; padding: 3px; margin-top: 12px; }
+.hero .value-toggle button { padding: 6px 14px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.2s; }
+.hero .value-toggle button.active { background: var(--accent); color: #fff; }
+
+/* Left on table banner */
+.left-on-table { background: var(--gold-glow); border: 1px solid var(--gold); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px; }
+.left-on-table .lot-title { font-size: 14px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+.left-on-table .lot-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-top: 4px; }
+.left-on-table .lot-detail { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+/* Expiration warnings */
+.expiration-warning { background: rgba(255,77,106,0.08); border: 1px solid var(--danger); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; }
+.expiration-warning .ew-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.expiration-warning .ew-program { font-size: 14px; font-weight: 700; }
+.expiration-warning .ew-detail { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.expiration-warning .ew-value { font-size: 14px; font-weight: 700; color: var(--danger); margin-top: 4px; }
+.expired-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(255,77,106,0.2); color: var(--danger); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; animation: pulse 2s ease-in-out infinite; }
+
+/* Recommendation cards */
+.rec-section { margin-bottom: 24px; }
+.rec-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.rec-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.rec-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; transition: transform 0.15s, box-shadow 0.2s; }
+.rec-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+.rec-card.best { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.rec-card .rc-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.rec-card .rc-type { font-size: 15px; font-weight: 700; margin-top: 6px; }
+.rec-card .rc-cpp { font-size: 24px; font-weight: 800; letter-spacing: -1px; margin-top: 4px; }
+.rec-card .rc-cpp small { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+.rec-card .rc-value { font-size: 14px; font-weight: 600; margin-top: 4px; color: var(--success); }
+.rec-card .rc-reason { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+
+/* Per-account detail */
+.account-section { margin-bottom: 20px; }
+.account-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.account-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 10px; }
+.account-card .ac-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.account-card .ac-program { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.account-card .ac-balance { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.type-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.type-dot.airline { background: var(--airline-color); }
+.type-dot.hotel { background: var(--hotel-color); }
+.type-dot.credit_card { background: var(--card-color); }
+.type-dot.other { background: var(--other-color); }
+.estimated-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(251,191,36,0.15); color: var(--warning); font-weight: 600; margin-left: 6px; }
+
+.redemption-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(40,42,54,0.5); }
+.redemption-row:last-child { border-bottom: none; }
+.redemption-row .rr-type { font-size: 13px; font-weight: 600; min-width: 120px; display: flex; align-items: center; gap: 6px; }
+.redemption-row .rr-bar-wrap { flex: 1; }
+.redemption-row .rr-bar { height: 20px; border-radius: 4px; position: relative; min-width: 4px; transition: width 0.5s ease; }
+.redemption-row .rr-bar.travel { background: var(--accent); }
+.redemption-row .rr-bar.cash { background: var(--success); }
+.redemption-row .rr-bar.other { background: var(--other-color); }
+.redemption-row .rr-values { min-width: 120px; text-align: right; font-size: 13px; }
+.redemption-row .rr-dollar { font-weight: 700; }
+.redemption-row .rr-equiv { font-size: 11px; color: var(--text-muted); }
+.rr-star { color: var(--gold); font-size: 14px; }
+.rr-transfer { font-size: 11px; color: var(--accent-light); }
+
+/* Sweet spots section */
+.sweet-spots { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.sweet-spots h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.sweet-spot-item { padding: 10px 0; border-bottom: 1px solid rgba(40,42,54,0.5); }
+.sweet-spot-item:last-child { border-bottom: none; }
+.ss-header { display: flex; justify-content: space-between; align-items: center; }
+.ss-route { font-size: 14px; font-weight: 600; }
+.ss-cpp { font-size: 14px; font-weight: 800; color: var(--success); }
+.ss-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* Settings */
+.settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.settings-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(40,42,54,0.5); }
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 14px; font-weight: 600; }
+.setting-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.toggle { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle .slider { position: absolute; inset: 0; background: var(--border); border-radius: 14px; cursor: pointer; transition: background 0.3s; }
+.toggle .slider::before { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform 0.3s; }
+.toggle input:checked + .slider { background: var(--accent); }
+.toggle input:checked + .slider::before { transform: translateX(20px); }
+
+/* Data freshness */
+.freshness { text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted); }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+.empty-state .emoji { font-size: 56px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; color: var(--text); font-weight: 700; margin-bottom: 6px; }
+.empty-state p { font-size: 14px; line-height: 1.6; max-width: 340px; margin: 0 auto; }
+.empty-state a { color: var(--accent-light); text-decoration: none; font-weight: 600; }
+.empty-state a:hover { text-decoration: underline; }
+
+/* Grayed-out zero balance */
+.zero-balance { opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Value Advisor</h1>
+    <p>Get the most from your rewards</p>
+  </div>
+  <a href="index.html" class="back-link">Rewards Tracker</a>
+</header>
+
+<div class="container" id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATIC VALUATION DATASET — March 2026
+// Sources: TPG, NerdWallet, Upgraded Points, AwardWallet
+// ═══════════════════════════════════════════════════════════
+
+const VALUATIONS = {
+  lastUpdated: "2026-03-17",
+  programs: {
+    // ── Flexible currencies ──
+    "Chase Ultimate Rewards": {
+      type: "flexible",
+      fallbackOptions: [
+        { type: "cash_back", cpp: 1.0, label: "Cash back" },
+        { type: "travel_portal", cpp: 1.25, label: "Chase Travel portal" },
+        { type: "pay_with_points", cpp: 0.8, label: "Pay with points" },
+        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
+        { type: "merchandise", cpp: 0.6, label: "Merchandise" }
+      ],
+      transferPartners: [
+        { partner: "World of Hyatt", ratio: "1:1", bestCpp: 2.2, sweetSpot: "Category 1-4 hotels. Park Hyatt Tokyo at 25k/night = $550+ value." },
+        { partner: "United MileagePlus", ratio: "1:1", bestCpp: 1.8, sweetSpot: "Short-haul domestic economy, Polaris business class to Europe." },
+        { partner: "Air France/KLM Flying Blue", ratio: "1:1", bestCpp: 2.1, sweetSpot: "Europe business class, monthly promo awards." },
+        { partner: "Southwest Rapid Rewards", ratio: "1:1", bestCpp: 1.4, sweetSpot: "Domestic flights, no change fees." },
+        { partner: "British Airways Avios", ratio: "1:1", bestCpp: 1.6, sweetSpot: "Short-haul partner flights, AA domestic routes." },
+        { partner: "Singapore KrisFlyer", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Suites class, first class to Asia." },
+        { partner: "Virgin Atlantic Flying Club", ratio: "1:1", bestCpp: 2.8, sweetSpot: "ANA first/business class to Japan — one of the best sweet spots." },
+        { partner: "IHG One Rewards", ratio: "1:1", bestCpp: 0.6, sweetSpot: "Low-category IHG properties." }
+      ]
+    },
+    "American Express Membership Rewards": {
+      type: "flexible",
+      fallbackOptions: [
+        { type: "cash_back", cpp: 0.6, label: "Statement credit" },
+        { type: "travel_portal", cpp: 1.0, label: "Amex Travel portal" },
+        { type: "pay_with_points", cpp: 0.7, label: "Pay with points" },
+        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
+        { type: "merchandise", cpp: 0.5, label: "Merchandise" }
+      ],
+      transferPartners: [
+        { partner: "ANA Mileage Club", ratio: "1:1", bestCpp: 3.5, sweetSpot: "Business class roundtrip to Japan for 75-88k. One of the best values in award travel." },
+        { partner: "Virgin Atlantic Flying Club", ratio: "1:1", bestCpp: 2.8, sweetSpot: "ANA first class, Delta domestic." },
+        { partner: "Air Canada Aeroplan", ratio: "1:1", bestCpp: 2.0, sweetSpot: "Star Alliance business class, stopover rules." },
+        { partner: "Singapore KrisFlyer", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Singapore Suites, first class to Asia." },
+        { partner: "British Airways Avios", ratio: "1:1", bestCpp: 1.6, sweetSpot: "Short-haul, off-peak pricing." },
+        { partner: "Delta SkyMiles", ratio: "1:1", bestCpp: 1.4, sweetSpot: "Domestic economy, flash sales." },
+        { partner: "Hilton Honors", ratio: "1:2", bestCpp: 1.0, sweetSpot: "Only during transfer bonuses (30-40% common)." },
+        { partner: "Marriott Bonvoy", ratio: "1:1", bestCpp: 1.0, sweetSpot: "Off-peak Category 1-4 properties." }
+      ]
+    },
+    "Capital One Miles": {
+      type: "flexible",
+      fallbackOptions: [
+        { type: "cash_back", cpp: 0.5, label: "Statement credit (Venture)" },
+        { type: "travel_portal", cpp: 1.0, label: "Capital One Travel" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
+      ],
+      transferPartners: [
+        { partner: "Air Canada Aeroplan", ratio: "1:1", bestCpp: 2.0, sweetSpot: "Star Alliance business class." },
+        { partner: "Turkish Miles&Smiles", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Star Alliance business class, low surcharges." },
+        { partner: "British Airways Avios", ratio: "1:1", bestCpp: 1.6, sweetSpot: "Short-haul partner flights." },
+        { partner: "Wyndham Rewards", ratio: "1:1", bestCpp: 1.2, sweetSpot: "All-inclusive resorts." }
+      ]
+    },
+    "Citi ThankYou Points": {
+      type: "flexible",
+      fallbackOptions: [
+        { type: "cash_back", cpp: 1.0, label: "Cash back" },
+        { type: "travel_portal", cpp: 1.0, label: "Citi Travel" },
+        { type: "gift_cards", cpp: 1.0, label: "Gift cards" }
+      ],
+      transferPartners: [
+        { partner: "Turkish Miles&Smiles", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Star Alliance business class, United flights." },
+        { partner: "Air France/KLM Flying Blue", ratio: "1:1", bestCpp: 2.1, sweetSpot: "Europe promo awards." },
+        { partner: "Singapore KrisFlyer", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Suites class." },
+        { partner: "Virgin Atlantic Flying Club", ratio: "1:1", bestCpp: 2.8, sweetSpot: "ANA first class to Japan." }
+      ]
+    },
+    "Bilt Rewards": {
+      type: "flexible",
+      fallbackOptions: [
+        { type: "cash_back", cpp: 0.5, label: "Statement credit" },
+        { type: "travel_portal", cpp: 1.25, label: "Bilt Travel" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
+      ],
+      transferPartners: [
+        { partner: "World of Hyatt", ratio: "1:1", bestCpp: 2.2, sweetSpot: "Category 1-4 hotels." },
+        { partner: "Air Canada Aeroplan", ratio: "1:1", bestCpp: 2.0, sweetSpot: "Star Alliance business class." },
+        { partner: "Turkish Miles&Smiles", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Star Alliance business, low surcharges." },
+        { partner: "American Airlines AAdvantage", ratio: "1:1", bestCpp: 1.5, sweetSpot: "Web specials, off-peak." },
+        { partner: "United MileagePlus", ratio: "1:1", bestCpp: 1.8, sweetSpot: "Polaris business class." },
+        { partner: "IHG One Rewards", ratio: "1:1", bestCpp: 0.6, sweetSpot: "Low-category only." }
+      ]
+    },
+    // ── Airlines ──
+    "Delta SkyMiles": {
+      type: "airline",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.3, label: "Delta flights" },
+        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
+        { type: "pay_with_points", cpp: 1.0, label: "Pay with miles (SkyMiles Shopping)" },
+        { type: "merchandise", cpp: 0.7, label: "SkyMiles Marketplace" }
+      ],
+      transferPartners: []
+    },
+    "United MileagePlus": {
+      type: "airline",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.3, label: "United flights" },
+        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
+        { type: "merchandise", cpp: 0.6, label: "Merchandise" }
+      ],
+      transferPartners: []
+    },
+    "American Airlines AAdvantage": {
+      type: "airline",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.4, label: "AA flights" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" },
+        { type: "merchandise", cpp: 0.5, label: "Merchandise" }
+      ],
+      transferPartners: []
+    },
+    "Southwest Rapid Rewards": {
+      type: "airline",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.4, label: "Southwest flights" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
+      ],
+      transferPartners: []
+    },
+    "Alaska Mileage Plan": {
+      type: "airline",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.5, label: "Alaska + partner flights" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
+      ],
+      transferPartners: []
+    },
+    "JetBlue TrueBlue": {
+      type: "airline",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.3, label: "JetBlue flights" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
+      ],
+      transferPartners: []
+    },
+    // ── Hotels ──
+    "Marriott Bonvoy": {
+      type: "hotel",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 0.9, label: "Marriott hotels" },
+        { type: "gift_cards", cpp: 0.7, label: "Gift cards" },
+        { type: "merchandise", cpp: 0.4, label: "Merchandise" }
+      ],
+      transferPartners: [
+        { partner: "Airline transfers (3:1)", ratio: "3:1", bestCpp: 1.0, sweetSpot: "60k Marriott = 20k airline miles + 5k bonus." }
+      ]
+    },
+    "Hilton Honors": {
+      type: "hotel",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 0.6, label: "Hilton hotels" },
+        { type: "gift_cards", cpp: 0.5, label: "Gift cards" },
+        { type: "experiences", cpp: 0.4, label: "Experiences" }
+      ],
+      transferPartners: []
+    },
+    "World of Hyatt": {
+      type: "hotel",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 2.0, label: "Hyatt hotels" },
+        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
+      ],
+      transferPartners: []
+    },
+    "IHG One Rewards": {
+      type: "hotel",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 0.6, label: "IHG hotels" },
+        { type: "merchandise", cpp: 0.4, label: "Merchandise" }
+      ],
+      transferPartners: []
+    },
+    "Wyndham Rewards": {
+      type: "hotel",
+      fallbackOptions: [
+        { type: "travel_booking", cpp: 1.1, label: "Wyndham hotels" },
+        { type: "gift_cards", cpp: 0.7, label: "Gift cards" }
+      ],
+      transferPartners: []
+    }
+  },
+  expirationRules: {
+    "Delta SkyMiles": { expires: false },
+    "United MileagePlus": { expires: true, inactivityMonths: 18 },
+    "American Airlines AAdvantage": { expires: false },
+    "Southwest Rapid Rewards": { expires: true, inactivityMonths: 24 },
+    "Alaska Mileage Plan": { expires: true, inactivityMonths: 24 },
+    "JetBlue TrueBlue": { expires: true, inactivityMonths: 24 },
+    "Marriott Bonvoy": { expires: true, inactivityMonths: 24 },
+    "Hilton Honors": { expires: true, inactivityMonths: 15 },
+    "World of Hyatt": { expires: true, inactivityMonths: 24 },
+    "IHG One Rewards": { expires: true, inactivityMonths: 12 },
+    "Wyndham Rewards": { expires: true, inactivityMonths: 18 },
+    "Chase Ultimate Rewards": { expires: false },
+    "American Express Membership Rewards": { expires: false },
+    "Capital One Miles": { expires: false },
+    "Citi ThankYou Points": { expires: false },
+    "Bilt Rewards": { expires: false }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// WALLET READER — reads osaka-v2 localStorage
+// ═══════════════════════════════════════════════════════════
+
+function readRewardsData() {
+  // Try osaka-v2's key first, then fallback to generic key
+  const keys = ['osaka_data', 'rewardsData'];
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.accounts)) continue;
+      return data;
+    } catch (e) {
+      console.error('[ValueAdvisor] Failed to parse ' + key + ':', e);
+      return 'corrupted';
+    }
+  }
+  return null;
+}
+
+function readPrefs() {
+  try {
+    const raw = localStorage.getItem('valueAdvisorPrefs');
+    if (!raw) return { interestedInTravel: true };
+    return JSON.parse(raw);
+  } catch (e) {
+    return { interestedInTravel: true };
+  }
+}
+
+function savePrefs(prefs) {
+  localStorage.setItem('valueAdvisorPrefs', JSON.stringify(prefs));
+}
+
+// ═══════════════════════════════════════════════════════════
+// VALUATION ENGINE
+// ═══════════════════════════════════════════════════════════
+
+function getValuations(account) {
+  const prog = VALUATIONS.programs[account.program];
+  const balance = account.balance || 0;
+  const isEstimated = !prog;
+
+  const fallbackOptions = prog
+    ? prog.fallbackOptions.map(fo => ({
+        ...fo,
+        dollarValue: Math.round(balance * fo.cpp / 100)
+      }))
+    : [{ type: "cash_back", cpp: 1.0, label: "Cash back (estimated)", dollarValue: Math.round(balance / 100) }];
+
+  const bestFallback = fallbackOptions.reduce((a, b) => a.dollarValue >= b.dollarValue ? a : b, fallbackOptions[0]);
+
+  const transferPartners = (prog && prog.transferPartners)
+    ? prog.transferPartners.map(tp => ({
+        ...tp,
+        dollarValue: Math.round(balance * tp.bestCpp / 100)
+      }))
+    : [];
+
+  const allOptions = [...fallbackOptions, ...transferPartners.map(tp => ({
+    type: "transfer_partner",
+    label: tp.partner,
+    cpp: tp.bestCpp,
+    dollarValue: tp.dollarValue,
+    sweetSpot: tp.sweetSpot
+  }))];
+
+  const bestOverall = allOptions.reduce((a, b) => a.dollarValue >= b.dollarValue ? a : b, allOptions[0]);
+
+  return { fallbackOptions, bestFallback, transferPartners, bestOverall, isEstimated, allOptions };
+}
+
+function calcLeftOnTable(account) {
+  const v = getValuations(account);
+  const cashBackOption = v.fallbackOptions.find(fo => fo.type === 'cash_back') || v.bestFallback;
+  const best = v.bestOverall;
+  const gap = best.dollarValue - cashBackOption.dollarValue;
+  const gapPercent = cashBackOption.dollarValue > 0 ? Math.round((gap / cashBackOption.dollarValue) * 100) : 0;
+  return { best, cashBack: cashBackOption, gap, gapPercent };
+}
+
+function checkExpiration(account) {
+  const rule = VALUATIONS.expirationRules[account.program];
+  if (!rule || !rule.expires) return null;
+
+  // Check if account has a manually set expiration date
+  const lastUpdated = account.lastUpdated ? new Date(account.lastUpdated) : null;
+  if (!lastUpdated) return { atRisk: true, message: "Expiration risk unknown \u2014 update your last activity date.", dollarAtRisk: 0 };
+
+  const expiresAt = new Date(lastUpdated);
+  expiresAt.setMonth(expiresAt.getMonth() + rule.inactivityMonths);
+  const now = new Date();
+  const daysRemaining = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+  const v = getValuations(account);
+  const dollarAtRisk = v.bestOverall.dollarValue;
+
+  if (daysRemaining <= 0) {
+    return { atRisk: true, expired: true, daysRemaining: 0, dollarAtRisk, message: "EXPIRED", expiresAt };
+  }
+  if (daysRemaining <= 180) {
+    return { atRisk: true, expired: false, daysRemaining, dollarAtRisk, message: daysRemaining + " days remaining", expiresAt,
+      tips: ["Make a small purchase or earn to reset the clock", "Transfer to a non-expiring partner", "Book an award before expiration"] };
+  }
+  return null;
+}
+
+function cashBackEquivalence(cpp) {
+  // Assuming average earning rate of 1 point per dollar spent (simplification)
+  return (cpp).toFixed(1);
+}
+
+// ═══════════════════════════════════════════════════════════
+// AI AGENT INTERFACE — write results to localStorage
+// ═══════════════════════════════════════════════════════════
+
+function writeAgentResults(data, prefs) {
+  const accounts = data.accounts.filter(a => (a.balance || 0) > 0);
+  const portfolio = accounts.map(account => {
+    const v = getValuations(account);
+    const lot = calcLeftOnTable(account);
+    const exp = checkExpiration(account);
+    return {
+      currency: account.program,
+      balance: account.balance,
+      fallback_options: v.fallbackOptions.map(fo => ({ type: fo.type, cpp: fo.cpp, dollar_value: fo.dollarValue })),
+      recommended_option: v.bestOverall.type === 'transfer_partner'
+        ? { type: "transfer_partner_award", program: v.bestOverall.label, best_cpp: v.bestOverall.cpp,
+            dollar_value: v.bestOverall.dollarValue, value_over_floor: v.bestFallback.dollarValue > 0
+              ? +((v.bestOverall.dollarValue - v.bestFallback.dollarValue) / v.bestFallback.dollarValue).toFixed(2) : 0,
+            reason: v.bestOverall.sweetSpot || ("beats fallback by " + lot.gapPercent + "%") }
+        : { type: v.bestOverall.type, cpp: v.bestOverall.cpp, dollar_value: v.bestOverall.dollarValue,
+            reason: "best available option" },
+      alternatives: v.allOptions.filter(o => o !== v.bestOverall).slice(0, 3).map(o => ({
+        type: o.type, label: o.label, cpp: o.cpp, dollar_value: o.dollarValue, reason: o.sweetSpot || ""
+      })),
+      expiration_warning: exp ? { at_risk: exp.atRisk, days_remaining: exp.daysRemaining, dollar_at_risk: exp.dollarAtRisk } : null,
+      left_on_table: { gap: lot.gap, percent: lot.gapPercent }
+    };
+  });
+
+  const totalBest = portfolio.reduce((s, p) => s + (p.recommended_option.dollar_value || 0), 0);
+  const totalCashBack = portfolio.reduce((s, p) => {
+    const cb = p.fallback_options.find(fo => fo.type === 'cash_back');
+    return s + (cb ? cb.dollar_value : 0);
+  }, 0);
+
+  const result = {
+    generatedAt: new Date().toISOString(),
+    userPreferences: prefs,
+    portfolio,
+    totalPortfolioValue: { best: totalBest, cashBack: totalCashBack },
+    leftOnTableTotal: totalBest - totalCashBack
+  };
+
+  try {
+    localStorage.setItem('valueAdvisorResults', JSON.stringify(result));
+  } catch (e) {
+    console.error('[ValueAdvisor] Failed to write agent results:', e);
+  }
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════
+
+function esc(str) {
+  const el = document.createElement('span');
+  el.textContent = str;
+  return el.innerHTML;
+}
+
+function formatDollars(n) {
+  return '$' + n.toLocaleString();
+}
+
+function formatPoints(n) {
+  if (n >= 1000) return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k';
+  return n.toLocaleString();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const data = readRewardsData();
+  const prefs = readPrefs();
+
+  if (data === 'corrupted') {
+    app.innerHTML = '<div class="empty-state"><div class="emoji">&#9888;&#65039;</div><h3>Data could not be read</h3><p>Your rewards data appears to be corrupted. Try clearing it in the <a href="index.html">Rewards Tracker</a> and re-entering your accounts.</p></div>';
+    return;
+  }
+
+  if (!data || !data.accounts || data.accounts.length === 0) {
+    app.innerHTML = '<div class="empty-state"><div class="emoji">&#128176;</div><h3>No rewards data found</h3><p>Add your loyalty accounts in the <a href="index.html">Rewards Tracker</a> first, then come back here to see what they\'re worth.</p></div>';
+    return;
+  }
+
+  const accounts = data.accounts;
+  const activeAccounts = accounts.filter(a => (a.balance || 0) > 0);
+  const agentResults = writeAgentResults(data, prefs);
+  const showTravel = prefs.interestedInTravel !== false;
+
+  let html = '';
+
+  // ── Hero: portfolio value ──
+  const totalBest = agentResults.totalPortfolioValue.best;
+  const totalCash = agentResults.totalPortfolioValue.cashBack;
+  const displayTotal = showTravel ? totalBest : totalCash;
+  const displayLabel = showTravel ? 'best redemption value' : 'cash back value';
+
+  html += '<div class="hero animate-in">';
+  html += '<div class="label">Your portfolio</div>';
+  html += '<div class="value">' + esc(formatDollars(displayTotal)) + '</div>';
+  html += '<div class="subtitle">at ' + esc(displayLabel) + ' across ' + esc(String(activeAccounts.length)) + ' account' + (activeAccounts.length !== 1 ? 's' : '') + '</div>';
+  if (showTravel && totalCash > 0) {
+    html += '<div class="subtitle" style="margin-top:2px">Cash back value: ' + esc(formatDollars(totalCash)) + '</div>';
+  }
+  html += '</div>';
+
+  // ── Left on table banner ──
+  const lotTotal = agentResults.leftOnTableTotal;
+  if (showTravel && lotTotal > 0) {
+    const lotPercent = totalCash > 0 ? Math.round((lotTotal / totalCash) * 100) : 0;
+    html += '<div class="left-on-table animate-in">';
+    html += '<div class="lot-title">&#9888;&#65039; Money left on the table</div>';
+    html += '<div class="lot-value">' + esc(formatDollars(lotTotal)) + '</div>';
+    html += '<div class="lot-detail">You\'re leaving ' + esc(formatDollars(lotTotal)) + ' (' + esc(String(lotPercent)) + '% more) on the table by cashing out instead of using transfer partners.</div>';
+    html += '</div>';
+  }
+
+  // ── Expiration warnings ──
+  const expirations = [];
+  for (const account of accounts) {
+    const exp = checkExpiration(account);
+    if (exp && exp.atRisk) {
+      expirations.push({ account, exp });
+    }
+  }
+  if (expirations.length > 0) {
+    expirations.sort((a, b) => (a.exp.daysRemaining || 0) - (b.exp.daysRemaining || 0));
+    for (const { account, exp } of expirations) {
+      html += '<div class="expiration-warning animate-in">';
+      html += '<div class="ew-icon">&#9200;</div>';
+      html += '<div>';
+      html += '<div class="ew-program">' + esc(account.program) + ' (' + esc(formatPoints(account.balance)) + ' ' + esc(account.currency || 'pts') + ')';
+      if (exp.expired) html += ' <span class="expired-badge">Expired</span>';
+      html += '</div>';
+      html += '<div class="ew-detail">' + esc(exp.message) + '</div>';
+      if (exp.dollarAtRisk > 0) {
+        html += '<div class="ew-value">Worth ' + esc(formatDollars(exp.dollarAtRisk)) + ' at best redemption</div>';
+      }
+      if (exp.tips) {
+        html += '<div class="ew-detail" style="margin-top:6px">';
+        for (const tip of exp.tips) html += '&bull; ' + esc(tip) + '<br>';
+        html += '</div>';
+      }
+      html += '</div></div>';
+    }
+  }
+
+  // ── Recommendation cards ──
+  html += '<div class="rec-section animate-in">';
+  html += '<h2>Recommendations</h2>';
+  html += '<div class="rec-cards">';
+
+  // Find best overall, best simple (no transfer), best non-travel
+  let bestOverallAcc = null, bestOverallVal = 0;
+  let bestSimpleAcc = null, bestSimpleVal = 0;
+  let bestNonTravelAcc = null, bestNonTravelVal = 0;
+
+  for (const account of activeAccounts) {
+    const v = getValuations(account);
+    if (v.bestOverall.dollarValue > bestOverallVal) {
+      bestOverallVal = v.bestOverall.dollarValue;
+      bestOverallAcc = { account, option: v.bestOverall, valuations: v };
+    }
+    if (v.bestFallback.dollarValue > bestSimpleVal) {
+      bestSimpleVal = v.bestFallback.dollarValue;
+      bestSimpleAcc = { account, option: v.bestFallback, valuations: v };
+    }
+    const cashOpt = v.fallbackOptions.find(fo => fo.type === 'cash_back' || fo.type === 'travel_booking');
+    if (cashOpt && cashOpt.dollarValue > bestNonTravelVal) {
+      bestNonTravelVal = cashOpt.dollarValue;
+      bestNonTravelAcc = { account, option: cashOpt, valuations: v };
+    }
+  }
+
+  const cards = showTravel
+    ? [
+        { label: "Best Overall", data: bestOverallAcc, isBest: true },
+        { label: "Best Simple", data: bestSimpleAcc, isBest: false },
+        { label: "Best Non-Travel", data: bestNonTravelAcc, isBest: false }
+      ]
+    : [
+        { label: "Best Option", data: bestNonTravelAcc || bestSimpleAcc, isBest: true },
+        { label: "Best Simple", data: bestSimpleAcc, isBest: false }
+      ];
+
+  for (const card of cards) {
+    if (!card.data) continue;
+    const d = card.data;
+    html += '<div class="rec-card' + (card.isBest ? ' best' : '') + '">';
+    html += '<div class="rc-label">' + esc(card.label) + '</div>';
+    html += '<div class="rc-type">' + esc(d.option.label || d.option.type) + '</div>';
+    html += '<div class="rc-cpp">' + esc(d.option.cpp.toFixed(1)) + '<small> cpp</small></div>';
+    html += '<div class="rc-value">' + esc(formatDollars(d.option.dollarValue)) + '</div>';
+    html += '<div class="rc-reason">' + esc(d.account.program) + ' &middot; ' + esc(formatPoints(d.account.balance)) + ' pts';
+    if (d.option.sweetSpot) html += '<br>' + esc(d.option.sweetSpot);
+    html += '</div></div>';
+  }
+  html += '</div></div>';
+
+  // ── Per-account detail ──
+  html += '<div class="account-section animate-in">';
+  html += '<h2>By Account</h2>';
+
+  for (const account of accounts) {
+    const balance = account.balance || 0;
+    const v = getValuations(account);
+    const lot = calcLeftOnTable(account);
+    const isZero = balance === 0;
+    const maxDollar = v.bestOverall.dollarValue || 1;
+
+    html += '<div class="account-card' + (isZero ? ' zero-balance' : '') + '">';
+
+    // Header
+    html += '<div class="ac-header">';
+    html += '<div class="ac-program"><span class="type-dot ' + esc(account.type || 'other') + '"></span>' + esc(account.program);
+    if (v.isEstimated) html += '<span class="estimated-badge">Estimated</span>';
+    html += '</div>';
+    html += '<div class="ac-balance">' + esc(formatPoints(balance)) + ' ' + esc(account.currency || 'pts') + '</div>';
+    html += '</div>';
+
+    if (isZero) {
+      html += '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">No balance to analyze</div>';
+      html += '</div>';
+      continue;
+    }
+
+    // Redemption rows — fallback options
+    for (const fo of v.fallbackOptions) {
+      const pct = maxDollar > 0 ? Math.round((fo.dollarValue / maxDollar) * 100) : 0;
+      const isBest = fo === v.bestOverall;
+      const barClass = fo.type.startsWith('travel') ? 'travel' : (fo.type === 'cash_back' ? 'cash' : 'other');
+      html += '<div class="redemption-row">';
+      html += '<div class="rr-type">' + (isBest ? '<span class="rr-star">&#9733;</span> ' : '') + esc(fo.label) + '</div>';
+      html += '<div class="rr-bar-wrap"><div class="rr-bar ' + barClass + '" style="width:' + pct + '%"></div></div>';
+      html += '<div class="rr-values"><div class="rr-dollar">' + esc(formatDollars(fo.dollarValue)) + '</div>';
+      html += '<div class="rr-equiv">= ' + esc(cashBackEquivalence(fo.cpp)) + '% eff.</div></div>';
+      html += '</div>';
+    }
+
+    // Transfer partners (if travel mode)
+    if (showTravel && v.transferPartners.length > 0) {
+      for (const tp of v.transferPartners) {
+        const pct = maxDollar > 0 ? Math.min(100, Math.round((tp.dollarValue / maxDollar) * 100)) : 0;
+        const isBest = v.bestOverall.label === tp.partner;
+        html += '<div class="redemption-row">';
+        html += '<div class="rr-type">' + (isBest ? '<span class="rr-star">&#9733;</span> ' : '') + '<span class="rr-transfer">&#8594; ' + esc(tp.partner) + '</span></div>';
+        html += '<div class="rr-bar-wrap"><div class="rr-bar travel" style="width:' + pct + '%"></div></div>';
+        html += '<div class="rr-values"><div class="rr-dollar">' + esc(formatDollars(tp.dollarValue)) + '</div>';
+        html += '<div class="rr-equiv">= ' + esc(cashBackEquivalence(tp.bestCpp)) + '% eff.</div></div>';
+        html += '</div>';
+      }
+    }
+
+    // Left on table for this account
+    if (showTravel && lot.gap > 0) {
+      html += '<div style="font-size:12px;color:var(--gold);padding:8px 0 0;font-weight:600">';
+      html += '&#9888;&#65039; ' + esc(formatDollars(lot.gap)) + ' more available via ' + esc(lot.best.label || lot.best.type) + ' vs cash back';
+      html += '</div>';
+    }
+
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // ── Transfer partner sweet spots ──
+  if (showTravel) {
+    const allSweets = [];
+    for (const account of activeAccounts) {
+      const v = getValuations(account);
+      for (const tp of v.transferPartners) {
+        if (tp.bestCpp >= 1.8) {
+          allSweets.push({ account, partner: tp.partner, bestCpp: tp.bestCpp, sweetSpot: tp.sweetSpot, dollarValue: tp.dollarValue });
+        }
+      }
+    }
+    allSweets.sort((a, b) => b.bestCpp - a.bestCpp);
+
+    if (allSweets.length > 0) {
+      html += '<div class="sweet-spots animate-in">';
+      html += '<h3>&#127775; Your Best Transfer Sweet Spots</h3>';
+      for (const ss of allSweets.slice(0, 8)) {
+        html += '<div class="sweet-spot-item">';
+        html += '<div class="ss-header">';
+        html += '<div class="ss-route">' + esc(ss.account.program) + ' &#8594; ' + esc(ss.partner) + '</div>';
+        html += '<div class="ss-cpp">' + esc(ss.bestCpp.toFixed(1)) + ' cpp</div>';
+        html += '</div>';
+        html += '<div class="ss-detail">' + esc(ss.sweetSpot || '') + '</div>';
+        html += '<div class="ss-detail" style="color:var(--success)">Worth ' + esc(formatDollars(ss.dollarValue)) + ' with your ' + esc(formatPoints(ss.account.balance)) + ' points</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+  }
+
+  // ── Settings ──
+  html += '<div class="settings-section animate-in">';
+  html += '<h3>Settings</h3>';
+  html += '<div class="setting-row">';
+  html += '<div><div class="setting-label">Interested in travel</div>';
+  html += '<div class="setting-desc">Show transfer partner recommendations and travel redemptions</div></div>';
+  html += '<label class="toggle"><input type="checkbox" id="travel-toggle"' + (showTravel ? ' checked' : '') + '><span class="slider"></span></label>';
+  html += '</div></div>';
+
+  // ── Data freshness ──
+  html += '<div class="freshness animate-in">Valuations last updated: ' + esc(VALUATIONS.lastUpdated) + ' &middot; Sources: TPG, NerdWallet, Upgraded Points</div>';
+
+  app.innerHTML = html;
+
+  // ── Event listeners ──
+  const travelToggle = document.getElementById('travel-toggle');
+  if (travelToggle) {
+    travelToggle.addEventListener('change', function() {
+      const p = readPrefs();
+      p.interestedInTravel = this.checked;
+      savePrefs(p);
+      render();
+    });
+  }
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', render);
+
+// Re-render when localStorage changes (e.g., osaka-v2 updates in another tab)
+window.addEventListener('storage', function(e) {
+  if (e.key === 'rewardsData') render();
+});
+</script>
+</body>
+</html>
