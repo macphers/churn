@@ -25,7 +25,7 @@
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
-  --nav-active-bg: rgba(0,0,0,0.04);
+  --nav-active-bg: rgba(139,94,16,0.06);
 }
 [data-theme="dark"] {
   --bg: #0F0E0C; --surface: #1A1815; --surface-2: #141210; --border: #2A2723;
@@ -37,7 +37,7 @@
   --card-color: #8B5E10; --other-color: #9B9590;
   --gold: var(--accent-decorative);
   --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
-  --nav-active-bg: rgba(255,255,255,0.06);
+  --nav-active-bg: rgba(139,94,16,0.12);
 }
 
 html { background: var(--bg); }
@@ -65,35 +65,30 @@ body {
 .app-nav-inner {
   width: min(1060px, calc(100vw - 40px));
   margin: 0 auto;
-  min-height: 56px;
+  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 .nav-brand {
-  flex: 1;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text);
 }
 .nav-links {
   display: flex;
   gap: 4px;
-}
-.nav-end {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
+  margin-left: auto;
 }
 .nav-links a {
   color: var(--text-muted);
   text-decoration: none;
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   transition: color 120ms ease, background 120ms ease;
@@ -125,7 +120,7 @@ body {
 [data-theme="dark"] .btn-primary:hover { background: #B8860B; }
 
 .page-header {
-  padding: 40px 0 20px;
+  padding: 32px 0 0;
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -135,8 +130,9 @@ body {
   color: var(--accent);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  margin-bottom: 4px;
 }
 .page-header h1 {
   font-family: var(--font-display);
@@ -767,9 +763,6 @@ body {
       <a href="index.html#benefits">Benefits</a>
       <a href="index.html#profile">Profile</a>
       <a href="value.html" class="active">Advisor</a>
-    </div>
-    <div class="nav-end">
-      <button type="button" class="theme-toggle-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
     </div>
   </div>
 </nav>
