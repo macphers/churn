@@ -235,12 +235,46 @@ function validateBalance(v){var n=Number(v);if(isNaN(n)||!isFinite(n)||n<0)retur
 
 function defaultData(){return{_version:SCHEMA_VERSION,accounts:[],benefits:[],profile:{homeAirport:'',preferredAlliances:[],travelPreferences:{regions:[],classPreference:'economy'}}}}
 
+/* Migrate schema from older versions */
+function migrateData(d){
+  if(!d._version||d._version<2){
+    d._version=SCHEMA_VERSION;
+    if(!d.profile)d.profile=defaultData().profile;
+    d.accounts.forEach(function(a){if(!a.currency)a.currency='points';if(!a.type)a.type='other'});
+  }
+  return d;
+}
+
+/* Repair individual account records */
+function repairAccount(a){
+  if(!a.id||typeof a.id!=='string')a.id='repair-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  if(typeof a.program!=='string')a.program='Unknown Program';
+  a.type=validateType(a.type);a.currency=validateCurrency(a.currency);
+  a.balance=validateBalance(a.balance);
+  if(typeof a.accountNumber!=='string')a.accountNumber='';
+  if(typeof a.notes!=='string')a.notes='';
+  return a;
+}
+
+/* Repair individual benefit records */
+function repairBenefit(b){
+  if(!b.id||typeof b.id!=='string')b.id='repair-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  if(typeof b.name!=='string')b.name='Unknown Benefit';
+  if(typeof b.value!=='string')b.value='';
+  if(typeof b.notes!=='string')b.notes='';
+  b.used=!!b.used;
+  return b;
+}
+
 function loadData(){
   try{
     var raw=localStorage.getItem(STORAGE_KEY);if(!raw)return defaultData();
     var d=JSON.parse(raw);if(typeof d!=='object'||d===null)return defaultData();
+    d=migrateData(d);
     if(!Array.isArray(d.accounts))d.accounts=[];
     if(!Array.isArray(d.benefits))d.benefits=[];
+    d.accounts=d.accounts.filter(function(a){return a&&typeof a==='object'}).map(repairAccount);
+    d.benefits=d.benefits.filter(function(b){return b&&typeof b==='object'}).map(repairBenefit);
     if(!d.profile||typeof d.profile!=='object')d.profile=defaultData().profile;
     if(!d.profile.travelPreferences)d.profile.travelPreferences=defaultData().profile.travelPreferences;
     if(!Array.isArray(d.profile.preferredAlliances))d.profile.preferredAlliances=[];

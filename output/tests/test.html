@@ -41,6 +41,36 @@ function validateCurrency(c) { return VALID_CURRENCIES.includes(c) ? c : 'points
 function validateBalance(v) { var n = Number(v); if (isNaN(n) || !isFinite(n) || n < 0) return 0; return Math.min(Math.floor(n), MAX_BALANCE); }
 function defaultData() { return { _version: 2, accounts: [], benefits: [], profile: { homeAirport: '', preferredAlliances: [], travelPreferences: { regions: [], classPreference: 'economy' } } }; }
 
+var SCHEMA_VERSION = 2;
+
+function migrateData(d) {
+  if (!d._version || d._version < 2) {
+    d._version = SCHEMA_VERSION;
+    if (!d.profile) d.profile = defaultData().profile;
+    d.accounts.forEach(function(a) { if (!a.currency) a.currency = 'points'; if (!a.type) a.type = 'other'; });
+  }
+  return d;
+}
+
+function repairAccount(a) {
+  if (!a.id || typeof a.id !== 'string') a.id = 'repair-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  if (typeof a.program !== 'string') a.program = 'Unknown Program';
+  a.type = validateType(a.type); a.currency = validateCurrency(a.currency);
+  a.balance = validateBalance(a.balance);
+  if (typeof a.accountNumber !== 'string') a.accountNumber = '';
+  if (typeof a.notes !== 'string') a.notes = '';
+  return a;
+}
+
+function repairBenefit(b) {
+  if (!b.id || typeof b.id !== 'string') b.id = 'repair-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  if (typeof b.name !== 'string') b.name = 'Unknown Benefit';
+  if (typeof b.value !== 'string') b.value = '';
+  if (typeof b.notes !== 'string') b.notes = '';
+  b.used = !!b.used;
+  return b;
+}
+
 // Pure validation (matches refactored validateImport)
 function validateImport(d) {
   var errors = [];
@@ -215,6 +245,99 @@ assert('daysUntil far future > 0', (function(){ var d = Math.ceil((new Date(farF
 // 34 — daysUntil edge: past date
 var pastDate = '2020-01-01';
 assert('daysUntil past < 0', (function(){ var d = Math.ceil((new Date(pastDate).getTime() - Date.now()) / 86400000); return d < 0; })());
+
+// === SCHEMA MIGRATION ===
+// 35 — migrateData: v1 → v2
+var v1Data = { accounts: [{ id: 'a1', program: 'United', balance: 5000 }], benefits: [] };
+var migrated = migrateData(JSON.parse(JSON.stringify(v1Data)));
+assertEqual('migrate: adds _version', migrated._version, 2);
+assertEqual('migrate: adds currency', migrated.accounts[0].currency, 'points');
+assertEqual('migrate: adds type', migrated.accounts[0].type, 'other');
+assert('migrate: adds profile', typeof migrated.profile === 'object');
+
+// 36 — migrateData: v2 unchanged
+var v2Data = defaultData();
+v2Data.accounts.push({ id: 'a1', program: 'Delta', type: 'airline', balance: 1000, currency: 'miles' });
+var migrated2 = migrateData(JSON.parse(JSON.stringify(v2Data)));
+assertEqual('migrate: v2 unchanged', migrated2.accounts[0].type, 'airline');
+
+// === ACCOUNT REPAIR ===
+// 37 — repairAccount: missing id gets assigned
+var brokenAcct1 = { program: 'Test', balance: 100 };
+var repaired1 = repairAccount(JSON.parse(JSON.stringify(brokenAcct1)));
+assert('repair: assigns id when missing', repaired1.id.indexOf('repair-') === 0);
+assertEqual('repair: preserves program', repaired1.program, 'Test');
+
+// 38 — repairAccount: invalid types get defaulted
+var brokenAcct2 = { id: 'a1', program: 'Test', type: 'crypto', currency: 'gold', balance: -50 };
+var repaired2 = repairAccount(JSON.parse(JSON.stringify(brokenAcct2)));
+assertEqual('repair: invalid type → other', repaired2.type, 'other');
+assertEqual('repair: invalid currency → points', repaired2.currency, 'points');
+assertEqual('repair: negative balance → 0', repaired2.balance, 0);
+
+// 39 — repairAccount: non-string program gets default
+var brokenAcct3 = { id: 'a1', program: 42, balance: 100 };
+var repaired3 = repairAccount(JSON.parse(JSON.stringify(brokenAcct3)));
+assertEqual('repair: non-string program → Unknown', repaired3.program, 'Unknown Program');
+
+// === BENEFIT REPAIR ===
+// 40 — repairBenefit: missing fields get defaults
+var brokenBen1 = { name: 123, value: null, used: 'yes' };
+var repairedBen = repairBenefit(JSON.parse(JSON.stringify(brokenBen1)));
+assert('repair benefit: assigns id', repairedBen.id.indexOf('repair-') === 0);
+assertEqual('repair benefit: non-string name → Unknown', repairedBen.name, 'Unknown Benefit');
+assertEqual('repair benefit: null value → empty', repairedBen.value, '');
+assertEqual('repair benefit: truthy used → true', repairedBen.used, true);
+
+// 41 — repairBenefit: valid benefit preserved
+var goodBen = { id: 'b1', name: 'Lounge', value: '$0', notes: '', used: false };
+var repairedGood = repairBenefit(JSON.parse(JSON.stringify(goodBen)));
+assertEqual('repair benefit: valid preserved', repairedGood.name, 'Lounge');
+assertEqual('repair benefit: false stays false', repairedGood.used, false);
+
+// === ADDITIONAL BOUNDARY TESTS ===
+// 42 — validateBalance: string "0"
+assertEqual('balance: string zero', validateBalance('0'), 0);
+
+// 43 — validateBalance: very small positive
+assertEqual('balance: 0.1 floors to 0', validateBalance(0.1), 0);
+
+// 44 — sanitize: handles undefined
+assertEqual('sanitize: undefined input', sanitize(undefined), '');
+
+// 45 — sanitize: boolean input
+assertEqual('sanitize: boolean input', sanitize(true), '');
+
+// 46 — validateType: all valid types accepted
+var allTypesValid = VALID_TYPES.every(function(t) { return validateType(t) === t; });
+assert('validateType: all valid types pass', allTypesValid);
+
+// 47 — validateCurrency: all valid currencies accepted
+var allCurrValid = VALID_CURRENCIES.every(function(c) { return validateCurrency(c) === c; });
+assert('validateCurrency: all valid currencies pass', allCurrValid);
+
+// 48 — defaultData: full structure check
+var dd = defaultData();
+assertEqual('defaultData: _version', dd._version, 2);
+assert('defaultData: accounts is array', Array.isArray(dd.accounts));
+assert('defaultData: benefits is array', Array.isArray(dd.benefits));
+assertEqual('defaultData: accounts empty', dd.accounts.length, 0);
+assertEqual('defaultData: benefits empty', dd.benefits.length, 0);
+
+// 49 — Import + sanitize round-trip with orphans
+var rtOrphan = {
+  accounts: [{ id: 'rt1', program: 'Test', type: 'airline', balance: 100, currency: 'miles' }],
+  benefits: [
+    { id: 'b1', cardId: 'rt1', name: 'Good', value: '', used: false },
+    { id: 'b2', cardId: 'gone', name: 'Bad', value: '', used: false }
+  ],
+  profile: defaultData().profile
+};
+var rtErrors = validateImport(rtOrphan);
+assertEqual('round-trip orphan: validates clean', rtErrors.length, 0);
+var rtClean = sanitizeImport(rtOrphan);
+assertEqual('round-trip orphan: removes orphan', rtClean.benefits.length, 1);
+assertEqual('round-trip orphan: keeps valid', rtClean.benefits[0].name, 'Good');
 
 // === Render results ===
 document.getElementById('results').innerHTML = results.join('');
