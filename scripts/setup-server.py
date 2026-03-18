@@ -6,21 +6,28 @@ Binds to 127.0.0.1 only. No dependencies beyond Python stdlib.
 
 Usage:
   python3 scripts/setup-server.py
+  python3 scripts/setup-server.py --open
+  python3 scripts/setup-server.py --port 3000
 """
 
+import argparse
+import atexit
 import difflib
 import http.server
 import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import webbrowser
 from urllib.parse import parse_qs, urlparse
 
-PORT_RANGE = (8080, 8081, 8082)
+PREFERRED_PORTS = (3000, 8080, 8081, 8082, 8083, 8084, 8085, 8086, 8087, 8088, 8089)
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SERVER_STATE_PATH = os.path.join(ROOT, '.context', 'server.json')
 
 # File paths — all relative to project root
 ENV_PATH = os.path.join(ROOT, '.env')
@@ -47,6 +54,10 @@ CONTENT_TYPES = {
     '.gif': 'image/gif',
     '.woff2': 'font/woff2',
 }
+
+
+class ReusableHTTPServer(http.server.HTTPServer):
+    allow_reuse_address = True
 
 
 def read_file(path):
@@ -233,6 +244,58 @@ def guess_content_type(path):
     return CONTENT_TYPES.get(ext, 'application/octet-stream')
 
 
+def write_server_state(port):
+    os.makedirs(os.path.dirname(SERVER_STATE_PATH), exist_ok=True)
+    with open(SERVER_STATE_PATH, 'w') as f:
+        json.dump({
+            'pid': os.getpid(),
+            'port': port,
+            'url': f'http://127.0.0.1:{port}/',
+        }, f)
+
+
+def clear_server_state():
+    try:
+        with open(SERVER_STATE_PATH, 'r') as f:
+            state = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        state = None
+
+    if state and state.get('pid') != os.getpid():
+        return
+
+    try:
+        os.remove(SERVER_STATE_PATH)
+    except FileNotFoundError:
+        pass
+
+
+def open_browser(url):
+    try:
+        webbrowser.open(url, new=2)
+    except Exception:
+        pass
+
+
+def parse_args(argv):
+    parser = argparse.ArgumentParser(description='Serve Mission Control locally.')
+    parser.add_argument('--port', type=int, help='Bind to a specific port.')
+    parser.add_argument(
+        '--open',
+        action='store_true',
+        dest='open_browser',
+        help='Open the server in the default browser.',
+    )
+    return parser.parse_args(argv)
+
+
+def bind_server(port):
+    try:
+        return ReusableHTTPServer(('127.0.0.1', port), Handler)
+    except OSError:
+        return None
+
+
 def has_scored_runs():
     """Check if any run has a score.json file."""
     if not os.path.isdir(RUNS_DIR):
@@ -267,6 +330,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
     GET  /setup         → redirect to /
     GET  /dashboard     → redirect to /
     GET  /style.css     → style.css
+    GET  /server-meta   → JSON: workspace identity for local launcher
     GET  /styles        → JSON: available style profiles
     GET  /results       → JSON: run scores + progress
     GET  /output/*      → static files from output/ (path-traversal safe)
@@ -315,6 +379,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.serve_file(INDEX_PATH, 'text/html; charset=utf-8')
         elif path == '/style.css':
             self.serve_file(STYLE_PATH, 'text/css; charset=utf-8')
+        elif path == '/server-meta':
+            self.get_server_meta()
         elif path == '/styles':
             self.get_styles()
         elif path == '/results':
@@ -339,6 +405,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             'rounds': int(get_config_value('rounds', '1')),
             'style': get_config_value('style', ''),
             'env_vars': get_user_env_vars(),
+        })
+
+    def get_server_meta(self):
+        self.respond(200, {
+            'root': ROOT,
+            'port': self.server.server_address[1],
         })
 
     def get_styles(self):
@@ -781,18 +853,47 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
-    ports = PORT_RANGE
-    if len(sys.argv) >= 3 and sys.argv[1] == '--port':
-        ports = (int(sys.argv[2]),)
-    for port in ports:
-        try:
-            server = http.server.HTTPServer(('127.0.0.1', port), Handler)
-            print(f'gstack-auto → http://127.0.0.1:{port}')
-            server.serve_forever()
-        except OSError:
-            continue
-    print('All ports in use. Free a port and try again.')
-    sys.exit(1)
+    args = parse_args(sys.argv[1:])
+    atexit.register(clear_server_state)
+
+    if args.port is not None:
+        server = bind_server(args.port)
+        if server is None:
+            print(f'Port {args.port} is in use. Try another port or omit --port.')
+            sys.exit(1)
+    else:
+        server = None
+        for port in PREFERRED_PORTS:
+            server = bind_server(port)
+            if server is not None:
+                break
+        if server is None:
+            server = bind_server(0)
+
+    if server is None:
+        print('Could not find an open port.')
+        sys.exit(1)
+
+    port = server.server_address[1]
+    url = f'http://127.0.0.1:{port}/'
+    write_server_state(port)
+    print(f'gstack-auto → {url}')
+    if args.open_browser:
+        open_browser(url)
+
+    def handle_shutdown(signum, frame):
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGINT, handle_shutdown)
+    signal.signal(signal.SIGTERM, handle_shutdown)
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+        clear_server_state()
 
 
 if __name__ == '__main__':

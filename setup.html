@@ -331,7 +331,7 @@ async function testConnection() {
       setStatus(status, 'err', res.data.error);
     }
   } catch (e) {
-    setStatus(status, 'err', 'Server not reachable. Is setup-server.py running?');
+    setStatus(status, 'err', 'Server not reachable. Run python3 scripts/open-local.py');
   } finally {
     btn.disabled = false;
   }
@@ -393,7 +393,7 @@ async function saveConfig() {
       setStatus(status, 'err', res.data.error || 'Save failed.');
     }
   } catch (e) {
-    setStatus(status, 'err', 'Server not reachable. Is setup-server.py running?');
+    setStatus(status, 'err', 'Server not reachable. Run python3 scripts/open-local.py');
   } finally {
     btn.disabled = false;
   }

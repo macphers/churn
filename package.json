@@ -1,0 +1,9 @@
+{
+  "name": "churn-local",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/churn-dev-server.mjs",
+    "dev:open": "node scripts/churn-dev-server.mjs --open",
+    "dev:tool": "python3 scripts/setup-server.py --open"
+  }
+}

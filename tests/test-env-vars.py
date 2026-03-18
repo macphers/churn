@@ -14,6 +14,7 @@ SERVER = os.path.join(ROOT, 'scripts', 'setup-server.py')
 ENV_PATH = os.path.join(ROOT, '.env')
 SPEC_PATH = os.path.join(ROOT, 'product-spec.md')
 CONFIG_PATH = os.path.join(ROOT, 'pipeline', 'config.yml')
+SERVER_STATE_PATH = os.path.join(ROOT, '.context', 'server.json')
 PORT = 8089  # Use a high port to avoid conflicts
 
 def post(path, body):
@@ -140,6 +141,8 @@ def main():
         if proc:
             proc.terminate()
             proc.wait(timeout=5)
+        if os.path.exists(SERVER_STATE_PATH):
+            os.remove(SERVER_STATE_PATH)
         # Restore all backed-up files
         for path, content in backups.items():
             with open(path, 'w') as f:
