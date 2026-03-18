@@ -21,11 +21,12 @@
   --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
   --card-color: #8B5E10; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
   --gold: var(--accent-decorative);
+  --error-bg: rgba(166,61,64,0.06);
   --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
-  --nav-active-bg: rgba(0,0,0,0.04);
+  --nav-active-bg: rgba(139,94,16,0.06);
 }
 [data-theme="dark"] {
   --bg: #0F0E0C; --surface: #1A1815; --surface-2: #141210; --border: #2A2723;
@@ -36,8 +37,9 @@
   --warning: #C49A2E; --airline-color: #5A9FD4; --hotel-color: #A873B8;
   --card-color: #8B5E10; --other-color: #9B9590;
   --gold: var(--accent-decorative);
+  --error-bg: rgba(212,88,91,0.1);
   --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
-  --nav-active-bg: rgba(255,255,255,0.06);
+  --nav-active-bg: rgba(139,94,16,0.12);
 }
 
 html { background: var(--bg); }
@@ -51,6 +53,7 @@ body {
 }
 
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
@@ -72,28 +75,23 @@ body {
   gap: 16px;
 }
 .nav-brand {
-  flex: 1;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text);
 }
 .nav-links {
   display: flex;
   gap: 4px;
-}
-.nav-end {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
+  margin-left: auto;
 }
 .nav-links a {
   color: var(--text-muted);
   text-decoration: none;
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   transition: color 120ms ease, background 120ms ease;
@@ -135,8 +133,9 @@ body {
   color: var(--accent);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  margin-bottom: 4px;
 }
 .page-header h1 {
   font-family: var(--font-display);
@@ -176,11 +175,11 @@ body {
 }
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.85fr);
   gap: 20px;
 }
 .hero-card, .delta-card {
-  padding: 26px;
+  padding: 24px;
   animation: fadeInUp 220ms ease-out;
 }
 .mini-label {
@@ -762,7 +761,10 @@ body {
   <div class="app-nav-inner">
     <span class="nav-brand">Churn</span>
     <div class="nav-links">
-      <a href="index.html">Tracker</a>
+      <a href="index.html">Dashboard</a>
+      <a href="index.html#accounts">Accounts</a>
+      <a href="index.html#benefits">Benefits</a>
+      <a href="index.html#profile">Profile</a>
       <a href="value.html" class="active">Advisor</a>
     </div>
     <div class="nav-end">

@@ -20,11 +20,12 @@
   --accent-glow: rgba(139,94,16,0.12); --danger: #A63D40; --success: #2D7A4F;
   --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
   --card-color: #8B5E10; --accent-decorative: #C4841D; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
+  --gold: var(--accent-decorative);
   --error-bg: rgba(166,61,64,0.06); --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
-  --nav-active-bg: rgba(0,0,0,0.04);
+  --nav-active-bg: rgba(139,94,16,0.06);
 }
 [data-theme="dark"] {
   --bg: #0F0E0C; --surface: #1A1815; --surface-2: #141210; --border: #2A2723;
@@ -35,7 +36,7 @@
   --warning: #C49A2E; --airline-color: #5A9FD4; --hotel-color: #A873B8;
   --card-color: #8B5E10; --accent-decorative: #C4841D; --other-color: #9B9590;
   --error-bg: rgba(212,88,91,0.1); --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
-  --nav-active-bg: rgba(255,255,255,0.06);
+  --nav-active-bg: rgba(139,94,16,0.12);
 }
 
 html { background: var(--bg); }
@@ -71,28 +72,28 @@ body {
   min-height: 56px;
 }
 .nav-brand {
-  flex: 1;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text);
 }
 .nav-links {
   display: flex;
   gap: 4px;
+  margin-left: auto;
 }
 .nav-end {
-  flex: 1;
   display: flex;
-  justify-content: flex-end;
+  gap: 4px;
+  margin-left: 8px;
 }
-.nav-links a {
+.nav-links a, .nav-links button {
   color: var(--text-muted);
   text-decoration: none;
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   transition: color 120ms ease, background 120ms ease;
@@ -100,8 +101,8 @@ body {
   display: flex;
   align-items: center;
 }
-.nav-links a:hover { color: var(--text); }
-.nav-links a.active {
+.nav-links a:hover, .nav-links button:hover { color: var(--text); }
+.nav-links a.active, .nav-links button.active {
   color: var(--text);
   background: var(--nav-active-bg);
   font-weight: 600;
@@ -134,8 +135,9 @@ body {
   color: var(--accent);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  margin-bottom: 4px;
 }
 .page-header h1 {
   font-family: var(--font-display);
@@ -185,7 +187,7 @@ body {
   box-shadow: var(--panel-shadow);
 }
 .hero-card {
-  padding: 28px 26px;
+  padding: 24px;
   animation: fadeInUp 220ms ease-out;
 }
 .hero-label, .section-kicker, .mini-label {
@@ -316,17 +318,16 @@ body {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 .account-card {
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .account-main {
-  padding: 18px;
+  padding: 24px;
 }
 .account-header {
   display: flex;
@@ -343,9 +344,9 @@ body {
   letter-spacing: -0.01em;
 }
 .type-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   flex: 0 0 auto;
 }
 .type-dot.flexible, .type-dot.credit_card { background: var(--card-color); }
@@ -463,7 +464,7 @@ body {
 }
 .detail-metric {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 14px;
   background: var(--surface);
 }
@@ -481,7 +482,7 @@ body {
 }
 .detail-item {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 14px;
   background: var(--surface);
 }
@@ -587,12 +588,12 @@ body {
 
 .benefits-grid {
   display: grid;
-  gap: 10px;
+  gap: 16px;
 }
 .benefit-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  padding: 24px;
   background: var(--surface);
 }
 .benefit-card h3 {
@@ -617,12 +618,12 @@ body {
 .profile-grid, .data-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
+  gap: 16px;
 }
 .profile-card, .data-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: var(--radius-sm);
+  padding: 20px;
   background: var(--surface);
 }
 .profile-value {
@@ -769,7 +770,7 @@ body {
   overflow: auto;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   box-shadow: 0 12px 32px rgba(0,0,0,0.1);
   z-index: 4;
   display: none;
@@ -925,6 +926,218 @@ body {
   border: 0;
 }
 
+/* ── Tab views ──────────────────────────────── */
+.view { display: none; }
+.view.active { display: block; animation: fadeInUp 220ms ease-out; }
+.nav-tab {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-body);
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active {
+  color: var(--text);
+  background: var(--nav-active-bg);
+  font-weight: 600;
+}
+.view-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.5vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ── Dashboard stat cards ──────────────────── */
+.stat-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+}
+.stat-card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.stat-card-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stat-card-unit {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  font-style: normal;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+/* ── Dashboard account table ───────────────── */
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.dash-table thead th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.dash-table thead th:nth-child(2),
+.dash-table thead th:nth-child(3) { text-align: right; }
+.dash-table tbody td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.dash-table tbody tr:last-child td { border-bottom: none; }
+.dash-table tbody td:first-child {
+  font-weight: 600;
+}
+.dash-table tbody td:nth-child(2),
+.dash-table tbody td:nth-child(3) {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.dash-table tbody td:nth-child(2) {
+  font-weight: 500;
+  font-size: 13px;
+}
+.dash-table tbody td:nth-child(3) {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.dash-table .program-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-hero-number {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.dash-hero-number em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+/* ── Benefits hero + grid ──────────────────── */
+.benefits-hero-number {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.benefits-hero-number em {
+  color: var(--accent);
+  font-style: italic;
+}
+.benefits-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.benefit-card-v2 {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.benefit-card-v2 h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+.benefit-card-v2 .benefit-value {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--accent);
+}
+.benefit-card-v2 .benefit-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 0;
+}
+.benefit-card-v2 .benefit-status-line {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 0;
+}
+.benefit-card-v2 .benefit-status-line.available { color: var(--success); }
+.benefit-card-v2 .benefit-status-line.used { color: var(--text-muted); }
+.benefit-card-v2 .benefit-status-line.expiring { color: var(--warning); }
+.benefit-card-v2 .benefit-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.dash-subtitle {
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+.dash-welcome {
+  padding: 32px 0;
+}
+.dash-welcome h1 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.dash-welcome p { color: var(--text-muted); font-size: 15px; max-width: 34rem; margin-top: 8px; }
+
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; }
   .form-grid, .detail-grid, .rate-grid { grid-template-columns: 1fr; }
@@ -1064,8 +1277,11 @@ body {
   <div class="app-nav-inner">
     <span class="nav-brand">Churn</span>
     <div class="nav-links">
-      <a href="index.html" class="active">Tracker</a>
-      <a href="value.html">Advisor</a>
+      <button type="button" class="nav-tab active" data-tab="dashboard">Dashboard</button>
+      <button type="button" class="nav-tab" data-tab="accounts">Accounts</button>
+      <button type="button" class="nav-tab" data-tab="benefits">Benefits</button>
+      <button type="button" class="nav-tab" data-tab="profile">Profile</button>
+      <button type="button" class="nav-tab" data-tab="advisor">Advisor</button>
     </div>
     <div class="nav-end">
       <button type="button" class="nav-refresh" id="nav-refresh-btn" title="Refresh balances" aria-label="Refresh balances">
@@ -1076,81 +1292,88 @@ body {
   </div>
 </nav>
 
-<div class="container page-header">
-  <div>
-    <div class="eyebrow">Your Rewards</div>
-    <h1>Rewards intelligence with real dollar context.</h1>
-    <p>Add loyalty balances with built-in valuations from a shared program database, and track which cards earn into each account.</p>
-  </div>
-  <div class="header-actions">
-    <button type="button" class="btn btn-secondary" id="hero-open-benefit">Track benefit</button>
-    <button type="button" class="btn btn-primary" id="hero-open-account">Add account</button>
-  </div>
-</div>
-
 <main class="container stack">
   <div id="error-banner" class="banner error" role="alert"></div>
   <div id="success-banner" class="banner success" role="status"></div>
 
-  <section class="hero-grid" aria-label="Portfolio summary">
-    <div id="hero-card" class="panel hero-card"></div>
-    <div id="chart-card" class="panel chart-card" role="img" aria-label="Points distribution by program type"></div>
+  <!-- DASHBOARD VIEW -->
+  <section id="view-dashboard" class="view active">
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">Your Portfolio</div>
+        <div id="dash-hero"></div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-secondary" id="hero-open-benefit">Track benefit</button>
+        <button type="button" class="btn btn-primary" id="hero-open-account">Add account</button>
+      </div>
+    </div>
+    <div id="dash-stat-cards" class="stat-cards-grid"></div>
+    <div id="dash-account-table"></div>
+    <div id="hero-card" style="display:none"></div>
+    <div id="chart-card" style="display:none"></div>
   </section>
 
-  <section class="panel section-panel" aria-labelledby="accounts-heading">
-    <div class="section-header">
+  <!-- ACCOUNTS VIEW -->
+  <section id="view-accounts" class="view">
+    <div class="page-header">
       <div>
-        <div class="section-kicker">Tracker</div>
-        <h2 id="accounts-heading">Accounts</h2>
-        <p class="section-copy">Every balance stores the selected program, its cents-per-point valuation, and the cards that help you earn it.</p>
+        <div class="eyebrow">Tracker</div>
+        <div id="accounts-hero"></div>
       </div>
-      <button type="button" class="btn btn-primary" id="accounts-add-button">Add account</button>
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" id="accounts-add-button">Add account</button>
+      </div>
     </div>
     <div id="accounts-groups"></div>
   </section>
 
-  <section class="panel section-panel" aria-labelledby="benefits-heading">
-    <div class="section-header">
+  <!-- BENEFITS VIEW -->
+  <section id="view-benefits" class="view">
+    <div class="page-header">
       <div>
-        <div class="section-kicker">Perks</div>
-        <h2 id="benefits-heading">Benefits</h2>
-        <p class="section-copy">Keep card credits and lounge perks tied to the accounts that unlock them.</p>
+        <div class="eyebrow">Benefits</div>
+        <div id="benefits-hero"></div>
       </div>
-      <button type="button" class="btn btn-secondary" id="benefits-add-button">Add benefit</button>
+      <div class="header-actions">
+        <button type="button" class="btn btn-secondary" id="benefits-add-button">Add benefit</button>
+      </div>
     </div>
-    <div id="benefits-list" class="benefits-grid"></div>
+    <div id="benefits-list" class="benefits-card-grid"></div>
   </section>
 
-  <section class="panel section-panel" aria-labelledby="profile-heading">
-    <div class="section-header">
+  <!-- PROFILE VIEW -->
+  <section id="view-profile" class="view">
+    <div class="page-header">
       <div>
-        <div class="section-kicker">Traveler</div>
-        <h2 id="profile-heading">Travel profile</h2>
-        <p class="section-copy">Preferences here feed the advisor page when you want redemption recommendations.</p>
+        <div class="eyebrow">Traveler</div>
+        <div class="dash-hero-number">Travel <em>profile</em></div>
+        <p class="dash-subtitle">Preferences here feed the advisor page when you want redemption recommendations.</p>
       </div>
-      <button type="button" class="btn btn-secondary" id="profile-edit-button">Edit profile</button>
+      <div class="header-actions">
+        <button type="button" class="btn btn-secondary" id="profile-edit-button">Edit profile</button>
+      </div>
     </div>
     <div id="profile-grid" class="profile-grid"></div>
-  </section>
-
-  <section class="panel section-panel" aria-labelledby="data-heading">
-    <div class="section-header">
-      <div>
-        <div class="section-kicker">Backup</div>
-        <h2 id="data-heading">Data tools</h2>
-        <p class="section-copy">Everything is stored in localStorage. Export before larger edits or imports.</p>
-      </div>
-    </div>
-    <div class="data-grid">
-      <div class="data-card">
-        <div class="mini-label">Actions</div>
-        <div class="summary-row">
-          <button type="button" class="btn btn-secondary" id="export-button">Export data</button>
-          <button type="button" class="btn btn-secondary" id="import-button">Import data</button>
+    <div style="margin-top:32px">
+      <div class="section-header" style="margin-bottom:16px">
+        <div>
+          <div class="eyebrow">Backup</div>
+          <h2 style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;margin-top:8px">Data tools</h2>
+          <p class="section-copy">Everything is stored in localStorage. Export before larger edits or imports.</p>
         </div>
-        <input id="import-file" class="sr-only" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
       </div>
-      <div class="data-card" id="storage-card"></div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="mini-label">Actions</div>
+          <div class="summary-row">
+            <button type="button" class="btn btn-secondary" id="export-button">Export data</button>
+            <button type="button" class="btn btn-secondary" id="import-button">Import data</button>
+          </div>
+          <input id="import-file" class="sr-only" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
+        </div>
+        <div class="data-card" id="storage-card"></div>
+      </div>
     </div>
   </section>
 </main>
@@ -1975,9 +2198,17 @@ function buildAccountDetails(account) {
 
 function renderAccounts(data) {
   var wrapper = document.getElementById('accounts-groups');
+  var heroEl = document.getElementById('accounts-hero');
   if (!data.accounts.length) {
+    if (heroEl) heroEl.innerHTML = '<div class="dash-hero-number">Your <em>accounts</em></div><p class="dash-subtitle">Add your first loyalty program to see dollar values, transfer partners, and card details.</p>';
     wrapper.innerHTML = '<div class="empty-state"><strong>No accounts yet</strong>Add your first loyalty program — like Chase Ultimate Rewards or Delta SkyMiles — to see dollar values, transfer partners, and card details here.<br><button type="button" class="btn btn-primary" id="empty-add-account">Add account</button></div>';
     return;
+  }
+  var totalValue = data.accounts.reduce(function (s, a) { return s + calculateAccountValue(a); }, 0);
+  var totalPoints = data.accounts.reduce(function (s, a) { return s + validateBalance(a.balance); }, 0);
+  if (heroEl) {
+    heroEl.innerHTML = '<div class="dash-hero-number">' + formatDollars(totalValue) + ' <em>in value</em></div>' +
+      '<p class="dash-subtitle">' + data.accounts.length + ' program' + (data.accounts.length === 1 ? '' : 's') + ' &middot; ' + formatPoints(totalPoints) + ' total points</p>';
   }
   var groups = ['flexible', 'airline', 'hotel', 'other'];
   wrapper.innerHTML = '';
@@ -2036,33 +2267,50 @@ function renderAccounts(data) {
 
 function renderBenefits(data) {
   var list = document.getElementById('benefits-list');
+  var heroEl = document.getElementById('benefits-hero');
   if (!data.benefits.length) {
+    if (heroEl) heroEl.innerHTML = '<div class="benefits-hero-number">Card perks <em>&amp; credits</em></div><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
     list.innerHTML = '<div class="empty-state"><strong>No benefits tracked</strong>Track card perks like lounge access, free night certificates, and travel credits. Benefits stay linked to accounts so nothing expires unnoticed.<br><button type="button" class="btn btn-secondary" id="empty-add-benefit">Track a benefit</button></div>';
     return;
   }
+  // Benefits hero
+  var totalValue = 0;
+  data.benefits.forEach(function (b) {
+    var match = (b.value || '').match(/[\d,.]+/);
+    if (match) totalValue += parseFloat(match[0].replace(/,/g, '')) || 0;
+  });
   var accountMap = {};
   data.accounts.forEach(function (account) { accountMap[account.id] = account.program; });
+  var linkedAccounts = {};
+  data.benefits.forEach(function (b) { if (accountMap[b.cardId]) linkedAccounts[accountMap[b.cardId]] = true; });
+  var linkedList = Object.keys(linkedAccounts);
+  if (heroEl) {
+    heroEl.innerHTML = '<div class="benefits-hero-number">' + formatDollars(totalValue) + ' <em>in perks</em></div>' +
+      '<p class="dash-subtitle">' + (linkedList.length ? linkedList.join(', ') + ' &middot; ' : '') + data.benefits.length + ' benefit' + (data.benefits.length === 1 ? '' : 's') + ' tracked</p>';
+  }
   list.innerHTML = '';
   data.benefits.slice().sort(function (left, right) {
     return daysUntil(left.renewalDate) - daysUntil(right.renewalDate);
   }).forEach(function (benefit) {
     var remaining = daysUntil(benefit.renewalDate);
-    var statusClass = benefit.used ? 'status-used' : (remaining <= 30 ? 'status-expiring' : 'status-active');
-    var statusLabel = benefit.used ? 'Used' : (remaining <= 30 && remaining !== Infinity ? remaining + 'd left' : 'Active');
+    var statusClass = benefit.used ? 'used' : (remaining <= 30 ? 'expiring' : 'available');
+    var statusLabel = benefit.used ? 'Activated' : (remaining <= 30 && remaining !== Infinity ? remaining + 'd left' : '\u2713 Available');
+    var renewalText = '';
+    if (benefit.renewalDate) {
+      var d = new Date(benefit.renewalDate);
+      if (!isNaN(d.getTime())) renewalText = 'Renews ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
     var card = document.createElement('article');
-    card.className = 'benefit-card';
+    card.className = 'benefit-card-v2';
     card.innerHTML = '' +
-      '<h3><span>' + esc(benefit.name) + '</span><span class="benefit-status ' + statusClass + '">' + statusLabel + '</span></h3>' +
-      '<p class="section-copy">' + esc(accountMap[benefit.cardId] || 'Missing linked account') + '</p>' +
-      '<div class="account-meta">' +
-        (benefit.value ? '<span>' + esc(benefit.value) + '</span>' : '') +
-        (benefit.renewalDate ? '<span>Renews ' + esc(benefit.renewalDate) + '</span>' : '') +
-      '</div>' +
-      (benefit.notes ? '<p class="section-copy" style="margin-top:10px">' + esc(benefit.notes) + '</p>' : '') +
-      '<div class="account-actions">' +
-        '<button type="button" class="btn btn-secondary" data-toggle-benefit="' + esc(benefit.id) + '">' + (benefit.used ? 'Mark unused' : 'Mark used') + '</button>' +
-        '<button type="button" class="btn btn-secondary" data-edit-benefit="' + esc(benefit.id) + '">Edit</button>' +
-        '<button type="button" class="btn btn-danger" data-delete-benefit="' + esc(benefit.id) + '">Delete</button>' +
+      '<h3>' + esc(benefit.name) + '</h3>' +
+      (benefit.value ? '<div class="benefit-value">' + esc(benefit.value) + '</div>' : '') +
+      (renewalText ? '<div class="benefit-meta">' + renewalText + '</div>' : '') +
+      '<div class="benefit-status-line ' + statusClass + '">' + statusLabel + '</div>' +
+      '<div class="benefit-actions">' +
+        '<button type="button" class="btn btn-secondary" style="font-size:12px;padding:6px 10px" data-toggle-benefit="' + esc(benefit.id) + '">' + (benefit.used ? 'Mark unused' : 'Mark used') + '</button>' +
+        '<button type="button" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" data-edit-benefit="' + esc(benefit.id) + '">Edit</button>' +
+        '<button type="button" class="btn btn-danger" style="font-size:12px;padding:6px 10px" data-delete-benefit="' + esc(benefit.id) + '">Delete</button>' +
       '</div>';
     list.appendChild(card);
   });
@@ -2084,9 +2332,85 @@ function renderProfile(data) {
     }).join('') + '</div></div>';
 }
 
+function renderDashboard(data) {
+  var dashHero = document.getElementById('dash-hero');
+  var statCards = document.getElementById('dash-stat-cards');
+  var accountTable = document.getElementById('dash-account-table');
+  if (!dashHero) return;
+
+  if (!data.accounts.length) {
+    dashHero.innerHTML = '<div class="dash-welcome"><h1>Track your loyalty points in real dollars.</h1><p>Add a program like Chase Ultimate Rewards or Delta SkyMiles. Churn fills in valuations, transfer partners, and card details automatically.</p></div>';
+    statCards.innerHTML = '';
+    accountTable.innerHTML = '';
+    return;
+  }
+
+  var totalPoints = data.accounts.reduce(function (s, a) { return s + validateBalance(a.balance); }, 0);
+  var totalValue = data.accounts.reduce(function (s, a) { return s + calculateAccountValue(a); }, 0);
+  var staleCounts = countStale(data);
+  var lastUpdate = data.accounts.reduce(function (latest, a) {
+    if (!a.lastUpdated) return latest;
+    return a.lastUpdated > latest ? a.lastUpdated : latest;
+  }, '');
+
+  dashHero.innerHTML =
+    '<div class="dash-hero-number">' + formatPoints(totalPoints) + ' <em>points</em></div>' +
+    '<div class="dash-subtitle">Across ' + data.accounts.length + ' program' + (data.accounts.length === 1 ? '' : 's') +
+    ' &middot; ' + formatDollars(totalValue) + ' estimated value' +
+    (lastUpdate ? ' &middot; Last updated ' + timeAgo(lastUpdate) : '') + '</div>' +
+    (staleCounts.needsRefresh > 0 ? '<button type="button" class="refresh-cta" id="hero-refresh-btn">' + staleCounts.needsRefresh + ' balance' + (staleCounts.needsRefresh === 1 ? '' : 's') + ' need' + (staleCounts.needsRefresh === 1 ? 's' : '') + ' refresh &#9656;</button>' : '');
+
+  // Stat cards by category
+  var categories = [
+    { key: 'airline', label: 'Airlines', color: 'var(--airline-color)' },
+    { key: 'hotel', label: 'Hotels', color: 'var(--hotel-color)' },
+    { key: 'flexible', label: 'Flex Currency', color: 'var(--card-color)' }
+  ];
+  var cardsHtml = '';
+  categories.forEach(function (cat) {
+    var accts = data.accounts.filter(function (a) { return getAccountGroupKey(a) === cat.key; });
+    if (!accts.length) return;
+    var pts = accts.reduce(function (s, a) { return s + validateBalance(a.balance); }, 0);
+    var curr = accts[0].currency || 'points';
+    cardsHtml += '<div class="stat-card">' +
+      '<div class="stat-card-label"><span class="type-dot ' + cat.key + '"></span>' + cat.label.toUpperCase() + '</div>' +
+      '<div class="stat-card-value">' + formatPoints(pts) + '<span class="stat-card-unit">' + curr + '</span></div>' +
+    '</div>';
+  });
+  statCards.innerHTML = cardsHtml;
+
+  // Account table
+  var sorted = data.accounts.slice().sort(function (a, b) { return calculateAccountValue(b) - calculateAccountValue(a); });
+  var tableHtml = '<table class="dash-table"><thead><tr><th>Program</th><th>Balance</th><th>Updated</th></tr></thead><tbody>';
+  sorted.forEach(function (a) {
+    var dateStr = a.lastUpdated ? new Date(a.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    tableHtml += '<tr>' +
+      '<td><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + '</span></td>' +
+      '<td>' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</td>' +
+      '<td>' + dateStr + '</td>' +
+    '</tr>';
+  });
+  tableHtml += '</tbody></table>';
+  accountTable.innerHTML = tableHtml;
+}
+
+function switchTab(tabName) {
+  if (tabName === 'advisor') {
+    window.location.href = 'value.html';
+    return;
+  }
+  document.querySelectorAll('.nav-tab').forEach(function (btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+  });
+  document.querySelectorAll('.view').forEach(function (view) {
+    view.classList.toggle('active', view.id === 'view-' + tabName);
+  });
+}
+
 function render() {
   var data = loadData();
   renderHero(data);
+  renderDashboard(data);
   renderAccounts(data);
   renderBenefits(data);
   renderProfile(data);
@@ -2720,10 +3044,22 @@ function checkRefreshCompletion() {
 }
 
 function bindEvents() {
+  // Tab navigation
+  document.querySelectorAll('.nav-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      switchTab(btn.getAttribute('data-tab'));
+    });
+  });
   document.getElementById('nav-refresh-btn').addEventListener('click', openRefreshModal);
   document.getElementById('refresh-done-btn').addEventListener('click', closeRefreshModal);
   document.getElementById('refresh-modal').addEventListener('click', function (e) {
     if (e.target === this) closeRefreshModal();
+  });
+  // Dashboard hero clicks (refresh + welcome)
+  document.getElementById('view-dashboard').addEventListener('click', function (e) {
+    if (e.target.id === 'hero-refresh-btn' || e.target.closest('#hero-refresh-btn')) {
+      openRefreshModal();
+    }
   });
   document.getElementById('hero-card').addEventListener('click', function (e) {
     if (e.target.id === 'hero-refresh-btn' || e.target.closest('#hero-refresh-btn')) {

@@ -422,3 +422,10 @@ Always read DESIGN.md before making any visual or UI decisions.
 All font choices, colors, spacing, and aesthetic direction are defined there.
 Do not deviate without explicit user approval.
 In QA mode, flag any code that doesn't match DESIGN.md.
+
+**Critical rule:** When asked to "match a mockup", apply ONLY visual styling changes.
+Never remove existing functionality (buttons, features, dark mode, etc.) to match a
+static mockup — mockups show design direction, not a complete feature spec.
+DESIGN.md is the authoritative source for all CSS values (spacing, radii, colors).
+If a mockup appears to conflict with DESIGN.md, flag the conflict — do not silently
+override DESIGN.md values.
