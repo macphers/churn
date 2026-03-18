@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Osaka Advisor Tests</title>
+<title>Churn Advisor Tests</title>
 <style>
 body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #F5F2ED; color: #1A1A1A; padding: 24px; }
 h1 { margin-bottom: 8px; }
@@ -18,7 +18,7 @@ iframe { width: 0; height: 0; border: 0; position: absolute; left: -9999px; }
 </style>
 </head>
 <body>
-<h1>Osaka Advisor Test Suite</h1>
+<h1>Churn Advisor Test Suite</h1>
 <p class="muted">Loads the actual advisor page, then asserts against the exported scoring helpers and rendered UI.</p>
 <div id="results"></div>
 <div id="summary"></div>
@@ -54,7 +54,7 @@ function renderResults() {
 function run() {
   var frame = document.getElementById('advisor-frame');
   var win = frame.contentWindow;
-  var api = win.OsakaAdvisor;
+  var api = win.ChurnAdvisor;
   var baseData = {
     _version: 3,
     accounts: [
@@ -87,9 +87,9 @@ function run() {
     }
   };
 
-  win.localStorage.setItem('osaka_data', JSON.stringify(baseData));
+  win.localStorage.setItem('churn_data', JSON.stringify(baseData));
   win.localStorage.removeItem('valueAdvisorPrefs');
-  win.localStorage.removeItem('osaka_household');
+  win.localStorage.removeItem('churn_household');
   win.localStorage.removeItem('valueAdvisorResults');
 
   assert('advisor API exported', !!api);
@@ -181,9 +181,9 @@ function run() {
   assert('writeAgentResults stores totals', results.totals.best > 0);
   assert('valueAdvisorResults stored in localStorage', !!win.localStorage.getItem('valueAdvisorResults'));
 
-  win.localStorage.setItem('osaka_data', '{broken json');
+  win.localStorage.setItem('churn_data', '{broken json');
   assertEqual('readRewardsData returns corrupted sentinel', api.readRewardsData(), 'corrupted');
-  win.localStorage.setItem('osaka_data', JSON.stringify(baseData));
+  win.localStorage.setItem('churn_data', JSON.stringify(baseData));
 
   api.render();
   assert('render produces mode tabs', win.document.querySelectorAll('[data-mode]').length === 7);

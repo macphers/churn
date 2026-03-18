@@ -1,4 +1,4 @@
-# Osaka — Personal Credit Card Rewards Tracker
+# Churn — Personal Credit Card Rewards Tracker
 
 ## Vision
 A personal dashboard for tracking credit card points, miles, and benefits across all travel loyalty programs. Designed to be both a human-friendly UI and an AI-agent-readable data source for booking trips with points.

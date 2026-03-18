@@ -2,7 +2,7 @@
 
 Generated: 2026-03-17
 Branch: realmm13/install-gstack
-Repo: macphers/churn (workspace: osaka-v2)
+Repo: macphers/churn (workspace: churn)
 
 ## What You're Building
 
@@ -17,7 +17,7 @@ All files live in `output/`. Pure HTML/CSS/JS, no frameworks, no build step. Dat
 ## Current State of the Codebase
 
 ### output/index.html (655 lines)
-Rewards tracker. Schema v2 with `SCHEMA_VERSION=2`, `STORAGE_KEY='osaka_data'`.
+Rewards tracker. Schema v2 with `SCHEMA_VERSION=2`, `STORAGE_KEY='churn_data'`.
 
 Key existing functions:
 - `render()` — main render, dispatches to renderDashboard/renderAccounts/renderBenefits/renderProfile
@@ -48,11 +48,11 @@ Existing accessibility features (DO NOT remove):
 - `@media (prefers-reduced-motion: reduce)` disabling animations
 
 ### output/value.html (815 lines)
-Points Value Advisor. Reads `osaka_data` from localStorage (read-only).
+Points Value Advisor. Reads `churn_data` from localStorage (read-only).
 
 Key existing structures:
 - `VALUATIONS` constant (lines 165-370) — 16 programs with fallbackOptions, transferPartners, expirationRules. **This gets extracted to programs.js.**
-- `readRewardsData()` — reads osaka_data from localStorage
+- `readRewardsData()` — reads churn_data from localStorage
 - `readPrefs()` — currently returns `{ interestedInTravel: true }`. **Gets DEFAULT_PREFS merge.**
 - `getValuations(account)` — basic CPP valuation. **Gets replaced by WTP-aware engine.**
 - `calcLeftOnTable(account)` — gap between best and cash back
@@ -138,7 +138,7 @@ Bilt:
 **2a. Add shared nav bar (top of body):**
 ```html
 <nav style="...">
-  <span>Osaka</span>
+  <span>Churn</span>
   <a href="index.html" class="active">Tracker</a>
   <a href="value.html">Advisor</a>
 </nav>
@@ -396,8 +396,8 @@ Inside the collapsible Settings section at bottom:
 **4e. Household management:**
 - Inside Settings section, below WTP
 - "Player Two" header with "Add" button
-- Reads/writes separate localStorage key: `osaka_household`
-- Same format as osaka_data: `{ accounts: [...] }`
+- Reads/writes separate localStorage key: `churn_household`
+- Same format as churn_data: `{ accounts: [...] }`
 - Mini add-account form (reuses program picker pattern)
 - Combined totals shown in hero when household has accounts
 - "Remove player two" option
@@ -560,10 +560,10 @@ After all phases complete:
 1. **XSS Protection**: Use the existing `esc()` function for ALL user-generated content in innerHTML. Never insert raw user strings.
 
 2. **localStorage keys**:
-   - `osaka_data` — main rewards data (index.html writes, value.html reads)
+   - `churn_data` — main rewards data (index.html writes, value.html reads)
    - `valueAdvisorPrefs` — value advisor preferences
    - `valueAdvisorResults` — AI agent structured output
-   - `osaka_household` — player two accounts (NEW)
+   - `churn_household` — player two accounts (NEW)
 
 3. **No frameworks**. Pure HTML/CSS/JS. No React, no Vue, no build step.
 
@@ -577,7 +577,7 @@ After all phases complete:
 
 8. **Animations**: Use existing `fadeInUp` keyframe with `animate-in` class. Respect `prefers-reduced-motion`.
 
-9. **The storage event listener** in value.html currently listens for `rewardsData` key changes — update it to listen for `osaka_data` (the actual key used).
+9. **The storage event listener** in value.html currently listens for `rewardsData` key changes — update it to listen for `churn_data` (the actual key used).
 
 10. **Commit after each phase** with a descriptive message summarizing what changed.
 
@@ -588,12 +588,12 @@ programs.js  (no dependencies — pure data)
     │
     ├── index.html  (reads PROGRAMS for picker + cpp values)
     │       │
-    │       └── writes osaka_data to localStorage
+    │       └── writes churn_data to localStorage
     │
     └── value.html  (reads PROGRAMS for scoring engine)
             │
-            ├── reads osaka_data from localStorage
+            ├── reads churn_data from localStorage
             ├── reads/writes valueAdvisorPrefs
-            ├── reads/writes osaka_household
+            ├── reads/writes churn_household
             └── writes valueAdvisorResults
 ```

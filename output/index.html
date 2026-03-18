@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Osaka — Rewards Tracker</title>
+<title>Churn — Rewards Tracker</title>
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -836,7 +836,7 @@ body {
 <body>
 <nav class="app-nav">
   <div class="app-nav-inner">
-    <span class="nav-brand">Osaka</span>
+    <span class="nav-brand">Churn</span>
     <div class="nav-links">
       <a href="index.html" class="active">Tracker</a>
       <a href="value.html">Advisor</a>
@@ -1118,7 +1118,8 @@ body {
 <script>
 'use strict';
 
-var STORAGE_KEY = 'osaka_data';
+var STORAGE_KEY = 'churn_data';
+var LEGACY_STORAGE_KEY = 'osaka_data';
 var SCHEMA_VERSION = 3;
 var VALID_TYPES = ['flexible', 'airline', 'hotel', 'credit_card', 'other'];
 var VALID_CURRENCIES = ['points', 'miles'];
@@ -1405,6 +1406,10 @@ function repairBenefit(benefit) {
 function loadData() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) { localStorage.setItem(STORAGE_KEY, raw); localStorage.removeItem(LEGACY_STORAGE_KEY); }
+    }
     if (!raw) return defaultData();
     var parsed = JSON.parse(raw);
     parsed = migrateData(parsed);
@@ -2189,7 +2194,7 @@ function exportData() {
   var url = URL.createObjectURL(blob);
   var link = document.createElement('a');
   link.href = url;
-  link.download = 'osaka-backup-' + new Date().toISOString().split('T')[0] + '.json';
+  link.download = 'churn-backup-' + new Date().toISOString().split('T')[0] + '.json';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -2334,7 +2339,7 @@ function bindEvents() {
   });
 }
 
-window.OsakaTracker = {
+window.ChurnTracker = {
   STORAGE_KEY: STORAGE_KEY,
   SCHEMA_VERSION: SCHEMA_VERSION,
   sanitize: sanitize,

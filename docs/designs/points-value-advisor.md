@@ -21,8 +21,8 @@ readPrefs()  ──────────────────────�
 ```
 
 ### Data Model
-- `osaka_data` — existing rewards accounts (read-only from value.html)
-- `osaka_household` — player-two accounts (NEW, separate localStorage key)
+- `churn_data` — existing rewards accounts (read-only from value.html)
+- `churn_household` — player-two accounts (NEW, separate localStorage key)
 - `valueAdvisorPrefs` — modes, WTP caps, cabin/hotel prefs, complexity tolerance (EXTEND)
 - `valueAdvisorResults` — AI agent structured output (EXTEND)
 
@@ -80,4 +80,4 @@ Refactor monolithic render() into composable section functions: renderHero(), re
 - Transfer bonus ingestion → TODOS.md
 - Redemption journal → TODOS.md
 - Destination browser → TODOS.md
-- Card application tracking → TODOS.md (from osaka-v2 review)
+- Card application tracking → TODOS.md (from churn review)
