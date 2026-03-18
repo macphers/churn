@@ -799,7 +799,115 @@ body {
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
   .modal-footer .btn { width: 100%; }
+  .refresh-row-bottom { flex-wrap: wrap; }
+  .refresh-row-bottom input[type="number"] { width: 100%; }
 }
+
+.staleness-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.staleness-dot.fresh { background: var(--success); }
+.staleness-dot.aging { background: var(--warning); }
+.staleness-dot.stale { background: var(--danger); }
+
+.staleness-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.staleness-label.fresh { color: var(--success); }
+.staleness-label.aging { color: var(--warning); }
+.staleness-label.stale { color: var(--danger); }
+
+.refresh-cta {
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(251,191,36,0.4);
+  background: rgba(12,13,18,0.45);
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-top: 10px;
+  font: inherit;
+}
+.refresh-cta:hover { border-color: var(--warning); color: var(--warning); }
+
+.nav-refresh {
+  border: none;
+  background: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  position: relative;
+  font: inherit;
+}
+.nav-refresh.has-stale { color: var(--warning); }
+.nav-refresh:hover { background: rgba(255,255,255,0.06); }
+
+.refresh-row {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 8px;
+}
+.refresh-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.refresh-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.refresh-row-bottom input[type="number"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 14px;
+  width: 140px;
+  font: inherit;
+  -moz-appearance: textfield;
+}
+.refresh-row-bottom input[type="number"]::-webkit-inner-spin-button,
+.refresh-row-bottom input[type="number"]::-webkit-outer-spin-button {
+  display: none;
+}
+.refresh-row-bottom .open-site {
+  color: var(--accent-light);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.refresh-row.checked .refresh-row-bottom input { display: none; }
+.refresh-row.checked .refresh-check { display: inline; }
+.refresh-check {
+  display: none;
+  color: var(--success);
+  font-weight: 700;
+}
+.refresh-header-done { color: var(--success); }
+@keyframes checkPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 </style>
 </head>
 <body>
@@ -810,6 +918,9 @@ body {
       <a href="index.html" class="active">Tracker</a>
       <a href="value.html">Advisor</a>
     </div>
+    <button type="button" class="nav-refresh" id="nav-refresh-btn" title="Refresh balances" aria-label="Refresh balances">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    </button>
   </div>
 </nav>
 
@@ -831,7 +942,7 @@ body {
 
   <section class="hero-grid" aria-label="Portfolio summary">
     <div id="hero-card" class="panel hero-card"></div>
-    <div id="chart-card" class="panel chart-card"></div>
+    <div id="chart-card" class="panel chart-card" role="img" aria-label="Points distribution by program type"></div>
   </section>
 
   <section class="panel section-panel" aria-labelledby="accounts-heading">
@@ -1029,6 +1140,23 @@ body {
   </div>
 </div>
 
+<div id="refresh-modal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="refresh-modal-title">
+    <div class="modal-scroll">
+      <div class="modal-header">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <h2 id="refresh-modal-title">Refresh balances</h2>
+        <p id="refresh-modal-subtitle"></p>
+      </div>
+      <div class="modal-body" id="refresh-modal-body" aria-live="polite">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="refresh-done-btn">Done refreshing</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="profile-modal" class="modal-backdrop" aria-hidden="true">
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="modal-scroll">
@@ -1208,6 +1336,43 @@ function timeAgo(dateString) {
   if (days < 7) return days + 'd ago';
   if (days < 30) return Math.floor(days / 7) + 'w ago';
   return Math.floor(days / 30) + 'mo ago';
+}
+
+function getStaleness(account) {
+  var program = getProgramForAccount(account);
+  var type = program ? program.type : (account.type || 'other');
+  var freshDays = (type === 'airline' || type === 'hotel') ? 14 : 30;
+  var agingDays = (type === 'airline' || type === 'hotel') ? 30 : 60;
+  if (!account.lastUpdated) return { level: 'stale', days: -1, label: 'Stale' };
+  var date = new Date(account.lastUpdated);
+  if (isNaN(date.getTime())) return { level: 'stale', days: -1, label: 'Stale' };
+  var days = Math.floor((Date.now() - date.getTime()) / 86400000);
+  if (days < freshDays) return { level: 'fresh', days: days, label: 'Fresh' };
+  if (days < agingDays) return { level: 'aging', days: days, label: 'Aging' };
+  return { level: 'stale', days: days, label: 'Stale' };
+}
+
+function getLoginUrl(account) {
+  var program = getProgramForAccount(account);
+  return (program && program.loginUrl) ? program.loginUrl : null;
+}
+
+function getStalenessText(account) {
+  var staleness = getStaleness(account);
+  var ago = timeAgo(account.lastUpdated);
+  if (ago === 'unknown') return staleness.label;
+  return staleness.label + ' \u00b7 ' + ago;
+}
+
+function countStale(data) {
+  var stale = 0;
+  var aging = 0;
+  data.accounts.forEach(function (account) {
+    var s = getStaleness(account);
+    if (s.level === 'stale') stale++;
+    else if (s.level === 'aging') aging++;
+  });
+  return { stale: stale, aging: aging, needsRefresh: stale + aging };
 }
 
 function daysUntil(dateString) {
@@ -1482,7 +1647,7 @@ function updateStorageMeter(data) {
     '<div class="profile-value">' + (used / 1024).toFixed(1) + ' KB</div>' +
     '<p class="section-copy">Roughly ' + pct + '% of the standard browser budget for this origin.</p>' +
     '<div class="storage-meter">' +
-      '<div class="meter-track"><div class="meter-fill ' + fillClass + '" style="width:' + Math.min(pct, 100) + '%"></div></div>' +
+      '<div class="meter-track" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="Storage usage"><div class="meter-fill ' + fillClass + '" style="width:' + Math.min(pct, 100) + '%"></div></div>' +
     '</div>';
 }
 
@@ -1523,6 +1688,11 @@ function renderHero(data) {
       '<div class="summary-chip">' + data.benefits.length + ' tracked benefit' + (data.benefits.length === 1 ? '' : 's') + '</div>' +
       '<div class="summary-chip">' + (data.accounts.filter(function (account) { return normalizeCards(account.cards).length > 0; }).length) + ' account' + (data.accounts.length === 1 ? '' : 's') + ' with card context</div>' +
     '</div>';
+  var staleCounts = countStale(data);
+  if (staleCounts.needsRefresh > 0 && data.accounts.length > 0) {
+    hero.innerHTML += '<button type="button" class="refresh-cta" id="hero-refresh-btn">' +
+      staleCounts.needsRefresh + ' balance' + (staleCounts.needsRefresh === 1 ? '' : 's') + ' need' + (staleCounts.needsRefresh === 1 ? 's' : '') + ' refresh &#9656;</button>';
+  }
   var chartRows = getChartRows(data.accounts);
   if (!chartRows.length) {
     chart.innerHTML = '' +
@@ -1645,7 +1815,7 @@ function renderAccounts(data) {
             '<span class="type-pill">' + label.label + '</span>' +
           '</div>' +
           '<div class="account-meta">' +
-            '<span>Updated ' + timeAgo(account.lastUpdated) + '</span>' +
+            '<span><span class="staleness-dot ' + getStaleness(account).level + '" aria-hidden="true"></span><span class="staleness-label ' + getStaleness(account).level + '">' + esc(getStalenessText(account)) + '</span></span>' +
             (account.accountNumber ? '<span>' + esc(account.accountNumber) + '</span>' : '') +
             '<span>' + normalizeCards(account.cards).length + ' card' + (normalizeCards(account.cards).length === 1 ? '' : 's') + '</span>' +
             '<span>' + validateCpp(account.cpp).toFixed(2) + ' cpp</span>' +
@@ -1723,6 +1893,17 @@ function render() {
   renderBenefits(data);
   renderProfile(data);
   updateStorageMeter(data);
+  var navBtn = document.getElementById('nav-refresh-btn');
+  if (navBtn) {
+    var navCounts = countStale(data);
+    if (navCounts.needsRefresh > 0) {
+      navBtn.classList.add('has-stale');
+      navBtn.title = navCounts.needsRefresh + ' balance' + (navCounts.needsRefresh === 1 ? '' : 's') + ' need' + (navCounts.needsRefresh === 1 ? 's' : '') + ' refresh';
+    } else {
+      navBtn.classList.remove('has-stale');
+      navBtn.title = 'All balances current';
+    }
+  }
 }
 
 function openModal(id) {
@@ -2188,7 +2369,186 @@ function importData(event) {
   reader.readAsText(file);
 }
 
+function openRefreshModal() {
+  var data = loadData();
+  var modal = document.getElementById('refresh-modal');
+  var body = document.getElementById('refresh-modal-body');
+  var subtitle = document.getElementById('refresh-modal-subtitle');
+  var doneBtn = document.getElementById('refresh-done-btn');
+
+  if (!data.accounts.length) {
+    subtitle.textContent = '';
+    body.innerHTML = '<div class="empty-state"><strong>No accounts to refresh</strong>Add your first loyalty account to start tracking balance freshness.</div>';
+    doneBtn.textContent = 'Done refreshing';
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    return;
+  }
+
+  var sorted = data.accounts.slice().sort(function (a, b) {
+    var order = { stale: 0, aging: 1, fresh: 2 };
+    return (order[getStaleness(a).level] || 0) - (order[getStaleness(b).level] || 0);
+  });
+
+  var staleCounts = countStale(data);
+  var checkedIds = JSON.parse(sessionStorage.getItem('osaka_refresh_checked') || '[]');
+
+  if (staleCounts.needsRefresh === 0) {
+    subtitle.textContent = 'All balances are current!';
+    subtitle.className = 'refresh-header-done';
+  } else {
+    subtitle.textContent = staleCounts.needsRefresh + ' of ' + data.accounts.length + ' need refresh';
+    subtitle.className = '';
+  }
+
+  body.innerHTML = '';
+  sorted.forEach(function (account) {
+    var staleness = getStaleness(account);
+    var loginUrl = getLoginUrl(account);
+    var isChecked = checkedIds.indexOf(account.id) >= 0;
+    var isFresh = staleness.level === 'fresh' && !isChecked;
+
+    var row = document.createElement('div');
+    row.className = 'refresh-row' + (isChecked ? ' checked' : '');
+    row.setAttribute('data-account-id', account.id);
+
+    var topHtml = '<div class="refresh-row-top">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span class="type-dot ' + getAccountGroupKey(account) + '"></span>' +
+        '<strong>' + esc(account.program) + '</strong>' +
+      '</div>' +
+      '<span class="staleness-label ' + staleness.level + '">' + esc(getStalenessText(account)) + '</span>' +
+    '</div>';
+
+    var bottomHtml = '<div class="refresh-row-bottom">' +
+      '<span>' + formatPoints(account.balance) + ' ' + esc(account.currency || 'points') + '</span>';
+
+    if (isFresh) {
+      bottomHtml += '<span style="color:var(--success);font-size:13px">(up to date)</span>';
+    } else if (isChecked) {
+      bottomHtml += '<span class="refresh-check" style="display:inline">\u2713 Updated</span>';
+    } else {
+      bottomHtml += '<span style="color:var(--text-muted)">\u2192</span>' +
+        '<input type="number" min="0" step="1" placeholder="New balance" class="refresh-balance-input" data-account-id="' + esc(account.id) + '" aria-label="New balance for ' + esc(account.program) + '">';
+    }
+
+    if (loginUrl) {
+      bottomHtml += '<a href="' + esc(loginUrl) + '" target="_blank" rel="noopener noreferrer" class="open-site">Open site \u2197</a>';
+    } else {
+      bottomHtml += '<span style="color:var(--text-muted);font-size:12px">manual only</span>';
+    }
+
+    bottomHtml += '</div>';
+    row.innerHTML = topHtml + bottomHtml;
+    body.appendChild(row);
+  });
+
+  doneBtn.textContent = 'Done refreshing';
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeRefreshModal() {
+  var modal = document.getElementById('refresh-modal');
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  render();
+}
+
+function saveRefreshBalance(accountId, newBalance) {
+  var data = loadData();
+  var account = null;
+  for (var i = 0; i < data.accounts.length; i++) {
+    if (data.accounts[i].id === accountId) {
+      account = data.accounts[i];
+      break;
+    }
+  }
+  if (!account) return;
+
+  account.balance = Math.max(0, Math.floor(Number(newBalance) || 0));
+  account.lastUpdated = new Date().toISOString().split('T')[0];
+  saveData(data);
+
+  var checkedIds = JSON.parse(sessionStorage.getItem('osaka_refresh_checked') || '[]');
+  if (checkedIds.indexOf(accountId) < 0) {
+    checkedIds.push(accountId);
+    sessionStorage.setItem('osaka_refresh_checked', JSON.stringify(checkedIds));
+  }
+
+  var row = document.querySelector('.refresh-row[data-account-id="' + accountId + '"]');
+  if (row) {
+    row.classList.add('checked');
+    var bottom = row.querySelector('.refresh-row-bottom');
+    if (bottom) {
+      var input = bottom.querySelector('input');
+      if (input) input.style.display = 'none';
+      var check = document.createElement('span');
+      check.className = 'refresh-check';
+      check.style.display = 'inline';
+      check.style.animation = 'fadeInUp 200ms ease-out';
+      check.textContent = '\u2713 ' + formatPoints(account.balance) + ' ' + (account.currency || 'points');
+      if (input) input.parentNode.insertBefore(check, input);
+    }
+    var label = row.querySelector('.staleness-label');
+    if (label) {
+      label.className = 'staleness-label fresh';
+      label.textContent = 'Fresh \u00b7 just now';
+    }
+  }
+
+  checkRefreshCompletion();
+}
+
+function checkRefreshCompletion() {
+  var data = loadData();
+  var staleCounts = countStale(data);
+  var subtitle = document.getElementById('refresh-modal-subtitle');
+  var doneBtn = document.getElementById('refresh-done-btn');
+
+  if (staleCounts.needsRefresh === 0) {
+    if (subtitle) {
+      subtitle.textContent = '\u2713 All balances current';
+      subtitle.className = 'refresh-header-done';
+    }
+    if (doneBtn) {
+      doneBtn.textContent = 'All done!';
+      doneBtn.style.animation = 'checkPulse 300ms ease-in-out';
+    }
+  } else if (subtitle) {
+    subtitle.textContent = staleCounts.needsRefresh + ' of ' + data.accounts.length + ' need refresh';
+    subtitle.className = '';
+  }
+}
+
 function bindEvents() {
+  document.getElementById('nav-refresh-btn').addEventListener('click', openRefreshModal);
+  document.getElementById('refresh-done-btn').addEventListener('click', closeRefreshModal);
+  document.getElementById('refresh-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeRefreshModal();
+  });
+  document.getElementById('hero-card').addEventListener('click', function (e) {
+    if (e.target.id === 'hero-refresh-btn' || e.target.closest('#hero-refresh-btn')) {
+      openRefreshModal();
+    }
+  });
+  document.getElementById('refresh-modal-body').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.classList.contains('refresh-balance-input')) {
+      e.preventDefault();
+      var value = e.target.value.trim();
+      if (value && !isNaN(Number(value))) {
+        saveRefreshBalance(e.target.getAttribute('data-account-id'), value);
+      }
+    }
+  });
+  document.getElementById('refresh-modal-body').addEventListener('focusout', function (e) {
+    if (e.target.classList.contains('refresh-balance-input')) {
+      var value = e.target.value.trim();
+      if (value && !isNaN(Number(value))) {
+        saveRefreshBalance(e.target.getAttribute('data-account-id'), value);
+      }
+    }
+  });
   document.getElementById('hero-open-account').addEventListener('click', function () { openAccountModal(); });
   document.getElementById('accounts-add-button').addEventListener('click', function () { openAccountModal(); });
   document.getElementById('hero-open-benefit').addEventListener('click', function () { openBenefitModal(); });
@@ -2289,6 +2649,11 @@ function bindEvents() {
   });
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
+      var refreshModal = document.getElementById('refresh-modal');
+      if (refreshModal && refreshModal.classList.contains('active')) {
+        closeRefreshModal();
+        return;
+      }
       document.querySelectorAll('.modal-backdrop.active').forEach(function (backdrop) {
         closeModal(backdrop.id);
       });
@@ -2323,7 +2688,11 @@ window.OsakaTracker = {
   loadData: loadData,
   saveData: saveData,
   render: render,
-  collectAccountFormData: collectAccountFormData
+  collectAccountFormData: collectAccountFormData,
+  getStaleness: getStaleness,
+  getLoginUrl: getLoginUrl,
+  getStalenessText: getStalenessText,
+  countStale: countStale
 };
 
 bindEvents();
