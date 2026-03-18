@@ -1,4 +1,4 @@
-# TODOS — Osaka/Tokyo Rewards Platform
+# TODOS — Churn Rewards Platform
 
 ## P2 — Transfer Bonus Ingestion
 **What:** Add `transferBonuses` section to VALUATIONS with active bonuses and expiry dates. Scoring engine multiplies transfer CPP by bonus multiplier when active.
