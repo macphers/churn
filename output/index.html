@@ -467,6 +467,67 @@ body {
   color: var(--text-muted);
 }
 .empty-state strong { color: var(--text); display: block; margin-bottom: 6px; }
+.empty-state .btn { margin-top: 14px; }
+
+.welcome-hero {
+  display: grid;
+  gap: 6px;
+}
+.welcome-hero .welcome-heading {
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.welcome-hero p { color: var(--text-muted); font-size: 15px; max-width: 34rem; }
+.welcome-hero .btn { margin-top: 8px; align-self: start; }
+
+.setup-checklist {
+  display: grid;
+  gap: 8px;
+}
+.setup-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: background 120ms ease;
+}
+.setup-step.done { color: var(--success); background: rgba(45,122,79,0.04); border-color: rgba(45,122,79,0.15); }
+.setup-step .step-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+.setup-step.done .step-icon { border-color: var(--success); background: var(--success); color: #fff; }
+.setup-step .step-label { font-weight: 500; }
+.setup-step .step-action {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 0;
+}
+.setup-step .step-action:hover { color: var(--accent-hover); }
+.setup-step .step-action:focus-visible { color: var(--accent-hover); }
+.setup-step.done .step-action { display: none; }
 
 .benefits-grid {
   display: grid;
@@ -959,7 +1020,7 @@ body {
   <div>
     <div class="eyebrow">Your Rewards</div>
     <h1>Rewards intelligence with real dollar context.</h1>
-    <p>Add loyalty balances, anchor them to a shared program database, and keep card-level earning context attached to each account.</p>
+    <p>Add loyalty balances with built-in valuations from a shared program database, and track which cards earn into each account.</p>
   </div>
   <div class="header-actions">
     <button type="button" class="btn btn-secondary" id="hero-open-benefit">Track benefit</button>
@@ -981,7 +1042,7 @@ body {
       <div>
         <div class="section-kicker">Tracker</div>
         <h2 id="accounts-heading">Accounts</h2>
-        <p class="section-copy">Every balance stores the selected program, editorial cpp, and the cards that help you earn it.</p>
+        <p class="section-copy">Every balance stores the selected program, its cents-per-point valuation, and the cards that help you earn it.</p>
       </div>
       <button type="button" class="btn btn-primary" id="accounts-add-button">Add account</button>
     </div>
@@ -1005,7 +1066,7 @@ body {
       <div>
         <div class="section-kicker">Traveler</div>
         <h2 id="profile-heading">Travel profile</h2>
-        <p class="section-copy">Preferences here feed the advisor page when you want decision support.</p>
+        <p class="section-copy">Preferences here feed the advisor page when you want redemption recommendations.</p>
       </div>
       <button type="button" class="btn btn-secondary" id="profile-edit-button">Edit profile</button>
     </div>
@@ -1040,7 +1101,7 @@ body {
       <div class="modal-header">
         <div class="sheet-handle" aria-hidden="true"></div>
         <h2 id="account-modal-title">Add account</h2>
-        <p>Pick a known program for auto-filled value assumptions, or switch to Custom if you need full control.</p>
+        <p>Pick a known program for auto-filled valuations, or switch to Custom to set your own cents-per-point and details.</p>
       </div>
       <form id="account-form">
         <div class="modal-body">
@@ -1083,7 +1144,7 @@ body {
             <div class="field">
               <label for="account-cpp">Value per point</label>
               <input id="account-cpp" type="number" min="0.1" max="10" step="0.05" inputmode="decimal">
-              <small>Cents per point used for tracker dollar values.</small>
+              <small>How many cents each point is worth — used to calculate dollar values.</small>
             </div>
             <div class="field">
               <label for="account-balance">Balance</label>
@@ -1127,7 +1188,7 @@ body {
       <div class="modal-header">
         <div class="sheet-handle" aria-hidden="true"></div>
         <h2 id="benefit-modal-title">Add benefit</h2>
-        <p>Benefits stay linked to accounts so the advisor can account for your card ecosystem.</p>
+        <p>Benefits stay linked to accounts so the advisor factors in your full card setup.</p>
       </div>
       <form id="benefit-form">
         <div class="modal-body">
@@ -1591,7 +1652,7 @@ function loadData() {
     parsed.benefits = parsed.benefits.filter(function (benefit) { return ids[benefit.cardId]; });
     return parsed;
   } catch (error) {
-    showBanner('error', 'Data was corrupted. Starting from a clean state.');
+    showBanner('error', 'Stored data was unreadable and has been reset. Re-import a backup if you have one.');
     return defaultData();
   }
 }
@@ -1601,7 +1662,7 @@ function saveData(data) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     return true;
   } catch (error) {
-    showBanner('error', 'Failed to save. Local storage may be full.');
+    showBanner('error', 'Could not save — your browser storage may be full. Try exporting and clearing old data.');
     return false;
   }
 }
@@ -1714,6 +1775,42 @@ function getChartRows(accounts) {
 function renderHero(data) {
   var hero = document.getElementById('hero-card');
   var chart = document.getElementById('chart-card');
+  var hasAccounts = data.accounts.length > 0;
+  var hasBenefits = data.benefits.length > 0;
+  var hasProfile = data.profile && data.profile.homeAirport;
+  var setupComplete = hasAccounts && hasBenefits;
+  function renderChecklist() {
+    return '' +
+      '<div class="setup-checklist">' +
+        '<div class="mini-label" style="margin-bottom:2px">Setup progress</div>' +
+        '<div class="setup-step' + (hasAccounts ? ' done' : '') + '">' +
+          '<span class="step-icon">' + (hasAccounts ? '&#10003;' : '1') + '</span>' +
+          '<span class="step-label">Add a loyalty account</span>' +
+          (!hasAccounts ? '<button type="button" class="step-action" id="step-add-account">Add</button>' : '') +
+        '</div>' +
+        '<div class="setup-step' + (hasBenefits ? ' done' : '') + '">' +
+          '<span class="step-icon">' + (hasBenefits ? '&#10003;' : '2') + '</span>' +
+          '<span class="step-label">Track a card benefit</span>' +
+          (!hasBenefits && hasAccounts ? '<button type="button" class="step-action" id="step-add-benefit">Add</button>' : '') +
+        '</div>' +
+        '<div class="setup-step' + (hasProfile ? ' done' : '') + '">' +
+          '<span class="step-icon">' + (hasProfile ? '&#10003;' : '3') + '</span>' +
+          '<span class="step-label">Set your travel profile</span>' +
+          (!hasProfile && hasAccounts ? '<button type="button" class="step-action" id="step-edit-profile">Set</button>' : '') +
+        '</div>' +
+      '</div>';
+  }
+  if (!hasAccounts) {
+    hero.innerHTML = '' +
+      '<div class="welcome-hero">' +
+        '<div class="hero-label">Get started</div>' +
+        '<div class="welcome-heading">Track your loyalty points in real dollars.</div>' +
+        '<p>Add a program like Chase Ultimate Rewards or Delta SkyMiles. Churn fills in valuations, transfer partners, and card details automatically.</p>' +
+        '<button type="button" class="btn btn-primary" id="welcome-add-account">Add your first account</button>' +
+      '</div>';
+    chart.innerHTML = renderChecklist();
+    return;
+  }
   var totalPoints = data.accounts.reduce(function (sum, account) { return sum + validateBalance(account.balance); }, 0);
   var totalValue = data.accounts.reduce(function (sum, account) { return sum + calculateAccountValue(account); }, 0);
   hero.innerHTML = '' +
@@ -1729,11 +1826,15 @@ function renderHero(data) {
     hero.innerHTML += '<button type="button" class="refresh-cta" id="hero-refresh-btn">' +
       staleCounts.needsRefresh + ' balance' + (staleCounts.needsRefresh === 1 ? '' : 's') + ' need' + (staleCounts.needsRefresh === 1 ? 's' : '') + ' refresh &#9656;</button>';
   }
+  if (!setupComplete) {
+    chart.innerHTML = renderChecklist();
+    return;
+  }
   var chartRows = getChartRows(data.accounts);
   if (!chartRows.length) {
     chart.innerHTML = '' +
       '<div class="mini-label">Points distribution</div>' +
-      '<div class="empty-state"><strong>No balances yet</strong>Use the add-account flow to see dollar-weighted distribution by program type.</div>' +
+      '<div class="empty-state"><strong>No balances yet</strong>Add a balance to one of your accounts to see dollar-weighted distribution by program type.</div>' +
       '<a class="advisor-link" href="value.html">Open Value Advisor &rarr;</a>';
     return;
   }
@@ -1783,10 +1884,10 @@ function buildAccountDetails(account) {
     });
     partnerHtml += '</div>';
   } else {
-    partnerHtml = '<div class="empty-state"><strong>No transfer partners listed</strong>This account currently relies on direct-use or fallback redemptions.</div>';
+    partnerHtml = '<div class="empty-state"><strong>No transfer partners listed</strong>This program doesn\u0027t have listed transfer partners. Points can still be used directly or at a fixed rate.</div>';
   }
   var cards = normalizeCards(account.cards);
-  var cardsHtml = cards.length ? '<div class="detail-list">' : '<div class="empty-state"><strong>No cards attached</strong>Add the cards that earn this currency to keep annual fees and earn rates visible.</div>';
+  var cardsHtml = cards.length ? '<div class="detail-list">' : '<div class="empty-state"><strong>No cards attached</strong>Add the cards that earn into this program so annual fees and earn rates stay visible.</div>';
   cards.forEach(function (card) {
     cardsHtml += '' +
       '<div class="detail-item">' +
@@ -1814,7 +1915,7 @@ function buildAccountDetails(account) {
 function renderAccounts(data) {
   var wrapper = document.getElementById('accounts-groups');
   if (!data.accounts.length) {
-    wrapper.innerHTML = '<div class="empty-state"><strong>No accounts yet</strong>Add your first loyalty program — like Chase Ultimate Rewards or Delta SkyMiles — to see dollar values, transfer partners, and card details here.</div>';
+    wrapper.innerHTML = '<div class="empty-state"><strong>No accounts yet</strong>Add your first loyalty program — like Chase Ultimate Rewards or Delta SkyMiles — to see dollar values, transfer partners, and card details here.<br><button type="button" class="btn btn-primary" id="empty-add-account">Add account</button></div>';
     return;
   }
   var groups = ['flexible', 'airline', 'hotel', 'other'];
@@ -1875,7 +1976,7 @@ function renderAccounts(data) {
 function renderBenefits(data) {
   var list = document.getElementById('benefits-list');
   if (!data.benefits.length) {
-    list.innerHTML = '<div class="empty-state"><strong>No benefits tracked</strong>Track card perks like lounge access, free night certificates, and travel credits. Benefits stay linked to accounts so nothing expires unnoticed.</div>';
+    list.innerHTML = '<div class="empty-state"><strong>No benefits tracked</strong>Track card perks like lounge access, free night certificates, and travel credits. Benefits stay linked to accounts so nothing expires unnoticed.<br><button type="button" class="btn btn-secondary" id="empty-add-benefit">Track a benefit</button></div>';
     return;
   }
   var accountMap = {};
@@ -1937,7 +2038,7 @@ function render() {
       navBtn.title = navCounts.needsRefresh + ' balance' + (navCounts.needsRefresh === 1 ? '' : 's') + ' need' + (navCounts.needsRefresh === 1 ? 's' : '') + ' refresh';
     } else {
       navBtn.classList.remove('has-stale');
-      navBtn.title = 'All balances current';
+      navBtn.title = 'All balances are current';
     }
   }
 }
@@ -2014,7 +2115,7 @@ function setProgramMode(mode) {
 function renderProgramHint(program) {
   var hint = document.getElementById('program-hint');
   if (!program || state.programPicker.mode === 'custom') {
-    hint.innerHTML = '<div class="program-hint"><strong>Custom mode.</strong> Manual fields stay editable so you can define your own valuation assumptions.</div>';
+    hint.innerHTML = '<div class="program-hint"><strong>Custom program.</strong> All fields are editable — set your own cents-per-point value and details.</div>';
     return;
   }
   hint.innerHTML = '<div class="program-hint"><strong>' + esc(program.type) + '</strong> program • ' + esc(program.currency) + ' • ' + program.cpp.toFixed(2) + ' cpp • ' + (program.cards || []).length + ' card option' + ((program.cards || []).length === 1 ? '' : 's') + '</div>';
@@ -2242,7 +2343,7 @@ function saveAccount(event) {
 }
 
 function deleteAccount(accountId) {
-  if (!window.confirm('Delete this account and any linked benefits?')) return;
+  if (!window.confirm('Delete this account? Any benefits linked to it will also be removed.')) return;
   var data = loadData();
   data.accounts = data.accounts.filter(function (account) { return account.id !== accountId; });
   data.benefits = data.benefits.filter(function (benefit) { return benefit.cardId !== accountId; });
@@ -2392,7 +2493,7 @@ function importData(event) {
         showBanner('error', 'Import failed: ' + errors[0]);
         return;
       }
-      if (!window.confirm('Import will replace all current tracker data. Continue?')) return;
+      if (!window.confirm('This will replace all your current tracker data with the imported file. Continue?')) return;
       var clean = sanitizeImport(parsed);
       if (saveData(clean)) {
         render();
@@ -2544,7 +2645,7 @@ function checkRefreshCompletion() {
 
   if (staleCounts.needsRefresh === 0) {
     if (subtitle) {
-      subtitle.textContent = '\u2713 All balances current';
+      subtitle.textContent = '\u2713 All balances are current';
       subtitle.className = 'refresh-header-done';
     }
     if (doneBtn) {
@@ -2566,6 +2667,20 @@ function bindEvents() {
   document.getElementById('hero-card').addEventListener('click', function (e) {
     if (e.target.id === 'hero-refresh-btn' || e.target.closest('#hero-refresh-btn')) {
       openRefreshModal();
+    }
+    if (e.target.id === 'welcome-add-account' || e.target.closest('#welcome-add-account')) {
+      openAccountModal();
+    }
+  });
+  document.getElementById('chart-card').addEventListener('click', function (e) {
+    if (e.target.id === 'step-add-account' || e.target.closest('#step-add-account')) {
+      openAccountModal();
+    }
+    if (e.target.id === 'step-add-benefit' || e.target.closest('#step-add-benefit')) {
+      openBenefitModal();
+    }
+    if (e.target.id === 'step-edit-profile' || e.target.closest('#step-edit-profile')) {
+      openProfileModal();
     }
   });
   document.getElementById('refresh-modal-body').addEventListener('keydown', function (e) {
@@ -2609,6 +2724,10 @@ function bindEvents() {
     });
   });
   document.getElementById('accounts-groups').addEventListener('click', function (event) {
+    if (event.target.id === 'empty-add-account' || event.target.closest('#empty-add-account')) {
+      openAccountModal();
+      return;
+    }
     var toggle = event.target.closest('[data-toggle-account]');
     var edit = event.target.closest('[data-edit-account]');
     var remove = event.target.closest('[data-delete-account]');
@@ -2625,6 +2744,10 @@ function bindEvents() {
     if (remove) deleteAccount(remove.getAttribute('data-delete-account'));
   });
   document.getElementById('benefits-list').addEventListener('click', function (event) {
+    if (event.target.id === 'empty-add-benefit' || event.target.closest('#empty-add-benefit')) {
+      openBenefitModal();
+      return;
+    }
     var edit = event.target.closest('[data-edit-benefit]');
     var remove = event.target.closest('[data-delete-benefit]');
     var toggle = event.target.closest('[data-toggle-benefit]');

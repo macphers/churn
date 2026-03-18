@@ -726,7 +726,7 @@ body {
   <div>
     <div class="eyebrow">Decision Layer</div>
     <h1>Value advice that respects how you actually redeem.</h1>
-    <p>Modes, WTP caps, and household context change the answer. This page turns raw points math into the recommendation you would actually follow.</p>
+    <p>Your spending limits, travel preferences, and household balances all shape the answer. This page turns raw points math into the recommendation you would actually follow.</p>
   </div>
   <a class="subnav-link" href="index.html">Back to tracker &rarr;</a>
 </header>
@@ -1284,7 +1284,7 @@ function worthSavingCard(analysis) {
     return {
       state: 'wait',
       title: 'Need more signal',
-      body: 'Add balances or travel preferences in the tracker before committing these points.',
+      body: 'Add more balances or set travel preferences in the tracker to get a stronger recommendation.',
       accent: 'muted'
     };
   }
@@ -1391,7 +1391,7 @@ function renderHero(analysis) {
 function renderLeftOnTable(analysis) {
   if (!analysis.activeAccounts.length) return '';
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Opportunity</div><h2>Left on table</h2><p class="section-copy">Where the current mode is still outperforming the cash floor by the most.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Opportunity</div><h2>Unrealized value</h2><p class="section-copy">Programs where the current mode beats the cash-equivalent floor by the widest margin.</p></div></div>' +
     '<div class="lot-grid">' + analysis.activeAccounts.map(function (item) {
       var bestPct = item.bestOption.adjustedValue > 0 ? 100 : 0;
       var floorPct = item.bestOption.adjustedValue > 0 ? round(item.floorOption.adjustedValue / item.bestOption.adjustedValue * 100, 0) : 0;
@@ -1409,7 +1409,7 @@ function renderLeftOnTable(analysis) {
 function renderWarnings(analysis) {
   if (!analysis.expiring.length) return '';
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Urgency</div><h2>Expiration warnings</h2><p class="section-copy">Accounts with real inactivity pressure should usually outrank theoretical sweet spots.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Urgency</div><h2>Expiration warnings</h2><p class="section-copy">Accounts at risk of expiring should usually be redeemed before chasing higher-value options elsewhere.</p></div></div>' +
     '<div class="warning-list">' + analysis.expiring.map(function (item) {
       var expiration = item.expiration;
       return '<article class="warning-card">' +
@@ -1432,9 +1432,9 @@ function recCard(label, card, extraClass, featured) {
     '<div class="rec-label">' + esc(label) + '</div>' +
     '<div class="rec-title">' + esc(card.label || card.title) + '</div>' +
     (card.adjustedValue != null ? '<div class="rec-value">' + esc(formatDollars(card.adjustedValue)) + '</div>' : '') +
-    (card.modeScore != null ? '<div class="rec-score">BFB ' + esc(card.modeScore.toFixed(1)) + '</div>' : '') +
+    (card.modeScore != null ? '<div class="rec-score">Score ' + esc(card.modeScore.toFixed(1)) + '</div>' : '') +
     '<p class="section-copy">' + esc(body) + '</p>' +
-    (card.account ? '<p class="section-copy">' + esc(card.sweetSpot || ('Floor lift: ' + round(card.liftRatio * 100, 0) + '%')) + '</p>' : '') +
+    (card.account ? '<p class="section-copy">' + esc(card.sweetSpot || ('Value over floor: ' + round(card.liftRatio * 100, 0) + '%')) + '</p>' : '') +
   '</article>';
 }
 
@@ -1472,11 +1472,11 @@ function renderAccountOptions(item) {
 function renderAccountDetails(item) {
   var details = '';
   details += '<div class="detail-grid">' +
-    '<div class="metric-card"><div class="mini-label">Best option</div><div class="value">' + esc(formatDollars(item.bestOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.bestOption.label + ' • ' + item.bestOption.modeScore.toFixed(1) + ' BFB') + '</div></div>' +
+    '<div class="metric-card"><div class="mini-label">Best option</div><div class="value">' + esc(formatDollars(item.bestOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.bestOption.label + ' • ' + item.bestOption.modeScore.toFixed(1) + ' score') + '</div></div>' +
     '<div class="metric-card"><div class="mini-label">Floor option</div><div class="value">' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.floorOption.label) + '</div></div>' +
   '</div>';
   if (item.householdBalance > 0) {
-    details += '<div class="metric-card" style="margin-top:12px"><div class="mini-label">Household boost</div><div class="value">' + esc(formatPoints(item.householdBalance)) + '</div><div class="section-copy">Additional same-program balance available from player two.</div></div>';
+    details += '<div class="metric-card" style="margin-top:12px"><div class="mini-label">Household balance</div><div class="value">' + esc(formatPoints(item.householdBalance)) + '</div><div class="section-copy">Additional balance in the same program from your household member.</div></div>';
   }
   details += '<div class="sweet-grid" style="margin-top:12px">' + item.options.slice(0, 4).map(function (option) {
     return '<div class="sweet-card">' +
@@ -1502,7 +1502,7 @@ function renderByAccount(analysis) {
           '<div class="account-header">' +
             '<div><div class="account-name"><span class="type-dot ' + esc(item.account.type || 'other') + '"></span>' + esc(item.account.program) + '</div>' +
             '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best mode winner: ' + esc(item.bestOption.label) + ' • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
-            '<div class="rec-score">BFB ' + esc(item.bestOption.modeScore.toFixed(1)) + '</div>' +
+            '<div class="rec-score">Score ' + esc(item.bestOption.modeScore.toFixed(1)) + '</div>' +
           '</div>' +
           '<div class="option-list">' + renderAccountOptions(item) + '</div>' +
         '</div>' +
@@ -1534,7 +1534,7 @@ function renderSweetSpots(analysis) {
 
 function renderHouseholdList(household) {
   if (!household.length) {
-    return '<div class="empty-state"><strong>Add player two</strong>Household balances nudge recommendations upward when the same program can be pooled or booked toward one trip.</div>';
+    return '<div class="empty-state"><strong>Add a household member</strong>When two people hold points in the same program, pooling them can unlock better redemptions.</div>';
   }
   return '<div class="household-list">' + household.map(function (item) {
     return '<article class="household-card">' +
@@ -1553,28 +1553,28 @@ function programSelectOptions() {
 function renderSettings(analysis) {
   var prefs = analysis.prefs;
   return '<section class="panel section-panel settings-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Settings</div><h2>Preference inputs</h2><p class="section-copy">These fields steer scoring and the WTP caps used to discount overly aspirational options.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Settings</div><h2>Preference inputs</h2><p class="section-copy">These fields steer scoring. Spending caps discount options that assume you\u0027d pay more than you actually would.</p></div></div>' +
     '<details>' +
-      '<summary>WTP, complexity, and household</summary>' +
+      '<summary>Spending caps, complexity, and household</summary>' +
       '<div class="settings-body">' +
         '<div class="settings-grid">' +
           '<div class="setting-card field"><label for="pref-interestedInTravel">Interested in travel</label><select id="pref-interestedInTravel" data-pref="interestedInTravel"><option value="true"' + (prefs.interestedInTravel ? ' selected' : '') + '>Yes</option><option value="false"' + (!prefs.interestedInTravel ? ' selected' : '') + '>No</option></select></div>' +
-          '<div class="setting-card field"><label for="pref-complexityTolerance">Complexity tolerance</label><select id="pref-complexityTolerance" data-pref="complexityTolerance"><option value="low"' + (prefs.complexityTolerance === 'low' ? ' selected' : '') + '>Low</option><option value="medium"' + (prefs.complexityTolerance === 'medium' ? ' selected' : '') + '>Medium</option><option value="high"' + (prefs.complexityTolerance === 'high' ? ' selected' : '') + '>High</option></select></div>' +
+          '<div class="setting-card field"><label for="pref-complexityTolerance">How many steps you\u0027ll tolerate</label><select id="pref-complexityTolerance" data-pref="complexityTolerance"><option value="low"' + (prefs.complexityTolerance === 'low' ? ' selected' : '') + '>Low</option><option value="medium"' + (prefs.complexityTolerance === 'medium' ? ' selected' : '') + '>Medium</option><option value="high"' + (prefs.complexityTolerance === 'high' ? ' selected' : '') + '>High</option></select></div>' +
           '<div class="setting-card field"><label for="pref-cabinPref">Cabin preference</label><select id="pref-cabinPref" data-pref="cabinPref"><option value="economy"' + (prefs.cabinPref === 'economy' ? ' selected' : '') + '>Economy</option><option value="premiumEconomy"' + (prefs.cabinPref === 'premiumEconomy' ? ' selected' : '') + '>Premium economy</option><option value="business"' + (prefs.cabinPref === 'business' ? ' selected' : '') + '>Business</option><option value="first"' + (prefs.cabinPref === 'first' ? ' selected' : '') + '>First</option></select></div>' +
           '<div class="setting-card field"><label for="pref-hotelPref">Hotel preference</label><select id="pref-hotelPref" data-pref="hotelPref"><option value="budgetHotel"' + (prefs.hotelPref === 'budgetHotel' ? ' selected' : '') + '>Budget</option><option value="midrangeHotel"' + (prefs.hotelPref === 'midrangeHotel' ? ' selected' : '') + '>Midrange</option><option value="luxuryHotel"' + (prefs.hotelPref === 'luxuryHotel' ? ' selected' : '') + '>Luxury</option><option value="resort"' + (prefs.hotelPref === 'resort' ? ' selected' : '') + '>Resort</option></select></div>' +
         '</div>' +
         '<div class="setting-card">' +
-          '<div class="mini-label">WTP caps</div>' +
-          '<div class="section-copy">If a redemption assumes you would happily pay luxury cash rates, the adjusted value soft-caps that optimism here.</div>' +
+          '<div class="mini-label">Spending caps</div>' +
+          '<div class="section-copy">When a redemption\u0027s value depends on a cash price you\u0027d never actually pay, these caps bring the estimate back to earth.</div>' +
           '<div class="caps-grid" style="margin-top:12px">' + Object.keys(prefs.wtpCaps).map(function (key) {
             return '<div class="field"><label for="cap-' + esc(key) + '">' + esc(key) + '</label><input id="cap-' + esc(key) + '" type="number" min="1" step="10" data-wtp-key="' + esc(key) + '" value="' + esc(prefs.wtpCaps[key]) + '"></div>';
           }).join('') + '</div>' +
         '</div>' +
         '<div class="setting-card">' +
           '<div class="mini-label">Household</div>' +
-          '<div class="section-copy">Add player-two balances here. They live in a dedicated `churn_household` key.</div>' +
+          '<div class="section-copy">Add your household member\u0027s loyalty balances here. They\u0027re stored separately from your main tracker data.</div>' +
           '<form id="household-form" class="household-form-grid" style="margin-top:12px">' +
-            '<div class="field"><label for="household-name">Member</label><input id="household-name" name="memberName" type="text" placeholder="Player two"></div>' +
+            '<div class="field"><label for="household-name">Member</label><input id="household-name" name="memberName" type="text" placeholder="e.g. Partner, spouse"></div>' +
             '<div class="field"><label for="household-program">Program</label><input id="household-program" name="program" type="text" list="household-program-list" placeholder="Chase Ultimate Rewards"></div>' +
             '<div class="field"><label for="household-balance">Balance</label><input id="household-balance" name="balance" type="number" min="0" step="1" placeholder="25000"></div>' +
             '<button type="submit" class="btn btn-primary">Add balance</button>' +
@@ -1588,22 +1588,27 @@ function renderSettings(analysis) {
 }
 
 function renderFreshness() {
-  return '<div class="freshness">Program dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' • results saved to `valueAdvisorResults` • household key `churn_household`</div>';
+  return '<div class="freshness">Program dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' • results auto-saved • household data stored separately</div>';
 }
 
-function renderEmptyState(title, copy) {
-  return '<section class="panel section-panel"><div class="empty-state"><strong>' + esc(title) + '</strong>' + esc(copy) + '</div></section>';
+function renderEmptyState(title, copy, linkHref, linkLabel) {
+  var html = '<section class="panel section-panel"><div class="empty-state"><strong>' + esc(title) + '</strong>' + esc(copy);
+  if (linkHref && linkLabel) {
+    html += '<br><a href="' + esc(linkHref) + '" class="btn btn-primary" style="display:inline-block;margin-top:14px;text-decoration:none">' + esc(linkLabel) + '</a>';
+  }
+  html += '</div></section>';
+  return html;
 }
 
 function render() {
   var app = document.getElementById('app');
   var data = readRewardsData();
   if (data === 'corrupted') {
-    app.innerHTML = renderEmptyState('Data could not be read', 'Your tracker data appears corrupted. Open the tracker and export or repair the stored JSON.');
+    app.innerHTML = renderEmptyState('Data could not be read', 'Your tracker data couldn\u0027t be read. Go to the tracker page and export a backup, then try re-importing it.', 'index.html', 'Open tracker');
     return;
   }
   if (!data || !data.accounts || !data.accounts.length) {
-    app.innerHTML = renderEmptyState('Add accounts in the tracker first', 'This page only becomes useful once `churn_data` contains balances from the tracker.');
+    app.innerHTML = renderEmptyState('Add accounts in the tracker first', 'Head to the tracker page and add at least one loyalty program balance to get started.', 'index.html', 'Open tracker');
     return;
   }
   var prefs = readPrefs();
@@ -1611,7 +1616,7 @@ function render() {
   var analysis = buildAnalysis(data, prefs, household);
   writeAgentResults(data, prefs);
   if (!analysis.activeAccounts.length) {
-    app.innerHTML = renderEmptyState('No active balances to score', 'Your accounts are present, but every balance is zero. Add points in the tracker to generate recommendations.');
+    app.innerHTML = renderEmptyState('No active balances to score', 'Your accounts are set up, but every balance is zero. Update your point totals in the tracker to see recommendations.', 'index.html', 'Update balances in tracker');
     return;
   }
   app.innerHTML = '' +
