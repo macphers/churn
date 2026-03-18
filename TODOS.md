@@ -35,9 +35,9 @@
 **Depends on:** Phase 1 shipped. Start with top 5 programs (Chase, Amex, United, Delta, Marriott).
 **Added:** 2026-03-18
 
-## P3 — Create DESIGN.md (Formal Design System)
-**What:** Run `/design-consultation` to document Osaka's implicit design system — colors, typography, spacing, component vocabulary, animation language.
-**Why:** Codebase has a strong implicit design system but nothing documented. Every new feature requires reverse-engineering patterns from CSS. Design review identified 10+ reusable patterns that should be cataloged.
+## P2 — Create DESIGN.md (Formal Design System)
+**What:** Run `/design-consultation` to document Churn's implicit design system — colors, typography, spacing, component vocabulary, animation language.
+**Why:** Codebase has a strong implicit design system but nothing documented. Every new feature requires reverse-engineering patterns from CSS. The advisor UX simplification added 2 new components (verdict banner, tooltip) that expand the design vocabulary without a formal system to anchor to.
 **Effort:** S (human: ~2 days / CC: ~30 min)
 **Depends on:** Nothing — can be done anytime
 **Added:** 2026-03-18

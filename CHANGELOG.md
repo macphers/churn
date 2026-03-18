@@ -4,11 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.12.0] - 2026-03-18
 
+### Added
+- First-run welcome hero with setup checklist on Tracker page for new users
+- Empty state CTAs across Tracker sections (accounts, benefits) to guide onboarding
+- Inlined all CSS into each page for zero-dependency static deployment
+
+### Changed
+- Rewrote user-facing copy across Tracker and Advisor for clarity — replaced jargon (BFB, WTP, cpp) with plain English
+- Advisor section headers simplified: "Left on table" → "Unrealized value", "Floor lift" → "Value over floor"
+- Household and settings copy rewritten for accessibility to non-experts
+
 ### Fixed
 - Uniform nav bar layout across Tracker and Advisor pages with centered links
 - Form field alignment in add account modal — helper text no longer pushes paired fields
 - Redundant "Back to tracker" link removed from Advisor header to reduce visual noise
 - Nav refresh button hover state now visible on light background
+
+### Removed
+- External styles.css — styles are now inlined per page
 
 ## [0.1.11.0] - 2026-03-18
 
@@ -17,7 +30,6 @@ All notable changes to this project will be documented in this file.
 - 33 new test assertions covering account deletion cascade, benefit management, profile operations, data import/export, and custom card persistence (92 tracker tests total)
 
 ### Changed
-- Extracted shared CSS to separate styles.css stylesheet for DRY principle and easier maintenance
 - Replaced regex-based HTML sanitizer with DOMParser for stronger XSS protection and standards compliance
 
 ### Fixed
