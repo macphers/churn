@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.11.0] - 2026-03-18
+
+### Added
+- Confirm dialog for account deletion to prevent accidental data loss
+- 33 new test assertions covering account deletion cascade, benefit management, profile operations, data import/export, and custom card persistence (92 tracker tests total)
+
+### Changed
+- Extracted shared CSS to separate styles.css stylesheet for DRY principle and easier maintenance
+- Replaced regex-based HTML sanitizer with DOMParser for stronger XSS protection and standards compliance
+
+### Fixed
+- XSS sanitization now uses browser's built-in HTML parser instead of regex pattern matching
+
 ## [0.1.10.0] - 2026-03-18
 
 ### Added
