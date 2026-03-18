@@ -159,6 +159,100 @@ function run() {
   var earnRates = api.formatEarnRates(programBySlug.cards[0]);
   assert('formatEarnRates exposes dining multiplier', earnRates.some(function (item) { return item.indexOf('dining') === 0; }));
 
+  // ── Staleness & Refresh Tests ──────────────────────────────────
+
+  // getStaleness: fresh flexible account (updated today)
+  var freshFlexible = { program: 'Chase Ultimate Rewards', lastUpdated: new Date().toISOString().split('T')[0] };
+  assertEqual('getStaleness fresh flexible returns fresh', api.getStaleness(freshFlexible).level, 'fresh');
+
+  // getStaleness: aging flexible account (35 days old)
+  var agingDate = new Date(Date.now() - 35 * 86400000).toISOString().split('T')[0];
+  var agingFlexible = { program: 'Chase Ultimate Rewards', lastUpdated: agingDate };
+  assertEqual('getStaleness aging flexible returns aging', api.getStaleness(agingFlexible).level, 'aging');
+
+  // getStaleness: stale flexible account (65 days old)
+  var staleDate = new Date(Date.now() - 65 * 86400000).toISOString().split('T')[0];
+  var staleFlexible = { program: 'Chase Ultimate Rewards', lastUpdated: staleDate };
+  assertEqual('getStaleness stale flexible returns stale', api.getStaleness(staleFlexible).level, 'stale');
+
+  // getStaleness: fresh airline (updated 5 days ago)
+  var freshAirlineDate = new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0];
+  var freshAirline = { program: 'Delta SkyMiles', lastUpdated: freshAirlineDate };
+  assertEqual('getStaleness fresh airline returns fresh', api.getStaleness(freshAirline).level, 'fresh');
+
+  // getStaleness: aging airline (18 days old — past 14d threshold)
+  var agingAirlineDate = new Date(Date.now() - 18 * 86400000).toISOString().split('T')[0];
+  var agingAirline = { program: 'Delta SkyMiles', lastUpdated: agingAirlineDate };
+  assertEqual('getStaleness aging airline returns aging', api.getStaleness(agingAirline).level, 'aging');
+
+  // getStaleness: stale hotel (35 days old — past 30d threshold)
+  var staleHotelDate = new Date(Date.now() - 35 * 86400000).toISOString().split('T')[0];
+  var staleHotel = { program: 'Marriott Bonvoy', lastUpdated: staleHotelDate };
+  assertEqual('getStaleness stale hotel returns stale', api.getStaleness(staleHotel).level, 'stale');
+
+  // getStaleness: missing lastUpdated → stale
+  var noDate = { program: 'Chase Ultimate Rewards' };
+  assertEqual('getStaleness missing date returns stale', api.getStaleness(noDate).level, 'stale');
+
+  // getStaleness: invalid lastUpdated → stale
+  var badDate = { program: 'Chase Ultimate Rewards', lastUpdated: 'not-a-date' };
+  assertEqual('getStaleness invalid date returns stale', api.getStaleness(badDate).level, 'stale');
+
+  // getStaleness: boundary — exactly 14 days for airline (should be aging, not fresh)
+  var boundary14 = new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0];
+  var boundaryAirline = { program: 'United MileagePlus', lastUpdated: boundary14 };
+  assertEqual('getStaleness airline at 14d boundary returns aging', api.getStaleness(boundaryAirline).level, 'aging');
+
+  // getStaleness: boundary — exactly 30 days for flexible (should be aging, not fresh)
+  var boundary30 = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+  var boundaryFlexible = { program: 'American Express Membership Rewards', lastUpdated: boundary30 };
+  assertEqual('getStaleness flexible at 30d boundary returns aging', api.getStaleness(boundaryFlexible).level, 'aging');
+
+  // getLoginUrl: known program returns URL
+  var chaseAccount = { program: 'Chase Ultimate Rewards' };
+  assert('getLoginUrl returns URL for Chase', api.getLoginUrl(chaseAccount) !== null);
+  assert('getLoginUrl Chase URL contains chase', api.getLoginUrl(chaseAccount).indexOf('chase') >= 0);
+
+  // getLoginUrl: custom program returns null
+  var customAccount = { program: 'My Custom Program' };
+  assertEqual('getLoginUrl returns null for custom program', api.getLoginUrl(customAccount), null);
+
+  // getStalenessText: returns formatted label
+  var textAccount = { program: 'Chase Ultimate Rewards', lastUpdated: new Date().toISOString().split('T')[0] };
+  var stalenessText = api.getStalenessText(textAccount);
+  assert('getStalenessText includes Fresh', stalenessText.indexOf('Fresh') >= 0);
+  assert('getStalenessText includes separator', stalenessText.indexOf('\u00b7') >= 0);
+
+  // countStale: counts correctly
+  var testData = api.defaultData();
+  testData.accounts = [
+    api.repairAccount({ program: 'Chase Ultimate Rewards', balance: 100000, lastUpdated: new Date().toISOString().split('T')[0] }),
+    api.repairAccount({ program: 'Delta SkyMiles', balance: 50000, lastUpdated: staleDate }),
+    api.repairAccount({ program: 'Marriott Bonvoy', balance: 80000, lastUpdated: agingDate })
+  ];
+  var counts = api.countStale(testData);
+  assert('countStale identifies stale accounts', counts.stale >= 1);
+  assert('countStale needsRefresh sums stale + aging', counts.needsRefresh === counts.stale + counts.aging);
+
+  // Rendered output: staleness label appears in account card
+  api.saveData(testData);
+  api.render();
+  var accountsHtml = win.document.getElementById('accounts-groups').innerHTML;
+  assert('rendered account card has staleness-label class', accountsHtml.indexOf('staleness-label') >= 0);
+  assert('rendered account card has staleness-dot class', accountsHtml.indexOf('staleness-dot') >= 0);
+
+  // Rendered output: hero contains/hides staleness CTA
+  var heroHtml = win.document.getElementById('hero-card').innerHTML;
+  assert('rendered hero shows refresh CTA when stale accounts exist', heroHtml.indexOf('need') >= 0 || heroHtml.indexOf('refresh') >= 0);
+
+  // Nav refresh button exists and has stale state
+  var navBtn = win.document.getElementById('nav-refresh-btn');
+  assert('nav refresh button exists', !!navBtn);
+  assert('nav refresh button has has-stale class when stale', navBtn.classList.contains('has-stale'));
+
+  // Refresh modal exists
+  assert('refresh modal element exists', !!win.document.getElementById('refresh-modal'));
+
   renderResults();
 }
 

@@ -21,5 +21,26 @@
 **Depends on:** WTP model from Points Value Advisor plan
 **Added:** 2026-03-17
 
-## Deferred from CEO Review (2026-03-17)
+## P2 — Screenshot AI Import (Balance Sync Phase 2)
+**What:** "Snap and sync" button — user drops a screenshot of their loyalty dashboard, vision AI extracts the balance automatically.
+**Why:** Removes tedium of manually typing balances while avoiding all scraping/credential problems. Natural next step after the checklist refresh flow.
+**Effort:** M (human: ~1 week / CC: ~15 min)
+**Depends on:** Phase 1 (staleness + checklist refresh) shipped first
+**Added:** 2026-03-18
+
+## P3 — Chrome Extension for Auto-Sync (Balance Sync Phase 3)
+**What:** Chrome extension that detects when user visits a loyalty program website, reads the balance from the DOM, and syncs it to Osaka's localStorage.
+**Why:** Closest thing to "real-time" balance syncing without a backend or credential storage. No legal risk since you're reading your own logged-in session.
+**Effort:** XL (human: ~2-4 weeks / CC: ~1 hour)
+**Depends on:** Phase 1 shipped. Start with top 5 programs (Chase, Amex, United, Delta, Marriott).
+**Added:** 2026-03-18
+
+## P3 — Create DESIGN.md (Formal Design System)
+**What:** Run `/design-consultation` to document Osaka's implicit design system — colors, typography, spacing, component vocabulary, animation language.
+**Why:** Codebase has a strong implicit design system but nothing documented. Every new feature requires reverse-engineering patterns from CSS. Design review identified 10+ reusable patterns that should be cataloged.
+**Effort:** S (human: ~2 days / CC: ~30 min)
+**Depends on:** Nothing — can be done anytime
+**Added:** 2026-03-18
+
+## Deferred from osaka-v2 CEO Review (2026-03-17)
 - Card application & approval tracking (5/24 status, signup bonus, minimum spend deadlines)

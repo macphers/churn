@@ -32,6 +32,7 @@
         type: 'flexible',
         currency: 'points',
         cpp: 2.0,
+        loginUrl: 'https://ultimaterewardspoints.chase.com',
         fallbackOptions: [
           { type: 'cash_back', cpp: 1.0, label: 'Cash back' },
           { type: 'travel_portal', cpp: 1.25, label: 'Chase Travel portal' },
@@ -61,6 +62,7 @@
         type: 'flexible',
         currency: 'points',
         cpp: 2.0,
+        loginUrl: 'https://global.americanexpress.com/rewards',
         fallbackOptions: [
           { type: 'cash_back', cpp: 0.6, label: 'Statement credit' },
           { type: 'travel_portal', cpp: 1.0, label: 'Amex Travel portal' },
@@ -89,6 +91,7 @@
         type: 'flexible',
         currency: 'miles',
         cpp: 1.85,
+        loginUrl: 'https://myaccounts.capitalone.com/rewards',
         fallbackOptions: [
           { type: 'cash_back', cpp: 0.5, label: 'Statement credit' },
           { type: 'travel_portal', cpp: 1.0, label: 'Capital One Travel' },
@@ -111,6 +114,7 @@
         type: 'flexible',
         currency: 'points',
         cpp: 1.8,
+        loginUrl: 'https://www.thankyou.com/account',
         fallbackOptions: [
           { type: 'cash_back', cpp: 1.0, label: 'Cash back' },
           { type: 'travel_portal', cpp: 1.0, label: 'Citi Travel' },
@@ -132,6 +136,7 @@
         type: 'flexible',
         currency: 'points',
         cpp: 2.0,
+        loginUrl: 'https://www.bfrealrewards.com/account',
         fallbackOptions: [
           { type: 'cash_back', cpp: 0.5, label: 'Statement credit' },
           { type: 'travel_portal', cpp: 1.25, label: 'Bilt Travel portal' },
@@ -154,6 +159,7 @@
         type: 'airline',
         currency: 'miles',
         cpp: 1.3,
+        loginUrl: 'https://www.delta.com/myprofile/personal-details',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.3, label: 'Delta flights' },
           { type: 'gift_cards', cpp: 1.0, label: 'Gift cards' },
@@ -168,6 +174,7 @@
         type: 'airline',
         currency: 'miles',
         cpp: 1.4,
+        loginUrl: 'https://www.united.com/ual/en/us/fly/mileageplus/myaccount.html',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.4, label: 'United flights' },
           { type: 'gift_cards', cpp: 1.0, label: 'Gift cards' },
@@ -181,6 +188,7 @@
         type: 'airline',
         currency: 'miles',
         cpp: 1.5,
+        loginUrl: 'https://www.aa.com/aadvantage-program/profile/account-summary',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.5, label: 'AA flights' },
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' },
@@ -194,6 +202,7 @@
         type: 'airline',
         currency: 'points',
         cpp: 1.4,
+        loginUrl: 'https://www.southwest.com/account',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.4, label: 'Southwest flights' },
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
@@ -206,6 +215,7 @@
         type: 'airline',
         currency: 'miles',
         cpp: 1.8,
+        loginUrl: 'https://www.alaskaair.com/account/overview',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.8, label: 'Alaska and partner flights' },
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
@@ -218,6 +228,7 @@
         type: 'airline',
         currency: 'points',
         cpp: 1.3,
+        loginUrl: 'https://www.jetblue.com/trueblue/account-summary',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.3, label: 'JetBlue flights' },
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
@@ -230,6 +241,7 @@
         type: 'hotel',
         currency: 'points',
         cpp: 0.9,
+        loginUrl: 'https://www.marriott.com/loyalty/myAccount/default.mi',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 0.9, label: 'Marriott hotels' },
           { type: 'gift_cards', cpp: 0.7, label: 'Gift cards' },
@@ -245,6 +257,7 @@
         type: 'hotel',
         currency: 'points',
         cpp: 0.6,
+        loginUrl: 'https://www.hilton.com/en/hilton-honors/guest/account/',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 0.6, label: 'Hilton hotels' },
           { type: 'gift_cards', cpp: 0.5, label: 'Gift cards' },
@@ -258,6 +271,7 @@
         type: 'hotel',
         currency: 'points',
         cpp: 2.0,
+        loginUrl: 'https://world.hyatt.com/content/gp/en/rewards/my-account.html',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 2.0, label: 'Hyatt hotels' },
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
@@ -270,6 +284,7 @@
         type: 'hotel',
         currency: 'points',
         cpp: 0.6,
+        loginUrl: 'https://www.ihg.com/rewardsclub/us/en/account/home',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 0.6, label: 'IHG hotels' },
           { type: 'merchandise', cpp: 0.4, label: 'Merchandise' }
@@ -282,6 +297,7 @@
         type: 'hotel',
         currency: 'points',
         cpp: 1.1,
+        loginUrl: 'https://www.wyndhamhotels.com/wyndham-rewards/account/dashboard',
         fallbackOptions: [
           { type: 'travel_booking', cpp: 1.1, label: 'Wyndham hotels' },
           { type: 'gift_cards', cpp: 0.7, label: 'Gift cards' }
