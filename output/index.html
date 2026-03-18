@@ -317,14 +317,13 @@ body {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 .account-card {
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .account-main {
   padding: 18px;
@@ -618,12 +617,12 @@ body {
 .profile-grid, .data-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
+  gap: 16px;
 }
 .profile-card, .data-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: var(--radius-sm);
+  padding: 20px;
   background: var(--surface);
 }
 .profile-value {
@@ -967,7 +966,7 @@ body {
   margin-bottom: 28px;
 }
 .stat-card {
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 20px;
@@ -1079,13 +1078,13 @@ body {
 .benefits-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 .benefit-card-v2 {
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 16px 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1283,6 +1282,12 @@ body {
       <button type="button" class="nav-tab" data-tab="profile">Profile</button>
       <button type="button" class="nav-tab" data-tab="advisor">Advisor</button>
     </div>
+    <div class="nav-end">
+      <button type="button" class="nav-refresh" id="nav-refresh-btn" title="Refresh balances" aria-label="Refresh balances">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+      <button type="button" class="theme-toggle-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+    </div>
   </div>
 </nav>
 
@@ -1297,6 +1302,10 @@ body {
         <div class="eyebrow">Your Portfolio</div>
         <div id="dash-hero"></div>
       </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-secondary" id="hero-open-benefit">Track benefit</button>
+        <button type="button" class="btn btn-primary" id="hero-open-account">Add account</button>
+      </div>
     </div>
     <div id="dash-stat-cards" class="stat-cards-grid"></div>
     <div id="dash-account-table"></div>
@@ -1309,10 +1318,11 @@ body {
     <div class="page-header">
       <div>
         <div class="eyebrow">Tracker</div>
-        <h1 class="view-title">Accounts</h1>
-        <p class="section-copy">Every balance stores the selected program, its cents-per-point valuation, and the cards that help you earn it.</p>
+        <div id="accounts-hero"></div>
       </div>
-      <button type="button" class="btn btn-primary" id="accounts-add-button">Add account</button>
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" id="accounts-add-button">Add account</button>
+      </div>
     </div>
     <div id="accounts-groups"></div>
   </section>
@@ -1336,10 +1346,12 @@ body {
     <div class="page-header">
       <div>
         <div class="eyebrow">Traveler</div>
-        <h1 class="view-title">Travel profile</h1>
-        <p class="section-copy">Preferences here feed the advisor page when you want redemption recommendations.</p>
+        <div class="dash-hero-number">Travel <em>profile</em></div>
+        <p class="dash-subtitle">Preferences here feed the advisor page when you want redemption recommendations.</p>
       </div>
-      <button type="button" class="btn btn-secondary" id="profile-edit-button">Edit profile</button>
+      <div class="header-actions">
+        <button type="button" class="btn btn-secondary" id="profile-edit-button">Edit profile</button>
+      </div>
     </div>
     <div id="profile-grid" class="profile-grid"></div>
     <div style="margin-top:32px">
@@ -2185,9 +2197,17 @@ function buildAccountDetails(account) {
 
 function renderAccounts(data) {
   var wrapper = document.getElementById('accounts-groups');
+  var heroEl = document.getElementById('accounts-hero');
   if (!data.accounts.length) {
+    if (heroEl) heroEl.innerHTML = '<h1 class="view-title">Accounts</h1><p class="dash-subtitle">Add your first loyalty program to see dollar values, transfer partners, and card details.</p>';
     wrapper.innerHTML = '<div class="empty-state"><strong>No accounts yet</strong>Add your first loyalty program — like Chase Ultimate Rewards or Delta SkyMiles — to see dollar values, transfer partners, and card details here.<br><button type="button" class="btn btn-primary" id="empty-add-account">Add account</button></div>';
     return;
+  }
+  var totalValue = data.accounts.reduce(function (s, a) { return s + calculateAccountValue(a); }, 0);
+  var totalPoints = data.accounts.reduce(function (s, a) { return s + validateBalance(a.balance); }, 0);
+  if (heroEl) {
+    heroEl.innerHTML = '<div class="dash-hero-number">' + formatDollars(totalValue) + ' <em>in value</em></div>' +
+      '<p class="dash-subtitle">' + data.accounts.length + ' program' + (data.accounts.length === 1 ? '' : 's') + ' &middot; ' + formatPoints(totalPoints) + ' total points</p>';
   }
   var groups = ['flexible', 'airline', 'hotel', 'other'];
   wrapper.innerHTML = '';
@@ -2335,7 +2355,9 @@ function renderDashboard(data) {
   dashHero.innerHTML =
     '<div class="dash-hero-number">' + formatPoints(totalPoints) + ' <em>points</em></div>' +
     '<div class="dash-subtitle">Across ' + data.accounts.length + ' program' + (data.accounts.length === 1 ? '' : 's') +
-    (lastUpdate ? ' &middot; Last updated ' + timeAgo(lastUpdate) : '') + '</div>';
+    ' &middot; ' + formatDollars(totalValue) + ' estimated value' +
+    (lastUpdate ? ' &middot; Last updated ' + timeAgo(lastUpdate) : '') + '</div>' +
+    (staleCounts.needsRefresh > 0 ? '<button type="button" class="refresh-cta" id="hero-refresh-btn">' + staleCounts.needsRefresh + ' balance' + (staleCounts.needsRefresh === 1 ? '' : 's') + ' need' + (staleCounts.needsRefresh === 1 ? 's' : '') + ' refresh &#9656;</button>' : '');
 
   // Stat cards by category
   var categories = [
@@ -3027,8 +3049,7 @@ function bindEvents() {
       switchTab(btn.getAttribute('data-tab'));
     });
   });
-  var navRefreshBtn = document.getElementById('nav-refresh-btn');
-  if (navRefreshBtn) navRefreshBtn.addEventListener('click', openRefreshModal);
+  document.getElementById('nav-refresh-btn').addEventListener('click', openRefreshModal);
   document.getElementById('refresh-done-btn').addEventListener('click', closeRefreshModal);
   document.getElementById('refresh-modal').addEventListener('click', function (e) {
     if (e.target === this) closeRefreshModal();
@@ -3075,11 +3096,9 @@ function bindEvents() {
       }
     }
   });
-  var heroAcct = document.getElementById('hero-open-account');
-  if (heroAcct) heroAcct.addEventListener('click', function () { openAccountModal(); });
+  document.getElementById('hero-open-account').addEventListener('click', function () { openAccountModal(); });
   document.getElementById('accounts-add-button').addEventListener('click', function () { openAccountModal(); });
-  var heroBen = document.getElementById('hero-open-benefit');
-  if (heroBen) heroBen.addEventListener('click', function () { openBenefitModal(); });
+  document.getElementById('hero-open-benefit').addEventListener('click', function () { openBenefitModal(); });
   document.getElementById('benefits-add-button').addEventListener('click', function () { openBenefitModal(); });
   document.getElementById('profile-edit-button').addEventListener('click', openProfileModal);
   document.getElementById('export-button').addEventListener('click', exportData);
