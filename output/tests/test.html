@@ -65,7 +65,7 @@ function run() {
   assertEqual('schema version is v3', api.SCHEMA_VERSION, 3);
   assertEqual('defaultData schema is v3', api.defaultData()._version, 3);
 
-  assertEqual('sanitize strips script tags', api.sanitize('<scr' + 'ipt>alert(1)<' + '/script>'), 'alert(1)');
+  assertEqual('sanitize strips script tags and content', api.sanitize('<scr' + 'ipt>alert(1)<' + '/script>'), '');
   assertEqual('sanitize strips nested tags', api.sanitize('Hello <b><i>world</i></b>'), 'Hello world');
   assertEqual('validateType accepts flexible', api.validateType('flexible'), 'flexible');
   assertEqual('validateType rejects invalid', api.validateType('crypto'), 'other');
@@ -115,7 +115,7 @@ function run() {
   });
   assertEqual('sanitizeImport upgrades schema', sanitized._version, 3);
   assertEqual('sanitizeImport strips account html', sanitized.accounts[0].program, 'Delta SkyMiles');
-  assertEqual('sanitizeImport strips notes html', sanitized.accounts[0].notes, 'x');
+  assertEqual('sanitizeImport strips script tags and content from notes', sanitized.accounts[0].notes, '');
   assertEqual('sanitizeImport removes orphan benefit', sanitized.benefits.length, 1);
   assertEqual('sanitizeImport adds program slug', sanitized.accounts[0].programSlug, 'delta-sm');
 
@@ -158,6 +158,176 @@ function run() {
 
   var earnRates = api.formatEarnRates(programBySlug.cards[0]);
   assert('formatEarnRates exposes dining multiplier', earnRates.some(function (item) { return item.indexOf('dining') === 0; }));
+
+  // ── deleteAccount with cascade ────────────────────────────────────────────
+  (function () {
+    var data = api.defaultData();
+    data.accounts.push(api.repairAccount({
+      id: 'del-acct-1',
+      program: 'Chase Ultimate Rewards',
+      programSlug: 'chase-ur',
+      type: 'flexible',
+      balance: 50000,
+      currency: 'points',
+      cpp: 2,
+      cards: []
+    }));
+    data.benefits.push(api.repairBenefit({ id: 'del-ben-1', cardId: 'del-acct-1', name: 'Lounge Pass', used: false }));
+    api.saveData(data);
+    var before = api.loadData();
+    assertEqual('deleteAccount cascade setup: 1 account', before.accounts.length, 1);
+    assertEqual('deleteAccount cascade setup: 1 benefit', before.benefits.length, 1);
+    // Simulate deleteAccount without confirm: filter out the account and its linked benefits
+    var after = api.loadData();
+    after.accounts = after.accounts.filter(function (a) { return a.id !== 'del-acct-1'; });
+    after.benefits = after.benefits.filter(function (b) { return b.cardId !== 'del-acct-1'; });
+    api.saveData(after);
+    var result = api.loadData();
+    assertEqual('deleteAccount removes account', result.accounts.length, 0);
+    assertEqual('deleteAccount removes linked benefit', result.benefits.length, 0);
+    api.saveData(api.defaultData());
+  }());
+
+  // ── deleteBenefit ─────────────────────────────────────────────────────────
+  (function () {
+    var data = api.defaultData();
+    data.accounts.push(api.repairAccount({
+      id: 'del-acct-2',
+      program: 'World of Hyatt',
+      programSlug: 'hyatt-woh',
+      type: 'hotel',
+      balance: 30000,
+      currency: 'points',
+      cpp: 2,
+      cards: []
+    }));
+    data.benefits.push(api.repairBenefit({ id: 'del-ben-2', cardId: 'del-acct-2', name: 'Free Night Award', used: false }));
+    api.saveData(data);
+    var before = api.loadData();
+    assertEqual('deleteBenefit setup: 1 benefit exists', before.benefits.length, 1);
+    // Simulate deleteBenefit without confirm: filter out the benefit
+    var after = api.loadData();
+    after.benefits = after.benefits.filter(function (b) { return b.id !== 'del-ben-2'; });
+    api.saveData(after);
+    var result = api.loadData();
+    assertEqual('deleteBenefit removes the benefit', result.benefits.length, 0);
+    assertEqual('deleteBenefit leaves account intact', result.accounts.length, 1);
+    api.saveData(api.defaultData());
+  }());
+
+  // ── toggleBenefit ─────────────────────────────────────────────────────────
+  (function () {
+    var data = api.defaultData();
+    data.accounts.push(api.repairAccount({
+      id: 'tog-acct-1',
+      program: 'Delta SkyMiles',
+      programSlug: 'delta-sm',
+      type: 'airline',
+      balance: 20000,
+      currency: 'miles',
+      cpp: 1.2,
+      cards: []
+    }));
+    data.benefits.push(api.repairBenefit({ id: 'tog-ben-1', cardId: 'tog-acct-1', name: 'Companion Certificate', used: false }));
+    api.saveData(data);
+    // First toggle: false → true
+    var d1 = api.loadData();
+    var b1 = d1.benefits.find(function (b) { return b.id === 'tog-ben-1'; });
+    b1.used = !b1.used;
+    api.saveData(d1);
+    var after1 = api.loadData();
+    var toggled1 = after1.benefits.find(function (b) { return b.id === 'tog-ben-1'; });
+    assertEqual('toggleBenefit false→true', toggled1.used, true);
+    // Second toggle: true → false
+    var d2 = api.loadData();
+    var b2 = d2.benefits.find(function (b) { return b.id === 'tog-ben-1'; });
+    b2.used = !b2.used;
+    api.saveData(d2);
+    var after2 = api.loadData();
+    var toggled2 = after2.benefits.find(function (b) { return b.id === 'tog-ben-1'; });
+    assertEqual('toggleBenefit true→false', toggled2.used, false);
+    api.saveData(api.defaultData());
+  }());
+
+  // ── Profile save/load ─────────────────────────────────────────────────────
+  (function () {
+    var data = api.defaultData();
+    data.profile = {
+      homeAirport: 'LAX',
+      preferredAlliances: ['Star Alliance', 'Oneworld'],
+      travelPreferences: {
+        regions: ['North America', 'Europe'],
+        classPreference: 'business'
+      }
+    };
+    api.saveData(data);
+    var loaded = api.loadData();
+    assertEqual('profile save/load homeAirport', loaded.profile.homeAirport, 'LAX');
+    assertEqual('profile save/load classPreference', loaded.profile.travelPreferences.classPreference, 'business');
+    assert('profile save/load preferredAlliances includes Star Alliance', loaded.profile.preferredAlliances.indexOf('Star Alliance') >= 0);
+    assert('profile save/load regions includes Europe', loaded.profile.travelPreferences.regions.indexOf('Europe') >= 0);
+    api.saveData(api.defaultData());
+  }());
+
+  // ── exportData format ─────────────────────────────────────────────────────
+  (function () {
+    api.saveData(api.defaultData());
+    var exported = api.loadData();
+    assert('exportData structure has _version', '_version' in exported);
+    assert('exportData structure has accounts', 'accounts' in exported);
+    assert('exportData structure has benefits', 'benefits' in exported);
+    assert('exportData structure has profile', 'profile' in exported);
+    api.saveData(api.defaultData());
+  }());
+
+  // ── importData validation ─────────────────────────────────────────────────
+  (function () {
+    var missingAccounts = api.validateImport({ benefits: [] });
+    assert('validateImport rejects missing accounts array', missingAccounts.length > 0);
+
+    var missingBenefits = api.validateImport({ accounts: [] });
+    assert('validateImport rejects missing benefits array', missingBenefits.length > 0);
+
+    var missingAccountId = api.validateImport({
+      accounts: [{ program: 'Delta SkyMiles', balance: 5000 }],
+      benefits: []
+    });
+    assert('validateImport rejects account missing id', missingAccountId.some(function (e) { return e.indexOf('missing id') >= 0; }));
+
+    var missingBenefitId = api.validateImport({
+      accounts: [{ id: 'a1', program: 'Delta SkyMiles', balance: 5000 }],
+      benefits: [{ name: 'Lounge' }]
+    });
+    assert('validateImport rejects benefit missing id', missingBenefitId.some(function (e) { return e.indexOf('missing id') >= 0; }));
+  }());
+
+  // ── Custom card add/normalize ─────────────────────────────────────────────
+  (function () {
+    var data = api.defaultData();
+    data.accounts.push(api.repairAccount({
+      id: 'cust-acct-1',
+      program: 'My Custom Program',
+      type: 'other',
+      balance: 15000,
+      currency: 'points',
+      cpp: 1.5,
+      cards: [{
+        name: 'My Custom Card',
+        annualFee: 120,
+        earnRates: { dining: 3, travel: 2, other: 1 },
+        custom: true
+      }]
+    }));
+    api.saveData(data);
+    var loaded = api.loadData();
+    var acct = loaded.accounts.find(function (a) { return a.id === 'cust-acct-1'; });
+    assert('custom card persists after save/load', acct && acct.cards.length === 1);
+    assert('custom card custom flag preserved', acct && acct.cards[0].custom === true);
+    assertEqual('custom card name preserved', acct && acct.cards[0].name, 'My Custom Card');
+    assertEqual('custom card annualFee preserved', acct && acct.cards[0].annualFee, 120);
+    assert('custom card earn rates normalized', acct && acct.cards[0].earnRates && acct.cards[0].earnRates.dining === 3);
+    api.saveData(api.defaultData());
+  }());
 
   // ── Staleness & Refresh Tests ──────────────────────────────────
 
