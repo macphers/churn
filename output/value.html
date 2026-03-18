@@ -51,6 +51,7 @@ body {
   gap: 16px;
 }
 .nav-brand {
+  flex: 1;
   font-family: 'Clash Display', 'Satoshi', sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -62,14 +63,22 @@ body {
   display: flex;
   gap: 4px;
 }
+.nav-end {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
 .nav-links a {
   color: var(--text-muted);
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 14px;
   font-weight: 500;
   border-radius: 6px;
   transition: color 120ms ease, background 120ms ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 .nav-links a:hover { color: var(--text); }
 .nav-links a.active {
@@ -719,6 +728,7 @@ body {
       <a href="index.html">Tracker</a>
       <a href="value.html" class="active">Advisor</a>
     </div>
+    <div class="nav-end"></div>
   </div>
 </nav>
 
