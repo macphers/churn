@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.12.0] - 2026-03-18
+
+### Fixed
+- Uniform nav bar layout across Tracker and Advisor pages with centered links
+- Form field alignment in add account modal — helper text no longer pushes paired fields
+- Redundant "Back to tracker" link removed from Advisor header to reduce visual noise
+- Nav refresh button hover state now visible on light background
+
 ## [0.1.11.0] - 2026-03-18
 
 ### Added
