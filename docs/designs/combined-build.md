@@ -72,7 +72,7 @@ const PROGRAMS = {
 };
 ```
 
-## index.html Changes (osaka-v2 rewards intelligence)
+## index.html Changes (churn rewards intelligence)
 
 ### Schema v3 Migration
 ```
@@ -124,13 +124,13 @@ Progressive disclosure in one modal:
 ### New Features
 - 7 user modes (max value, min cash, simple, travel now, no travel, expiring, luxury)
 - User settings (cabin pref, hotel pref, WTP caps per cabin class, complexity)
-- Household/player-two support (separate localStorage key: osaka_household)
+- Household/player-two support (separate localStorage key: churn_household)
 - Decision-first recommendation cards (Best Overall, Best Simple, Best Non-Travel, Worth Saving)
 - Surcharge/hidden cost modeling (inline in PROGRAMS per transfer partner)
 
 ### Data
 - DEFAULT_PREFS constant with all fields — readPrefs() merges with defaults
-- readHousehold() reads osaka_household key
+- readHousehold() reads churn_household key
 - writeAgentResults() extended with BFB scores, mode, WTP adjustments
 
 ## Implementation Order

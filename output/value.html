@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Osaka — Value Advisor</title>
+<title>Churn — Value Advisor</title>
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -714,7 +714,7 @@ body {
 <body>
 <nav class="app-nav">
   <div class="app-nav-inner">
-    <span class="nav-brand">Osaka</span>
+    <span class="nav-brand">Churn</span>
     <div class="nav-links">
       <a href="index.html">Tracker</a>
       <a href="value.html" class="active">Advisor</a>
@@ -737,9 +737,11 @@ body {
 <script>
 'use strict';
 
-var STORAGE_KEY = 'osaka_data';
+var STORAGE_KEY = 'churn_data';
+var LEGACY_STORAGE_KEY = 'osaka_data';
 var PREFS_KEY = 'valueAdvisorPrefs';
-var HOUSEHOLD_KEY = 'osaka_household';
+var HOUSEHOLD_KEY = 'churn_household';
+var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var state = { expanded: {} };
 var DEFAULT_PREFS = {
   mode: 'max_value',
@@ -824,6 +826,10 @@ function mergePrefs(raw) {
 function readRewardsData() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) { localStorage.setItem(STORAGE_KEY, raw); localStorage.removeItem(LEGACY_STORAGE_KEY); }
+    }
     if (!raw) return null;
     var data = JSON.parse(raw);
     if (!data || !Array.isArray(data.accounts)) return null;
@@ -865,6 +871,10 @@ function normalizeHouseholdAccount(item) {
 function readHousehold() {
   try {
     var raw = localStorage.getItem(HOUSEHOLD_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_HOUSEHOLD_KEY);
+      if (raw) { localStorage.setItem(HOUSEHOLD_KEY, raw); localStorage.removeItem(LEGACY_HOUSEHOLD_KEY); }
+    }
     if (!raw) return [];
     var parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
@@ -1562,7 +1572,7 @@ function renderSettings(analysis) {
         '</div>' +
         '<div class="setting-card">' +
           '<div class="mini-label">Household</div>' +
-          '<div class="section-copy">Add player-two balances here. They live in a dedicated `osaka_household` key.</div>' +
+          '<div class="section-copy">Add player-two balances here. They live in a dedicated `churn_household` key.</div>' +
           '<form id="household-form" class="household-form-grid" style="margin-top:12px">' +
             '<div class="field"><label for="household-name">Member</label><input id="household-name" name="memberName" type="text" placeholder="Player two"></div>' +
             '<div class="field"><label for="household-program">Program</label><input id="household-program" name="program" type="text" list="household-program-list" placeholder="Chase Ultimate Rewards"></div>' +
@@ -1578,7 +1588,7 @@ function renderSettings(analysis) {
 }
 
 function renderFreshness() {
-  return '<div class="freshness">Program dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' • results saved to `valueAdvisorResults` • household key `osaka_household`</div>';
+  return '<div class="freshness">Program dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' • results saved to `valueAdvisorResults` • household key `churn_household`</div>';
 }
 
 function renderEmptyState(title, copy) {
@@ -1593,7 +1603,7 @@ function render() {
     return;
   }
   if (!data || !data.accounts || !data.accounts.length) {
-    app.innerHTML = renderEmptyState('Add accounts in the tracker first', 'This page only becomes useful once `osaka_data` contains balances from the tracker.');
+    app.innerHTML = renderEmptyState('Add accounts in the tracker first', 'This page only becomes useful once `churn_data` contains balances from the tracker.');
     return;
   }
   var prefs = readPrefs();
@@ -1740,7 +1750,7 @@ function bindEvents() {
   });
 }
 
-window.OsakaAdvisor = {
+window.ChurnAdvisor = {
   DEFAULT_PREFS: DEFAULT_PREFS,
   MODE_DEFS: MODE_DEFS,
   readRewardsData: readRewardsData,

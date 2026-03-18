@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Osaka Tracker Tests</title>
+<title>Churn Tracker Tests</title>
 <style>
 body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #F5F2ED; color: #1A1A1A; padding: 24px; }
 h1 { margin-bottom: 8px; }
@@ -18,7 +18,7 @@ iframe { width: 0; height: 0; border: 0; position: absolute; left: -9999px; }
 </style>
 </head>
 <body>
-<h1>Osaka Tracker Test Suite</h1>
+<h1>Churn Tracker Test Suite</h1>
 <p class="muted">Loads the actual rebuilt tracker in a hidden iframe and asserts against its exported helpers.</p>
 <div id="results"></div>
 <div id="summary"></div>
@@ -54,11 +54,11 @@ function renderResults() {
 function run() {
   var frame = document.getElementById('tracker-frame');
   var win = frame.contentWindow;
-  var api = win.OsakaTracker;
+  var api = win.ChurnTracker;
   var programs = win.PROGRAMS;
   win.localStorage.removeItem(api.STORAGE_KEY);
   win.localStorage.removeItem('valueAdvisorPrefs');
-  win.localStorage.removeItem('osaka_household');
+  win.localStorage.removeItem('churn_household');
 
   assert('tracker API exported', !!api);
   assert('shared programs exported', !!programs);

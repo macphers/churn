@@ -1,7 +1,7 @@
 [
   {
     "timestamp": "2026-03-17T17:00:00Z",
-    "spec": "Osaka — Personal Credit Card Rewards Tracker",
+    "spec": "Churn — Personal Credit Card Rewards Tracker",
     "style": "marlinspike",
     "parallel_runs": 3,
     "total_rounds": 7,
