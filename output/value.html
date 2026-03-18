@@ -5,10 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Churn — Value Advisor</title>
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
 <style>
-/* Page-specific styles for value.html */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+:root {
+  --bg: #F5F2ED; --surface: #FFFFFF; --surface-2: #FAF8F5; --border: #E8E4DF;
+  --text: #1A1A1A; --text-muted: #6B6560; --accent: #8B5E10; --accent-hover: #6B4A0C;
+  --accent-decorative: #C4841D; --accent-glow: rgba(139,94,16,0.12); --danger: #A63D40; --success: #2D7A4F;
+  --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
+  --card-color: #8B5E10; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
+  --gold: var(--accent-decorative);
+  --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+}
+
+html { background: var(--bg); }
+body {
+  font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.container { width: min(1060px, calc(100vw - 40px)); margin: 0 auto; }
+.app-nav {
+  position: relative;
+  z-index: 40;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.app-nav-inner {
+  width: min(1060px, calc(100vw - 40px));
+  margin: 0 auto;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.nav-brand {
+  flex: 1;
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+.nav-end {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: color 120ms ease, background 120ms ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active {
+  color: var(--text);
+  background: rgba(0,0,0,0.04);
+  font-weight: 600;
+}
+
+.page-header {
+  padding: 40px 0 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.page-header h1 {
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-top: 8px;
+  color: var(--text);
+}
+.page-header p {
+  color: var(--text-muted);
+  margin-top: 8px;
+  max-width: 38rem;
+  font-size: 15px;
+}
 .subnav-link {
   display: inline-flex;
   align-items: center;
@@ -20,6 +126,17 @@
 }
 .subnav-link:hover { text-decoration: underline; }
 
+.stack {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 48px;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--panel-shadow);
+}
 .hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
@@ -29,9 +146,38 @@
   padding: 26px;
   animation: fadeInUp 220ms ease-out;
 }
+.mini-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+.hero-value {
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin-top: 8px;
+  color: var(--text);
+}
 .hero-copy {
   margin-top: 8px;
   font-size: 14px;
+  color: var(--text-muted);
+}
+.summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.summary-chip {
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 13px;
   color: var(--text-muted);
 }
 .delta-card {
@@ -67,9 +213,6 @@
   height: 100%;
   border-radius: 999px;
 }
-
-/* Override: value.html uses flex-end for section-header */
-.section-header { align-items: flex-end; }
 
 .modes-panel {
   padding: 20px 22px 22px;
@@ -124,6 +267,29 @@
   display: block;
   margin-top: 2px;
   font-size: 12px;
+}
+
+.section-panel {
+  padding: 24px;
+  animation: fadeInUp 300ms ease-out;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.section-copy {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 .lot-grid {
@@ -261,8 +427,50 @@
   display: grid;
   gap: 12px;
 }
+.account-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
 .account-shell {
   padding: 18px;
+}
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+.account-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.type-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.type-dot.flexible, .type-dot.credit_card { background: var(--card-color); }
+.type-dot.airline { background: var(--airline-color); }
+.type-dot.hotel { background: var(--hotel-color); }
+.type-dot.other { background: var(--other-color); }
+.account-balance {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.account-balance strong {
+  display: block;
+  color: var(--text);
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-size: 26px;
+  letter-spacing: -0.03em;
 }
 .option-list {
   display: grid;
@@ -300,6 +508,20 @@
   color: var(--text-muted);
   font-size: 12px;
 }
+.expand-toggle {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 13px;
+}
 .detail-panel {
   display: none;
   border-top: 1px solid var(--border);
@@ -307,6 +529,11 @@
   background: var(--surface-2);
 }
 .detail-panel.open { display: block; }
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 .metric-card, .sweet-card, .household-card, .setting-card {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -320,6 +547,24 @@
   letter-spacing: -0.03em;
   margin-top: 6px;
 }
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.tag {
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(139,94,16,0.08);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.tag.warn { background: rgba(122,90,8,0.1); color: var(--warning); }
+.tag.success { background: rgba(45,122,79,0.08); color: var(--success); }
 
 .sweet-grid {
   display: grid;
@@ -364,6 +609,27 @@
   display: grid;
   gap: 6px;
 }
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+.field input, .field select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139,94,16,0.1);
+}
 .caps-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -397,12 +663,25 @@
   font-size: 13px;
 }
 
-/* value.html overrides .btn padding to be slightly smaller */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1px solid transparent;
   padding: 9px 14px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 .btn:hover { transform: none; }
-.btn-danger { background: rgba(166,61,64,0.04); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: rgba(166,61,64,0.04); border-color: rgba(166,61,64,0.2); color: var(--danger); }
 
 .freshness {
   text-align: center;
@@ -410,6 +689,15 @@
   font-size: 12px;
   padding: 4px 0 12px;
 }
+
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.empty-state strong { display: block; color: var(--text); margin-bottom: 6px; }
 
 @media (max-width: 980px) {
   .hero-grid, .recommendation-grid, .settings-grid, .caps-grid, .detail-grid {
@@ -421,6 +709,8 @@
 }
 
 @media (max-width: 767px) {
+  .container, .app-nav-inner { width: calc(100vw - 24px); }
+  .page-header { flex-direction: column; align-items: flex-start; padding-top: 28px; }
   .mode-pill { min-width: 128px; }
   .recommendation-grid, .caps-grid { grid-template-columns: 1fr; }
   .option-row, .comparison-row, .delta-bar {
@@ -438,6 +728,7 @@
       <a href="index.html">Tracker</a>
       <a href="value.html" class="active">Advisor</a>
     </div>
+    <div class="nav-end"></div>
   </div>
 </nav>
 
@@ -447,7 +738,6 @@
     <h1>Value advice that respects how you actually redeem.</h1>
     <p>Modes, WTP caps, and household context change the answer. This page turns raw points math into the recommendation you would actually follow.</p>
   </div>
-  <a class="subnav-link" href="index.html">Back to tracker &rarr;</a>
 </header>
 
 <main class="container stack" id="app"></main>
