@@ -216,6 +216,21 @@ body {
   padding-bottom: 4px;
   scrollbar-width: none;
   margin-top: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 640px) {
+  .mode-strip {
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  }
+  .mode-strip.scrolled-end {
+    mask-image: linear-gradient(to left, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, black 85%, transparent 100%);
+  }
+  .mode-strip.scrolled-mid {
+    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+  }
 }
 .mode-strip::-webkit-scrollbar { display: none; }
 .mode-pill {
@@ -1599,6 +1614,7 @@ function render() {
     renderSweetSpots(analysis) +
     renderSettings(analysis) +
     renderFreshness();
+  bindModeStripScroll();
 }
 
 function handleModeChange(mode) {
@@ -1651,6 +1667,20 @@ function handleHouseholdSubmit(form) {
   saveHousehold(household);
   render();
   return false;
+}
+
+function bindModeStripScroll() {
+  var strip = document.querySelector('.mode-strip');
+  if (!strip) return;
+  function updateMask() {
+    var sl = strip.scrollLeft, max = strip.scrollWidth - strip.clientWidth;
+    if (max <= 0) { strip.className = 'mode-strip'; return; }
+    if (sl < 4) strip.className = 'mode-strip';
+    else if (sl > max - 4) strip.className = 'mode-strip scrolled-end';
+    else strip.className = 'mode-strip scrolled-mid';
+  }
+  strip.addEventListener('scroll', updateMask, { passive: true });
+  updateMask();
 }
 
 function bindEvents() {
