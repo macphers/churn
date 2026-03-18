@@ -20,6 +20,7 @@
   --accent-glow: rgba(139,94,16,0.12); --danger: #A63D40; --success: #2D7A4F;
   --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
   --card-color: #8B5E10; --accent-decorative: #C4841D; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
+  --gold: var(--accent-decorative);
   --error-bg: rgba(166,61,64,0.06); --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
@@ -68,7 +69,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 52px;
+  min-height: 56px;
 }
 .nav-brand {
   font-family: var(--font-display);
@@ -124,7 +125,7 @@ body {
 [data-theme="dark"] .btn-primary:hover { background: #B8860B; }
 
 .page-header {
-  padding: 32px 0 0;
+  padding: 40px 0 20px;
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -186,7 +187,7 @@ body {
   box-shadow: var(--panel-shadow);
 }
 .hero-card {
-  padding: 28px 26px;
+  padding: 24px;
   animation: fadeInUp 220ms ease-out;
 }
 .hero-label, .section-kicker, .mini-label {
@@ -326,7 +327,7 @@ body {
   overflow: hidden;
 }
 .account-main {
-  padding: 18px;
+  padding: 24px;
 }
 .account-header {
   display: flex;
@@ -463,7 +464,7 @@ body {
 }
 .detail-metric {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 14px;
   background: var(--surface);
 }
@@ -481,7 +482,7 @@ body {
 }
 .detail-item {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 14px;
   background: var(--surface);
 }
@@ -587,12 +588,12 @@ body {
 
 .benefits-grid {
   display: grid;
-  gap: 10px;
+  gap: 16px;
 }
 .benefit-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  padding: 24px;
   background: var(--surface);
 }
 .benefit-card h3 {
@@ -769,7 +770,7 @@ body {
   overflow: auto;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   box-shadow: 0 12px 32px rgba(0,0,0,0.1);
   z-index: 4;
   display: none;
@@ -932,8 +933,8 @@ body {
   background: none;
   border: none;
   color: var(--text-muted);
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
@@ -972,11 +973,11 @@ body {
   padding: 20px;
 }
 .stat-card-label {
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -1084,7 +1085,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1131,8 +1132,8 @@ body {
 }
 .dash-welcome h1 {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 3vw, 1.8rem);
-  line-height: 1.2;
+  font-size: 32px;
+  line-height: 1.1;
   letter-spacing: -0.02em;
 }
 .dash-welcome p { color: var(--text-muted); font-size: 15px; max-width: 34rem; margin-top: 8px; }
@@ -2199,7 +2200,7 @@ function renderAccounts(data) {
   var wrapper = document.getElementById('accounts-groups');
   var heroEl = document.getElementById('accounts-hero');
   if (!data.accounts.length) {
-    if (heroEl) heroEl.innerHTML = '<h1 class="view-title">Accounts</h1><p class="dash-subtitle">Add your first loyalty program to see dollar values, transfer partners, and card details.</p>';
+    if (heroEl) heroEl.innerHTML = '<div class="dash-hero-number">Your <em>accounts</em></div><p class="dash-subtitle">Add your first loyalty program to see dollar values, transfer partners, and card details.</p>';
     wrapper.innerHTML = '<div class="empty-state"><strong>No accounts yet</strong>Add your first loyalty program — like Chase Ultimate Rewards or Delta SkyMiles — to see dollar values, transfer partners, and card details here.<br><button type="button" class="btn btn-primary" id="empty-add-account">Add account</button></div>';
     return;
   }
@@ -2268,7 +2269,7 @@ function renderBenefits(data) {
   var list = document.getElementById('benefits-list');
   var heroEl = document.getElementById('benefits-hero');
   if (!data.benefits.length) {
-    if (heroEl) heroEl.innerHTML = '<h1 class="view-title">Card perks &amp; credits</h1><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
+    if (heroEl) heroEl.innerHTML = '<div class="benefits-hero-number">Card perks <em>&amp; credits</em></div><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
     list.innerHTML = '<div class="empty-state"><strong>No benefits tracked</strong>Track card perks like lounge access, free night certificates, and travel credits. Benefits stay linked to accounts so nothing expires unnoticed.<br><button type="button" class="btn btn-secondary" id="empty-add-benefit">Track a benefit</button></div>';
     return;
   }

@@ -46,7 +46,7 @@
 |-------|-------|------|-------|
 | bg | `#F5F2ED` (parchment) | `#0F0E0C` | Page background |
 | surface | `#FFFFFF` | `#1A1815` | Cards, panels |
-| surface-2 | `#FAF8F5` | `#141210` | Inset areas, stat cards |
+| surface-2 | `#FAF8F5` | `#141210` | Inset areas, expanded sections |
 | border | `#E8E4DF` | `#2A2723` | Default borders |
 | border-strong | `#D5D0CA` | `#3A3632` | Input borders, dividers |
 | text | `#1A1A1A` | `#E8E4DF` | Primary text |
@@ -92,6 +92,7 @@
   - md: 12px — cards, panels, main containers
   - full: 9999px — pills, avatars
 - **Nav height:** 56px minimum, flex-centered
+- **Nav background:** `var(--bg)` (parchment) — the nav blends into the page background, NOT white. Only cards and panels use `surface` (white).
 - **Page header padding:** 40px top, 20px bottom
 - **Card padding:** 24px (20px on mobile)
 

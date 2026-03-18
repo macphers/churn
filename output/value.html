@@ -21,6 +21,7 @@
   --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
   --card-color: #8B5E10; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
   --gold: var(--accent-decorative);
+  --error-bg: rgba(166,61,64,0.06);
   --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
@@ -36,6 +37,7 @@
   --warning: #C49A2E; --airline-color: #5A9FD4; --hotel-color: #A873B8;
   --card-color: #8B5E10; --other-color: #9B9590;
   --gold: var(--accent-decorative);
+  --error-bg: rgba(212,88,91,0.1);
   --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
   --nav-active-bg: rgba(139,94,16,0.12);
 }
@@ -51,6 +53,7 @@ body {
 }
 
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
@@ -65,7 +68,7 @@ body {
 .app-nav-inner {
   width: min(1060px, calc(100vw - 40px));
   margin: 0 auto;
-  min-height: 52px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,7 +123,7 @@ body {
 [data-theme="dark"] .btn-primary:hover { background: #B8860B; }
 
 .page-header {
-  padding: 32px 0 0;
+  padding: 40px 0 20px;
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -172,11 +175,11 @@ body {
 }
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.85fr);
   gap: 20px;
 }
 .hero-card, .delta-card {
-  padding: 26px;
+  padding: 24px;
   animation: fadeInUp 220ms ease-out;
 }
 .mini-label {
