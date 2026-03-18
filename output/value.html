@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Points Value Advisor</title>
+<title>Osaka — Value Advisor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -16,800 +16,1687 @@
   --accent-glow: rgba(59,130,246,0.2); --danger: #ff4d6a; --success: #34d399;
   --warning: #fbbf24; --airline-color: #38bdf8; --hotel-color: #c084fc;
   --card-color: #fb923c; --other-color: #6b6e80; --radius: 14px; --radius-sm: 8px;
-  --gold: #f59e0b; --gold-glow: rgba(245,158,11,0.15);
+  --gold: #f59e0b; --gold-glow: rgba(245,158,11,0.15); --panel-shadow: 0 24px 60px rgba(0,0,0,0.34);
 }
 
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.5; padding: 0 0 32px; }
+html { background: var(--bg); }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(59,130,246,0.16), transparent 26rem),
+    radial-gradient(circle at top right, rgba(245,158,11,0.14), transparent 20rem),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
 
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-@media (prefers-reduced-motion: reduce) { .animate-in { animation: none !important; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
 
-.animate-in { animation: fadeInUp 0.3s ease-out forwards; }
-.animate-in:nth-child(2) { animation-delay: 40ms; }
-.animate-in:nth-child(3) { animation-delay: 80ms; }
-.animate-in:nth-child(4) { animation-delay: 120ms; }
-.animate-in:nth-child(5) { animation-delay: 160ms; }
+.container { width: min(1160px, calc(100vw - 32px)); margin: 0 auto; }
+.app-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(12,13,18,0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(40,42,54,0.82);
+}
+.app-nav-inner {
+  width: min(1160px, calc(100vw - 32px));
+  margin: 0 auto;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.nav-brand {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 10px 14px 13px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a.active { color: var(--text); border-bottom-color: var(--accent); }
 
-.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+.page-header {
+  padding: 34px 0 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+}
+.eyebrow {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.page-header h1 {
+  font-size: clamp(2.2rem, 4.8vw, 3.9rem);
+  line-height: 0.94;
+  letter-spacing: -0.06em;
+  margin-top: 10px;
+}
+.page-header p {
+  color: var(--text-muted);
+  margin-top: 10px;
+  max-width: 40rem;
+}
+.subnav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-light);
+  text-decoration: none;
+  font-weight: 700;
+}
 
-header { padding: 24px 16px 8px; max-width: 640px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
-header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; }
-header p { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
-.back-link { font-size: 13px; color: var(--accent-light); text-decoration: none; font-weight: 600; padding: 8px 0; }
-.back-link:hover { text-decoration: underline; }
+.stack {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 40px;
+}
+.panel {
+  background: linear-gradient(180deg, rgba(30,32,40,0.98), rgba(22,24,31,0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--panel-shadow);
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.9fr);
+  gap: 18px;
+}
+.hero-card, .delta-card {
+  padding: 26px;
+  animation: fadeInUp 220ms ease-out;
+}
+.mini-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+}
+.hero-value {
+  font-size: clamp(2.8rem, 7vw, 5.2rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  margin-top: 8px;
+}
+.hero-copy {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.summary-chip {
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: rgba(12,13,18,0.5);
+  border: 1px solid rgba(40,42,54,0.8);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.delta-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+.delta-figure {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--gold);
+}
+.delta-bars {
+  display: grid;
+  gap: 10px;
+}
+.delta-bar {
+  display: grid;
+  grid-template-columns: 112px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+.delta-track {
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(12,13,18,0.72);
+  overflow: hidden;
+}
+.delta-fill {
+  height: 100%;
+  border-radius: 999px;
+}
 
-/* Hero portfolio value */
-.hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 20px; margin-bottom: 16px; }
-.hero .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-.hero .value { font-size: 44px; font-weight: 800; letter-spacing: -2px; margin-top: 4px; }
-.hero .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-.hero .value-toggle { display: inline-flex; background: var(--bg); border-radius: 8px; padding: 3px; margin-top: 12px; }
-.hero .value-toggle button { padding: 6px 14px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.2s; }
-.hero .value-toggle button.active { background: var(--accent); color: #fff; }
+.modes-panel {
+  padding: 18px 22px 22px;
+  animation: fadeInUp 280ms ease-out;
+}
+.mode-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.mode-strip::-webkit-scrollbar { display: none; }
+.mode-pill {
+  flex: 0 0 auto;
+  border: 1px solid rgba(40,42,54,0.9);
+  border-radius: 999px;
+  background: rgba(12,13,18,0.55);
+  color: var(--text-muted);
+  padding: 12px 14px;
+  min-width: 144px;
+  text-align: left;
+  cursor: pointer;
+}
+.mode-pill.active {
+  border-color: rgba(59,130,246,0.55);
+  background: rgba(59,130,246,0.16);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.2) inset;
+}
+.mode-pill strong {
+  display: block;
+  font-size: 14px;
+}
+.mode-pill span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+}
 
-/* Left on table banner */
-.left-on-table { background: var(--gold-glow); border: 1px solid var(--gold); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px; }
-.left-on-table .lot-title { font-size: 14px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
-.left-on-table .lot-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-top: 4px; }
-.left-on-table .lot-detail { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.section-panel {
+  padding: 22px;
+  animation: fadeInUp 320ms ease-out;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+.section-copy {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
 
-/* Expiration warnings */
-.expiration-warning { background: rgba(255,77,106,0.08); border: 1px solid var(--danger); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; }
-.expiration-warning .ew-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
-.expiration-warning .ew-program { font-size: 14px; font-weight: 700; }
-.expiration-warning .ew-detail { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-.expiration-warning .ew-value { font-size: 14px; font-weight: 700; color: var(--danger); margin-top: 4px; }
-.expired-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(255,77,106,0.2); color: var(--danger); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; animation: pulse 2s ease-in-out infinite; }
+.lot-grid {
+  display: grid;
+  gap: 12px;
+}
+.lot-item {
+  border: 1px solid rgba(40,42,54,0.88);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(12,13,18,0.46);
+}
+.lot-item h3 {
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lot-item p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
+.comparison-bar {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.comparison-row {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+.comparison-track {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(12,13,18,0.72);
+  overflow: hidden;
+}
+.comparison-fill {
+  height: 100%;
+  border-radius: 999px;
+}
 
-/* Recommendation cards */
-.rec-section { margin-bottom: 24px; }
-.rec-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
-.rec-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
-.rec-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; transition: transform 0.15s, box-shadow 0.2s; }
-.rec-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-.rec-card.best { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
-.rec-card .rc-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-.rec-card .rc-type { font-size: 15px; font-weight: 700; margin-top: 6px; }
-.rec-card .rc-cpp { font-size: 24px; font-weight: 800; letter-spacing: -1px; margin-top: 4px; }
-.rec-card .rc-cpp small { font-size: 13px; font-weight: 500; color: var(--text-muted); }
-.rec-card .rc-value { font-size: 14px; font-weight: 600; margin-top: 4px; color: var(--success); }
-.rec-card .rc-reason { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+.warning-list {
+  display: grid;
+  gap: 12px;
+}
+.warning-card {
+  border: 1px solid rgba(255,77,106,0.3);
+  border-radius: 16px;
+  background: rgba(255,77,106,0.08);
+  padding: 16px;
+}
+.warning-card h3 {
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.warning-card p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
+.expired-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,77,106,0.16);
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 700;
+}
 
-/* Per-account detail */
-.account-section { margin-bottom: 20px; }
-.account-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
-.account-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 10px; }
-.account-card .ac-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.account-card .ac-program { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.account-card .ac-balance { font-size: 14px; color: var(--text-muted); font-weight: 600; }
-.type-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.rec-card {
+  border: 1px solid rgba(40,42,54,0.88);
+  border-radius: 20px;
+  padding: 18px;
+  background: rgba(12,13,18,0.5);
+  display: grid;
+  gap: 10px;
+}
+.rec-card.featured {
+  border-color: rgba(245,158,11,0.48);
+  background: linear-gradient(180deg, rgba(245,158,11,0.12), rgba(12,13,18,0.55));
+  box-shadow: 0 0 0 1px rgba(245,158,11,0.22) inset;
+}
+.rec-card.wait {
+  border-color: rgba(107,110,128,0.42);
+}
+.rec-label {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+.rec-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.rec-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--success);
+}
+.rec-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(12,13,18,0.55);
+  border: 1px solid rgba(40,42,54,0.82);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.account-list {
+  display: grid;
+  gap: 14px;
+}
+.account-card {
+  border: 1px solid rgba(40,42,54,0.88);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(12,13,18,0.5);
+}
+.account-shell {
+  padding: 18px;
+}
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+.account-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.type-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+.type-dot.flexible, .type-dot.credit_card { background: var(--card-color); }
 .type-dot.airline { background: var(--airline-color); }
 .type-dot.hotel { background: var(--hotel-color); }
-.type-dot.credit_card { background: var(--card-color); }
 .type-dot.other { background: var(--other-color); }
-.estimated-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(251,191,36,0.15); color: var(--warning); font-weight: 600; margin-left: 6px; }
+.account-balance {
+  margin-top: 14px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.account-balance strong {
+  display: block;
+  color: var(--text);
+  font-size: 30px;
+  letter-spacing: -0.05em;
+}
+.option-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+.option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.option-copy strong { display: block; font-size: 14px; }
+.option-copy span { display: block; color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+.option-track {
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(30,32,40,0.88);
+  overflow: hidden;
+}
+.option-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+.option-values {
+  text-align: right;
+  min-width: 122px;
+}
+.option-values strong {
+  display: block;
+  font-size: 14px;
+}
+.option-values span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.expand-toggle {
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(40,42,54,0.82);
+  background: rgba(30,32,40,0.76);
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+}
+.detail-panel {
+  display: none;
+  border-top: 1px solid rgba(40,42,54,0.72);
+  padding: 18px;
+  background: rgba(30,32,40,0.72);
+}
+.detail-panel.open { display: block; }
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.metric-card, .sweet-card, .household-card, .setting-card {
+  border: 1px solid rgba(40,42,54,0.82);
+  border-radius: 16px;
+  background: rgba(12,13,18,0.52);
+  padding: 16px;
+}
+.metric-card .value {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-top: 6px;
+}
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.tag {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(59,130,246,0.12);
+  color: var(--accent-light);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.tag.warn { background: rgba(251,191,36,0.15); color: var(--warning); }
+.tag.success { background: rgba(52,211,153,0.15); color: var(--success); }
 
-.redemption-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(40,42,54,0.5); }
-.redemption-row:last-child { border-bottom: none; }
-.redemption-row .rr-type { font-size: 13px; font-weight: 600; min-width: 120px; display: flex; align-items: center; gap: 6px; }
-.redemption-row .rr-bar-wrap { flex: 1; }
-.redemption-row .rr-bar { height: 20px; border-radius: 4px; position: relative; min-width: 4px; transition: width 0.5s ease; }
-.redemption-row .rr-bar.travel { background: var(--accent); }
-.redemption-row .rr-bar.cash { background: var(--success); }
-.redemption-row .rr-bar.other { background: var(--other-color); }
-.redemption-row .rr-values { min-width: 120px; text-align: right; font-size: 13px; }
-.redemption-row .rr-dollar { font-weight: 700; }
-.redemption-row .rr-equiv { font-size: 11px; color: var(--text-muted); }
-.rr-star { color: var(--gold); font-size: 14px; }
-.rr-transfer { font-size: 11px; color: var(--accent-light); }
+.sweet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.sweet-card h3 {
+  font-size: 15px;
+}
+.sweet-card p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
 
-/* Sweet spots section */
-.sweet-spots { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
-.sweet-spots h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.sweet-spot-item { padding: 10px 0; border-bottom: 1px solid rgba(40,42,54,0.5); }
-.sweet-spot-item:last-child { border-bottom: none; }
-.ss-header { display: flex; justify-content: space-between; align-items: center; }
-.ss-route { font-size: 14px; font-weight: 600; }
-.ss-cpp { font-size: 14px; font-weight: 800; color: var(--success); }
-.ss-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.settings-panel details {
+  border: 1px solid rgba(40,42,54,0.88);
+  border-radius: 18px;
+  background: rgba(12,13,18,0.44);
+  overflow: hidden;
+}
+.settings-panel summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 18px;
+  font-weight: 700;
+}
+.settings-panel summary::-webkit-details-marker { display: none; }
+.settings-body {
+  padding: 0 18px 18px;
+  display: grid;
+  gap: 14px;
+}
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.settings-grid .field, .household-form-grid .field {
+  display: grid;
+  gap: 6px;
+}
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+}
+.field input, .field select {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(40,42,54,0.92);
+  background: rgba(12,13,18,0.84);
+  color: var(--text);
+  padding: 12px 14px;
+}
+.caps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.caps-grid .field label {
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+.household-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr auto;
+  gap: 10px;
+  align-items: end;
+}
+.household-list {
+  display: grid;
+  gap: 10px;
+}
+.household-card h3 {
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.household-card p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
 
-/* Settings */
-.settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
-.settings-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(40,42,54,0.5); }
-.setting-row:last-child { border-bottom: none; }
-.setting-label { font-size: 14px; font-weight: 600; }
-.setting-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.toggle { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle .slider { position: absolute; inset: 0; background: var(--border); border-radius: 14px; cursor: pointer; transition: background 0.3s; }
-.toggle .slider::before { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform 0.3s; }
-.toggle input:checked + .slider { background: var(--accent); }
-.toggle input:checked + .slider::before { transform: translateX(20px); }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  padding: 11px 15px;
+  cursor: pointer;
+  font: inherit;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-light); }
+.btn-secondary { background: rgba(12,13,18,0.72); border-color: var(--border); color: var(--text); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn-danger { background: rgba(255,77,106,0.1); border-color: rgba(255,77,106,0.3); color: var(--danger); }
 
-/* Data freshness */
-.freshness { text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted); }
+.freshness {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 4px 0 12px;
+}
 
-/* Empty state */
-.empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
-.empty-state .emoji { font-size: 56px; margin-bottom: 16px; }
-.empty-state h3 { font-size: 18px; color: var(--text); font-weight: 700; margin-bottom: 6px; }
-.empty-state p { font-size: 14px; line-height: 1.6; max-width: 340px; margin: 0 auto; }
-.empty-state a { color: var(--accent-light); text-decoration: none; font-weight: 600; }
-.empty-state a:hover { text-decoration: underline; }
+.empty-state {
+  border: 1px dashed rgba(40,42,54,0.9);
+  border-radius: 18px;
+  padding: 28px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.empty-state strong { display: block; color: var(--text); margin-bottom: 6px; }
 
-/* Grayed-out zero balance */
-.zero-balance { opacity: 0.4; }
+@media (max-width: 980px) {
+  .hero-grid, .recommendation-grid, .settings-grid, .caps-grid, .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .recommendation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .recommendation-grid .featured { grid-column: 1 / -1; }
+  .household-form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767px) {
+  .container, .app-nav-inner { width: calc(100vw - 24px); }
+  .page-header { flex-direction: column; align-items: flex-start; padding-top: 28px; }
+  .mode-pill { min-width: 136px; }
+  .recommendation-grid, .caps-grid { grid-template-columns: 1fr; }
+  .option-row, .comparison-row, .delta-bar {
+    grid-template-columns: 1fr;
+  }
+  .option-values, .delta-bar > :last-child { text-align: left; min-width: 0; }
+}
 </style>
 </head>
 <body>
-
-<header>
-  <div>
-    <h1>Value Advisor</h1>
-    <p>Get the most from your rewards</p>
+<nav class="app-nav">
+  <div class="app-nav-inner">
+    <span class="nav-brand">Osaka</span>
+    <div class="nav-links">
+      <a href="index.html">Tracker</a>
+      <a href="value.html" class="active">Advisor</a>
+    </div>
   </div>
-  <a href="index.html" class="back-link">Rewards Tracker</a>
+</nav>
+
+<header class="container page-header">
+  <div>
+    <div class="eyebrow">Decision Layer</div>
+    <h1>Value advice that respects how you actually redeem.</h1>
+    <p>Modes, WTP caps, and household context change the answer. This page turns raw points math into the recommendation you would actually follow.</p>
+  </div>
+  <a class="subnav-link" href="index.html">Back to tracker &rarr;</a>
 </header>
 
-<div class="container" id="app"></div>
+<main class="container stack" id="app"></main>
 
+<script src="programs.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════════
-// STATIC VALUATION DATASET — March 2026
-// Sources: TPG, NerdWallet, Upgraded Points, AwardWallet
-// ═══════════════════════════════════════════════════════════
+'use strict';
 
-const VALUATIONS = {
-  lastUpdated: "2026-03-17",
-  programs: {
-    // ── Flexible currencies ──
-    "Chase Ultimate Rewards": {
-      type: "flexible",
-      fallbackOptions: [
-        { type: "cash_back", cpp: 1.0, label: "Cash back" },
-        { type: "travel_portal", cpp: 1.25, label: "Chase Travel portal" },
-        { type: "pay_with_points", cpp: 0.8, label: "Pay with points" },
-        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
-        { type: "merchandise", cpp: 0.6, label: "Merchandise" }
-      ],
-      transferPartners: [
-        { partner: "World of Hyatt", ratio: "1:1", bestCpp: 2.2, sweetSpot: "Category 1-4 hotels. Park Hyatt Tokyo at 25k/night = $550+ value." },
-        { partner: "United MileagePlus", ratio: "1:1", bestCpp: 1.8, sweetSpot: "Short-haul domestic economy, Polaris business class to Europe." },
-        { partner: "Air France/KLM Flying Blue", ratio: "1:1", bestCpp: 2.1, sweetSpot: "Europe business class, monthly promo awards." },
-        { partner: "Southwest Rapid Rewards", ratio: "1:1", bestCpp: 1.4, sweetSpot: "Domestic flights, no change fees." },
-        { partner: "British Airways Avios", ratio: "1:1", bestCpp: 1.6, sweetSpot: "Short-haul partner flights, AA domestic routes." },
-        { partner: "Singapore KrisFlyer", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Suites class, first class to Asia." },
-        { partner: "Virgin Atlantic Flying Club", ratio: "1:1", bestCpp: 2.8, sweetSpot: "ANA first/business class to Japan — one of the best sweet spots." },
-        { partner: "IHG One Rewards", ratio: "1:1", bestCpp: 0.6, sweetSpot: "Low-category IHG properties." }
-      ]
-    },
-    "American Express Membership Rewards": {
-      type: "flexible",
-      fallbackOptions: [
-        { type: "cash_back", cpp: 0.6, label: "Statement credit" },
-        { type: "travel_portal", cpp: 1.0, label: "Amex Travel portal" },
-        { type: "pay_with_points", cpp: 0.7, label: "Pay with points" },
-        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
-        { type: "merchandise", cpp: 0.5, label: "Merchandise" }
-      ],
-      transferPartners: [
-        { partner: "ANA Mileage Club", ratio: "1:1", bestCpp: 3.5, sweetSpot: "Business class roundtrip to Japan for 75-88k. One of the best values in award travel." },
-        { partner: "Virgin Atlantic Flying Club", ratio: "1:1", bestCpp: 2.8, sweetSpot: "ANA first class, Delta domestic." },
-        { partner: "Air Canada Aeroplan", ratio: "1:1", bestCpp: 2.0, sweetSpot: "Star Alliance business class, stopover rules." },
-        { partner: "Singapore KrisFlyer", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Singapore Suites, first class to Asia." },
-        { partner: "British Airways Avios", ratio: "1:1", bestCpp: 1.6, sweetSpot: "Short-haul, off-peak pricing." },
-        { partner: "Delta SkyMiles", ratio: "1:1", bestCpp: 1.4, sweetSpot: "Domestic economy, flash sales." },
-        { partner: "Hilton Honors", ratio: "1:2", bestCpp: 1.0, sweetSpot: "Only during transfer bonuses (30-40% common)." },
-        { partner: "Marriott Bonvoy", ratio: "1:1", bestCpp: 1.0, sweetSpot: "Off-peak Category 1-4 properties." }
-      ]
-    },
-    "Capital One Miles": {
-      type: "flexible",
-      fallbackOptions: [
-        { type: "cash_back", cpp: 0.5, label: "Statement credit (Venture)" },
-        { type: "travel_portal", cpp: 1.0, label: "Capital One Travel" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
-      ],
-      transferPartners: [
-        { partner: "Air Canada Aeroplan", ratio: "1:1", bestCpp: 2.0, sweetSpot: "Star Alliance business class." },
-        { partner: "Turkish Miles&Smiles", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Star Alliance business class, low surcharges." },
-        { partner: "British Airways Avios", ratio: "1:1", bestCpp: 1.6, sweetSpot: "Short-haul partner flights." },
-        { partner: "Wyndham Rewards", ratio: "1:1", bestCpp: 1.2, sweetSpot: "All-inclusive resorts." }
-      ]
-    },
-    "Citi ThankYou Points": {
-      type: "flexible",
-      fallbackOptions: [
-        { type: "cash_back", cpp: 1.0, label: "Cash back" },
-        { type: "travel_portal", cpp: 1.0, label: "Citi Travel" },
-        { type: "gift_cards", cpp: 1.0, label: "Gift cards" }
-      ],
-      transferPartners: [
-        { partner: "Turkish Miles&Smiles", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Star Alliance business class, United flights." },
-        { partner: "Air France/KLM Flying Blue", ratio: "1:1", bestCpp: 2.1, sweetSpot: "Europe promo awards." },
-        { partner: "Singapore KrisFlyer", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Suites class." },
-        { partner: "Virgin Atlantic Flying Club", ratio: "1:1", bestCpp: 2.8, sweetSpot: "ANA first class to Japan." }
-      ]
-    },
-    "Bilt Rewards": {
-      type: "flexible",
-      fallbackOptions: [
-        { type: "cash_back", cpp: 0.5, label: "Statement credit" },
-        { type: "travel_portal", cpp: 1.25, label: "Bilt Travel" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
-      ],
-      transferPartners: [
-        { partner: "World of Hyatt", ratio: "1:1", bestCpp: 2.2, sweetSpot: "Category 1-4 hotels." },
-        { partner: "Air Canada Aeroplan", ratio: "1:1", bestCpp: 2.0, sweetSpot: "Star Alliance business class." },
-        { partner: "Turkish Miles&Smiles", ratio: "1:1", bestCpp: 2.5, sweetSpot: "Star Alliance business, low surcharges." },
-        { partner: "American Airlines AAdvantage", ratio: "1:1", bestCpp: 1.5, sweetSpot: "Web specials, off-peak." },
-        { partner: "United MileagePlus", ratio: "1:1", bestCpp: 1.8, sweetSpot: "Polaris business class." },
-        { partner: "IHG One Rewards", ratio: "1:1", bestCpp: 0.6, sweetSpot: "Low-category only." }
-      ]
-    },
-    // ── Airlines ──
-    "Delta SkyMiles": {
-      type: "airline",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.3, label: "Delta flights" },
-        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
-        { type: "pay_with_points", cpp: 1.0, label: "Pay with miles (SkyMiles Shopping)" },
-        { type: "merchandise", cpp: 0.7, label: "SkyMiles Marketplace" }
-      ],
-      transferPartners: []
-    },
-    "United MileagePlus": {
-      type: "airline",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.3, label: "United flights" },
-        { type: "gift_cards", cpp: 1.0, label: "Gift cards" },
-        { type: "merchandise", cpp: 0.6, label: "Merchandise" }
-      ],
-      transferPartners: []
-    },
-    "American Airlines AAdvantage": {
-      type: "airline",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.4, label: "AA flights" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" },
-        { type: "merchandise", cpp: 0.5, label: "Merchandise" }
-      ],
-      transferPartners: []
-    },
-    "Southwest Rapid Rewards": {
-      type: "airline",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.4, label: "Southwest flights" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
-      ],
-      transferPartners: []
-    },
-    "Alaska Mileage Plan": {
-      type: "airline",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.5, label: "Alaska + partner flights" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
-      ],
-      transferPartners: []
-    },
-    "JetBlue TrueBlue": {
-      type: "airline",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.3, label: "JetBlue flights" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
-      ],
-      transferPartners: []
-    },
-    // ── Hotels ──
-    "Marriott Bonvoy": {
-      type: "hotel",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 0.9, label: "Marriott hotels" },
-        { type: "gift_cards", cpp: 0.7, label: "Gift cards" },
-        { type: "merchandise", cpp: 0.4, label: "Merchandise" }
-      ],
-      transferPartners: [
-        { partner: "Airline transfers (3:1)", ratio: "3:1", bestCpp: 1.0, sweetSpot: "60k Marriott = 20k airline miles + 5k bonus." }
-      ]
-    },
-    "Hilton Honors": {
-      type: "hotel",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 0.6, label: "Hilton hotels" },
-        { type: "gift_cards", cpp: 0.5, label: "Gift cards" },
-        { type: "experiences", cpp: 0.4, label: "Experiences" }
-      ],
-      transferPartners: []
-    },
-    "World of Hyatt": {
-      type: "hotel",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 2.0, label: "Hyatt hotels" },
-        { type: "gift_cards", cpp: 0.8, label: "Gift cards" }
-      ],
-      transferPartners: []
-    },
-    "IHG One Rewards": {
-      type: "hotel",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 0.6, label: "IHG hotels" },
-        { type: "merchandise", cpp: 0.4, label: "Merchandise" }
-      ],
-      transferPartners: []
-    },
-    "Wyndham Rewards": {
-      type: "hotel",
-      fallbackOptions: [
-        { type: "travel_booking", cpp: 1.1, label: "Wyndham hotels" },
-        { type: "gift_cards", cpp: 0.7, label: "Gift cards" }
-      ],
-      transferPartners: []
-    }
-  },
-  expirationRules: {
-    "Delta SkyMiles": { expires: false },
-    "United MileagePlus": { expires: true, inactivityMonths: 18 },
-    "American Airlines AAdvantage": { expires: false },
-    "Southwest Rapid Rewards": { expires: true, inactivityMonths: 24 },
-    "Alaska Mileage Plan": { expires: true, inactivityMonths: 24 },
-    "JetBlue TrueBlue": { expires: true, inactivityMonths: 24 },
-    "Marriott Bonvoy": { expires: true, inactivityMonths: 24 },
-    "Hilton Honors": { expires: true, inactivityMonths: 15 },
-    "World of Hyatt": { expires: true, inactivityMonths: 24 },
-    "IHG One Rewards": { expires: true, inactivityMonths: 12 },
-    "Wyndham Rewards": { expires: true, inactivityMonths: 18 },
-    "Chase Ultimate Rewards": { expires: false },
-    "American Express Membership Rewards": { expires: false },
-    "Capital One Miles": { expires: false },
-    "Citi ThankYou Points": { expires: false },
-    "Bilt Rewards": { expires: false }
+var STORAGE_KEY = 'osaka_data';
+var PREFS_KEY = 'valueAdvisorPrefs';
+var HOUSEHOLD_KEY = 'osaka_household';
+var state = { expanded: {} };
+var DEFAULT_PREFS = {
+  mode: 'max_value',
+  interestedInTravel: true,
+  cabinPref: 'economy',
+  hotelPref: 'midrangeHotel',
+  complexityTolerance: 'medium',
+  wtpCaps: {
+    economy: 500,
+    premiumEconomy: 1000,
+    business: 2500,
+    first: 5000,
+    budgetHotel: 150,
+    midrangeHotel: 300,
+    luxuryHotel: 600,
+    resort: 800
   }
 };
+var MODE_DEFS = [
+  { key: 'max_value', label: 'Max Value', copy: 'Best possible cents-per-point.' },
+  { key: 'min_cash', label: 'Min Cash', copy: 'Lower out-of-pocket and low fees.' },
+  { key: 'simple', label: 'Simple', copy: 'Few moving parts, easier redemptions.' },
+  { key: 'travel_now', label: 'Travel Now', copy: 'Prioritize bookable options fast.' },
+  { key: 'no_travel', label: 'No Travel', copy: 'Ignore transfer-heavy travel plays.' },
+  { key: 'expiring', label: 'Expiring', copy: 'Urgency beats perfect theoretical value.' },
+  { key: 'luxury', label: 'Luxury', copy: 'Bias toward premium cabins and resorts.' }
+];
+var TYPE_COLORS = {
+  flexible: 'var(--card-color)',
+  credit_card: 'var(--card-color)',
+  airline: 'var(--airline-color)',
+  hotel: 'var(--hotel-color)',
+  other: 'var(--other-color)'
+};
 
-// ═══════════════════════════════════════════════════════════
-// WALLET READER — reads osaka-v2 localStorage
-// ═══════════════════════════════════════════════════════════
+function esc(value) {
+  var node = document.createElement('span');
+  node.textContent = value == null ? '' : String(value);
+  return node.innerHTML;
+}
+
+function formatDollars(number) {
+  return '$' + Number(number || 0).toLocaleString(undefined, {
+    minimumFractionDigits: number % 1 ? 2 : 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatPoints(number) {
+  return Number(number || 0).toLocaleString();
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function round(value, digits) {
+  var scale = Math.pow(10, digits || 0);
+  return Math.round(value * scale) / scale;
+}
+
+function deepClone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function mergePrefs(raw) {
+  var prefs = deepClone(DEFAULT_PREFS);
+  if (!raw || typeof raw !== 'object') return prefs;
+  Object.keys(raw).forEach(function (key) {
+    if (key === 'wtpCaps' && raw.wtpCaps && typeof raw.wtpCaps === 'object') {
+      Object.keys(raw.wtpCaps).forEach(function (capKey) {
+        var amount = Number(raw.wtpCaps[capKey]);
+        if (isFinite(amount) && amount > 0) prefs.wtpCaps[capKey] = amount;
+      });
+    } else if (raw[key] != null) {
+      prefs[key] = raw[key];
+    }
+  });
+  return prefs;
+}
 
 function readRewardsData() {
-  // Try osaka-v2's key first, then fallback to generic key
-  const keys = ['osaka_data', 'rewardsData'];
-  for (const key of keys) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const data = JSON.parse(raw);
-      if (!data || !Array.isArray(data.accounts)) continue;
-      return data;
-    } catch (e) {
-      console.error('[ValueAdvisor] Failed to parse ' + key + ':', e);
-      return 'corrupted';
-    }
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    var data = JSON.parse(raw);
+    if (!data || !Array.isArray(data.accounts)) return null;
+    return data;
+  } catch (error) {
+    return 'corrupted';
   }
-  return null;
 }
 
 function readPrefs() {
   try {
-    const raw = localStorage.getItem('valueAdvisorPrefs');
-    if (!raw) return { interestedInTravel: true };
-    return JSON.parse(raw);
-  } catch (e) {
-    return { interestedInTravel: true };
+    var raw = localStorage.getItem(PREFS_KEY);
+    if (!raw) return deepClone(DEFAULT_PREFS);
+    return mergePrefs(JSON.parse(raw));
+  } catch (error) {
+    return deepClone(DEFAULT_PREFS);
   }
 }
 
 function savePrefs(prefs) {
-  localStorage.setItem('valueAdvisorPrefs', JSON.stringify(prefs));
+  localStorage.setItem(PREFS_KEY, JSON.stringify(mergePrefs(prefs)));
 }
 
-// ═══════════════════════════════════════════════════════════
-// VALUATION ENGINE
-// ═══════════════════════════════════════════════════════════
-
-function getValuations(account) {
-  const prog = VALUATIONS.programs[account.program];
-  const balance = account.balance || 0;
-  const isEstimated = !prog;
-
-  const fallbackOptions = prog
-    ? prog.fallbackOptions.map(fo => ({
-        ...fo,
-        dollarValue: Math.round(balance * fo.cpp / 100)
-      }))
-    : [{ type: "cash_back", cpp: 1.0, label: "Cash back (estimated)", dollarValue: Math.round(balance / 100) }];
-
-  const bestFallback = fallbackOptions.reduce((a, b) => a.dollarValue >= b.dollarValue ? a : b, fallbackOptions[0]);
-
-  const transferPartners = (prog && prog.transferPartners)
-    ? prog.transferPartners.map(tp => ({
-        ...tp,
-        dollarValue: Math.round(balance * tp.bestCpp / 100)
-      }))
-    : [];
-
-  const allOptions = [...fallbackOptions, ...transferPartners.map(tp => ({
-    type: "transfer_partner",
-    label: tp.partner,
-    cpp: tp.bestCpp,
-    dollarValue: tp.dollarValue,
-    sweetSpot: tp.sweetSpot
-  }))];
-
-  const bestOverall = allOptions.reduce((a, b) => a.dollarValue >= b.dollarValue ? a : b, allOptions[0]);
-
-  return { fallbackOptions, bestFallback, transferPartners, bestOverall, isEstimated, allOptions };
+function normalizeHouseholdAccount(item) {
+  if (!item || typeof item !== 'object') return null;
+  var programName = item.program || getProgramNameBySlug(item.programSlug) || '';
+  var program = findProgram(programName, item.programSlug);
+  return {
+    id: typeof item.id === 'string' ? item.id : genId(),
+    memberName: typeof item.memberName === 'string' && item.memberName.trim() ? item.memberName.trim() : 'Player two',
+    program: programName,
+    programSlug: program ? program.slug : (item.programSlug || null),
+    balance: Math.max(0, Math.floor(Number(item.balance) || 0)),
+    currency: program ? program.currency : (item.currency || 'points'),
+    type: program ? program.type : (item.type || 'other')
+  };
 }
 
-function calcLeftOnTable(account) {
-  const v = getValuations(account);
-  const cashBackOption = v.fallbackOptions.find(fo => fo.type === 'cash_back') || v.bestFallback;
-  const best = v.bestOverall;
-  const gap = best.dollarValue - cashBackOption.dollarValue;
-  const gapPercent = cashBackOption.dollarValue > 0 ? Math.round((gap / cashBackOption.dollarValue) * 100) : 0;
-  return { best, cashBack: cashBackOption, gap, gapPercent };
-}
-
-function checkExpiration(account) {
-  const rule = VALUATIONS.expirationRules[account.program];
-  if (!rule || !rule.expires) return null;
-
-  // Check if account has a manually set expiration date
-  const lastUpdated = account.lastUpdated ? new Date(account.lastUpdated) : null;
-  if (!lastUpdated) return { atRisk: true, message: "Expiration risk unknown \u2014 update your last activity date.", dollarAtRisk: 0 };
-
-  const expiresAt = new Date(lastUpdated);
-  expiresAt.setMonth(expiresAt.getMonth() + rule.inactivityMonths);
-  const now = new Date();
-  const daysRemaining = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
-  const v = getValuations(account);
-  const dollarAtRisk = v.bestOverall.dollarValue;
-
-  if (daysRemaining <= 0) {
-    return { atRisk: true, expired: true, daysRemaining: 0, dollarAtRisk, message: "EXPIRED", expiresAt };
+function readHousehold() {
+  try {
+    var raw = localStorage.getItem(HOUSEHOLD_KEY);
+    if (!raw) return [];
+    var parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.map(normalizeHouseholdAccount).filter(Boolean);
+    }
+    if (parsed && Array.isArray(parsed.accounts)) {
+      return parsed.accounts.map(normalizeHouseholdAccount).filter(Boolean);
+    }
+    return [];
+  } catch (error) {
+    return [];
   }
-  if (daysRemaining <= 180) {
-    return { atRisk: true, expired: false, daysRemaining, dollarAtRisk, message: daysRemaining + " days remaining", expiresAt,
-      tips: ["Make a small purchase or earn to reset the clock", "Transfer to a non-expiring partner", "Book an award before expiration"] };
+}
+
+function saveHousehold(items) {
+  localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify(items.map(normalizeHouseholdAccount).filter(Boolean)));
+}
+
+function genId() {
+  try {
+    return crypto.randomUUID();
+  } catch (error) {
+    return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+}
+
+function getProgramEntries() {
+  return Object.keys(window.PROGRAMS.programs).map(function (name) {
+    var program = window.PROGRAMS.programs[name];
+    return {
+      name: name,
+      slug: program.slug,
+      program: program
+    };
+  }).sort(function (left, right) {
+    return left.name.localeCompare(right.name);
+  });
+}
+
+function getProgramNameBySlug(slug) {
+  var entry = getProgramEntries().find(function (item) { return item.slug === slug; });
+  return entry ? entry.name : null;
+}
+
+function findProgram(name, slug) {
+  if (slug) {
+    var bySlugName = getProgramNameBySlug(slug);
+    if (bySlugName) return Object.assign({ name: bySlugName }, window.PROGRAMS.programs[bySlugName]);
+  }
+  if (name && window.PROGRAMS.programs[name]) return Object.assign({ name: name }, window.PROGRAMS.programs[name]);
+  if (name) {
+    var match = getProgramEntries().find(function (entry) {
+      return entry.name.toLowerCase() === String(name).toLowerCase();
+    });
+    if (match) return Object.assign({ name: match.name }, match.program);
   }
   return null;
 }
 
-function cashBackEquivalence(cpp) {
-  // Assuming average earning rate of 1 point per dollar spent (simplification)
-  return (cpp).toFixed(1);
+function programFromAccount(account) {
+  return findProgram(account.program, account.programSlug);
 }
 
-// ═══════════════════════════════════════════════════════════
-// AI AGENT INTERFACE — write results to localStorage
-// ═══════════════════════════════════════════════════════════
+function typeColor(type) {
+  return TYPE_COLORS[type] || TYPE_COLORS.other;
+}
 
-function writeAgentResults(data, prefs) {
-  const accounts = data.accounts.filter(a => (a.balance || 0) > 0);
-  const portfolio = accounts.map(account => {
-    const v = getValuations(account);
-    const lot = calcLeftOnTable(account);
-    const exp = checkExpiration(account);
+function hospitalityKey(cabinType, prefs) {
+  if (cabinType === 'hotel') return prefs.hotelPref || 'midrangeHotel';
+  if (cabinType === 'midrange') return 'midrangeHotel';
+  if (cabinType === 'luxury') return 'luxuryHotel';
+  return cabinType;
+}
+
+function capKeyForCabin(cabinType, prefs) {
+  var key = hospitalityKey(cabinType, prefs);
+  if (prefs.wtpCaps[key] != null) return key;
+  return null;
+}
+
+function applyWTP(rawValue, cabinType, prefs) {
+  var key = capKeyForCabin(cabinType, prefs);
+  if (!key) return round(rawValue, 0);
+  var cap = Number(prefs.wtpCaps[key]);
+  if (!isFinite(cap) || cap <= 0) return round(rawValue, 0);
+  if (rawValue <= cap) return round(rawValue, 0);
+  return round(cap + (rawValue - cap) * 0.35, 0);
+}
+
+function calcNetCpp(balance, bestCpp, surchargeData) {
+  var surcharges = surchargeData && surchargeData.surcharges || 'low';
+  var availability = surchargeData && surchargeData.availability || 'high';
+  var flexibility = surchargeData && surchargeData.flexibility || 'medium';
+  var surchargePenalty = { low: 0.02, medium: 0.11, high: 0.24 }[surcharges] || 0;
+  var availabilityPenalty = { high: 0, medium: 0.04, low: 0.1 }[availability] || 0;
+  var flexibilityBonus = { high: 0.05, medium: 0.02, low: 0 }[flexibility] || 0;
+  return round(Math.max(0.3, bestCpp * (1 - surchargePenalty - availabilityPenalty + flexibilityBonus)), 2);
+}
+
+function complexityLevel(option) {
+  if (option.kind === 'transfer_partner') {
+    if (option.availability === 'low' || option.flexibility === 'low') return 'high';
+    return 'medium';
+  }
+  if (option.type === 'cash_back' || option.type === 'gift_cards' || option.type === 'travel_booking') return 'low';
+  return 'medium';
+}
+
+function complexityScore(level) {
+  return { low: 1, medium: 0.7, high: 0.4 }[level] || 0.7;
+}
+
+function availabilityScore(level) {
+  return { high: 1, medium: 0.72, low: 0.42 }[level] || 0.72;
+}
+
+function flexibilityScore(level) {
+  return { high: 1, medium: 0.72, low: 0.44 }[level] || 0.72;
+}
+
+function surchargeScore(level) {
+  return { low: 1, medium: 0.65, high: 0.32 }[level] || 0.65;
+}
+
+function preferenceFit(cabinType, prefs) {
+  if (!cabinType || cabinType === 'cash') return 0.82;
+  if (cabinType.indexOf('Hotel') > -1 || cabinType === 'resort') {
+    var hotelRank = { budgetHotel: 1, midrangeHotel: 2, luxuryHotel: 3, resort: 4 };
+    var desiredHotel = hotelRank[prefs.hotelPref || 'midrangeHotel'] || 2;
+    var actualHotel = hotelRank[cabinType] || desiredHotel;
+    return clamp(1 - Math.abs(desiredHotel - actualHotel) * 0.18, 0.34, 1);
+  }
+  var cabinRank = { economy: 1, premiumEconomy: 2, business: 3, first: 4 };
+  var desiredCabin = cabinRank[prefs.cabinPref || 'economy'] || 1;
+  var actualCabin = cabinRank[cabinType] || desiredCabin;
+  return clamp(1 - Math.abs(desiredCabin - actualCabin) * 0.2, 0.3, 1);
+}
+
+function luxuryFit(cabinType) {
+  return { economy: 0.2, premiumEconomy: 0.45, business: 0.85, first: 1, budgetHotel: 0.2, midrangeHotel: 0.45, luxuryHotel: 0.9, resort: 1 }[cabinType] || 0.25;
+}
+
+function normalizeBaseOption(option, floor, prefs) {
+  var floorValue = floor ? floor.adjustedValue : option.adjustedValue;
+  var liftRatio = floorValue > 0 ? (option.adjustedValue - floorValue) / floorValue : 0;
+  var valueComponent = clamp(55 + liftRatio * 45, 0, 100);
+  var simplicityComponent = complexityScore(option.complexity) * 100;
+  var availabilityComponent = availabilityScore(option.availability) * 100;
+  var flexibilityComponent = flexibilityScore(option.flexibility) * 100;
+  var preferenceComponent = preferenceFit(option.cabinType, prefs) * 100;
+  var surchargeComponent = surchargeScore(option.surcharges) * 100;
+  var baseScore = valueComponent * 0.38 + simplicityComponent * 0.16 + availabilityComponent * 0.16 + flexibilityComponent * 0.12 + preferenceComponent * 0.1 + surchargeComponent * 0.08;
+  if (option.householdBalance > 0) baseScore += 4;
+  return Object.assign({}, option, {
+    floorValue: floorValue,
+    liftRatio: round(liftRatio, 3),
+    baseScore: round(baseScore, 1)
+  });
+}
+
+function scoreBFB(option, floor, prefs, mode) {
+  return normalizeBaseOption(option, floor, prefs);
+}
+
+function rankByMode(scoredOptions, mode) {
+  return scoredOptions.map(function (option) {
+    var score = option.baseScore;
+    switch (mode) {
+      case 'max_value':
+        score += option.liftRatio * 32 + (option.kind === 'transfer_partner' ? 6 : 0);
+        break;
+      case 'min_cash':
+        score += surchargeScore(option.surcharges) * 22 + (option.isNonTravel ? 12 : 0) + availabilityScore(option.availability) * 8;
+        score -= option.surcharges === 'high' ? 12 : 0;
+        break;
+      case 'simple':
+        score += complexityScore(option.complexity) * 28 + (option.isSimple ? 18 : -12);
+        break;
+      case 'travel_now':
+        score += availabilityScore(option.availability) * 28 + flexibilityScore(option.flexibility) * 10;
+        score -= option.availability === 'low' ? 16 : 0;
+        break;
+      case 'no_travel':
+        score += option.isNonTravel ? 34 : -28;
+        score += option.isSimple ? 10 : 0;
+        break;
+      case 'expiring':
+        score += option.urgencyBoost || 0;
+        score += option.isSimple ? 14 : 0;
+        break;
+      case 'luxury':
+        score += luxuryFit(option.cabinType) * 34 + (option.kind === 'transfer_partner' ? 6 : 0);
+        break;
+    }
+    return Object.assign({}, option, { modeScore: round(score, 1) });
+  }).sort(function (left, right) {
+    return right.modeScore - left.modeScore;
+  });
+}
+
+function fallbackCabinType(program, fallbackType, prefs) {
+  if (fallbackType === 'cash_back' || fallbackType === 'gift_cards' || fallbackType === 'merchandise') return 'cash';
+  if (program && program.type === 'hotel') return program.cpp >= 1.5 ? 'luxuryHotel' : 'midrangeHotel';
+  return prefs.cabinPref || 'economy';
+}
+
+function buildFallbackOptions(account, program, prefs, householdBalance) {
+  var fallbackOptions = program && Array.isArray(program.fallbackOptions) && program.fallbackOptions.length
+    ? program.fallbackOptions
+    : [{ type: 'cash_back', cpp: account.cpp || 1, label: 'Cash back' }];
+  return fallbackOptions.map(function (item) {
+    var rawValue = account.balance * item.cpp / 100;
+    var cabinType = fallbackCabinType(program, item.type, prefs);
+    var adjustedValue = item.type === 'cash_back' || item.type === 'gift_cards' || item.type === 'merchandise'
+      ? rawValue
+      : applyWTP(rawValue, cabinType, prefs);
     return {
-      currency: account.program,
-      balance: account.balance,
-      fallback_options: v.fallbackOptions.map(fo => ({ type: fo.type, cpp: fo.cpp, dollar_value: fo.dollarValue })),
-      recommended_option: v.bestOverall.type === 'transfer_partner'
-        ? { type: "transfer_partner_award", program: v.bestOverall.label, best_cpp: v.bestOverall.cpp,
-            dollar_value: v.bestOverall.dollarValue, value_over_floor: v.bestFallback.dollarValue > 0
-              ? +((v.bestOverall.dollarValue - v.bestFallback.dollarValue) / v.bestFallback.dollarValue).toFixed(2) : 0,
-            reason: v.bestOverall.sweetSpot || ("beats fallback by " + lot.gapPercent + "%") }
-        : { type: v.bestOverall.type, cpp: v.bestOverall.cpp, dollar_value: v.bestOverall.dollarValue,
-            reason: "best available option" },
-      alternatives: v.allOptions.filter(o => o !== v.bestOverall).slice(0, 3).map(o => ({
-        type: o.type, label: o.label, cpp: o.cpp, dollar_value: o.dollarValue, reason: o.sweetSpot || ""
-      })),
-      expiration_warning: exp ? { at_risk: exp.atRisk, days_remaining: exp.daysRemaining, dollar_at_risk: exp.dollarAtRisk } : null,
-      left_on_table: { gap: lot.gap, percent: lot.gapPercent }
+      id: account.id + '-fallback-' + item.type,
+      accountId: account.id,
+      accountProgram: account.program,
+      kind: 'fallback',
+      type: item.type,
+      label: item.label,
+      rawCpp: round(item.cpp, 2),
+      netCpp: round(item.cpp, 2),
+      rawValue: round(rawValue, 0),
+      adjustedValue: round(adjustedValue, 0),
+      cabinType: cabinType,
+      surcharges: 'low',
+      availability: 'high',
+      flexibility: item.type === 'travel_portal' ? 'medium' : 'high',
+      complexity: item.type === 'travel_portal' ? 'medium' : 'low',
+      sweetSpot: '',
+      isTravel: item.type.indexOf('travel') === 0 || item.type === 'travel_booking' || item.type === 'pay_with_points',
+      isSimple: true,
+      isNonTravel: item.type === 'cash_back' || item.type === 'gift_cards' || item.type === 'merchandise',
+      householdBalance: householdBalance || 0,
+      urgencyBoost: 0
     };
   });
+}
 
-  const totalBest = portfolio.reduce((s, p) => s + (p.recommended_option.dollar_value || 0), 0);
-  const totalCashBack = portfolio.reduce((s, p) => {
-    const cb = p.fallback_options.find(fo => fo.type === 'cash_back');
-    return s + (cb ? cb.dollar_value : 0);
+function buildTransferOptions(account, program, prefs, householdBalance) {
+  if (!program || !Array.isArray(program.transferPartners) || !program.transferPartners.length) return [];
+  return program.transferPartners.map(function (partner) {
+    var netCpp = calcNetCpp(account.balance, partner.bestCpp, partner);
+    var rawValue = account.balance * partner.bestCpp / 100;
+    var adjustedValue = applyWTP(account.balance * netCpp / 100, partner.cabinType, prefs);
+    var transferShape = {
+      kind: 'transfer_partner',
+      availability: partner.availability,
+      flexibility: partner.flexibility
+    };
+    return {
+      id: account.id + '-transfer-' + partner.partner,
+      accountId: account.id,
+      accountProgram: account.program,
+      kind: 'transfer_partner',
+      type: 'transfer_partner',
+      label: partner.partner,
+      rawCpp: round(partner.bestCpp, 2),
+      netCpp: netCpp,
+      rawValue: round(rawValue, 0),
+      adjustedValue: round(adjustedValue, 0),
+      cabinType: partner.cabinType,
+      surcharges: partner.surcharges,
+      availability: partner.availability,
+      flexibility: partner.flexibility,
+      complexity: complexityLevel(transferShape),
+      sweetSpot: partner.sweetSpot,
+      ratio: partner.ratio,
+      isTravel: true,
+      isSimple: false,
+      isNonTravel: false,
+      householdBalance: householdBalance || 0,
+      urgencyBoost: 0
+    };
+  });
+}
+
+function checkExpiration(account) {
+  var rule = window.PROGRAMS.expirationRules[account.program];
+  if (!rule || !rule.expires) return null;
+  if (!account.lastUpdated) return { atRisk: true, expired: false, daysRemaining: null, message: 'Unknown last activity date.' };
+  var lastUpdated = new Date(account.lastUpdated);
+  if (isNaN(lastUpdated.getTime())) return { atRisk: true, expired: false, daysRemaining: null, message: 'Unknown last activity date.' };
+  var expiresAt = new Date(lastUpdated);
+  expiresAt.setMonth(expiresAt.getMonth() + rule.inactivityMonths);
+  var daysRemaining = Math.ceil((expiresAt.getTime() - Date.now()) / 86400000);
+  if (daysRemaining <= 0) return { atRisk: true, expired: true, daysRemaining: 0, message: 'Expired', expiresAt: expiresAt.toISOString().split('T')[0] };
+  if (daysRemaining <= 180) {
+    return { atRisk: true, expired: false, daysRemaining: daysRemaining, message: daysRemaining + ' days remaining', expiresAt: expiresAt.toISOString().split('T')[0] };
+  }
+  return null;
+}
+
+function analyzeAccount(rawAccount, prefs, household) {
+  var account = Object.assign({}, rawAccount);
+  account.balance = Math.max(0, Number(account.balance) || 0);
+  account.cpp = Number(account.cpp) || 1;
+  var program = programFromAccount(account);
+  var householdBalance = household.filter(function (member) {
+    return member.programSlug && account.programSlug && member.programSlug === account.programSlug;
+  }).reduce(function (sum, member) {
+    return sum + member.balance;
   }, 0);
-
-  const result = {
-    generatedAt: new Date().toISOString(),
-    userPreferences: prefs,
-    portfolio,
-    totalPortfolioValue: { best: totalBest, cashBack: totalCashBack },
-    leftOnTableTotal: totalBest - totalCashBack
+  var fallbackOptions = buildFallbackOptions(account, program, prefs, householdBalance);
+  var cashFloor = fallbackOptions.find(function (option) { return option.type === 'cash_back'; }) || fallbackOptions[0];
+  var transferOptions = prefs.interestedInTravel === false ? [] : buildTransferOptions(account, program, prefs, householdBalance);
+  var expiration = checkExpiration(account);
+  var urgencyBoost = expiration && expiration.atRisk ? (expiration.expired ? 24 : 16) : 0;
+  var options = fallbackOptions.concat(transferOptions).map(function (option) {
+    option.urgencyBoost = urgencyBoost + (option.isSimple ? 6 : 0) + availabilityScore(option.availability) * 4;
+    return option;
+  });
+  var scored = rankByMode(options.map(function (option) {
+    return scoreBFB(option, cashFloor, prefs, prefs.mode);
+  }), prefs.mode);
+  var bestOption = scored[0] || cashFloor;
+  var bestSimple = scored.find(function (option) { return option.isSimple; }) || bestOption;
+  var bestNonTravel = scored.find(function (option) { return option.isNonTravel; }) || bestSimple;
+  var gapValue = Math.max(0, round(bestOption.adjustedValue - cashFloor.adjustedValue, 0));
+  var gapPercent = cashFloor.adjustedValue > 0 ? round(gapValue / cashFloor.adjustedValue * 100, 0) : 0;
+  return {
+    account: account,
+    program: program,
+    householdBalance: householdBalance,
+    floorOption: cashFloor,
+    bestOption: bestOption,
+    bestSimple: bestSimple,
+    bestNonTravel: bestNonTravel,
+    options: scored,
+    fallbackOptions: fallbackOptions,
+    transferOptions: transferOptions,
+    expiration: expiration,
+    leftOnTable: {
+      gap: gapValue,
+      gapPercent: gapPercent
+    }
   };
+}
 
+function buildAnalysis(data, prefs, household) {
+  var accounts = (data.accounts || []).map(function (account) {
+    return analyzeAccount(account, prefs, household);
+  });
+  var active = accounts.filter(function (item) { return item.account.balance > 0; });
+  var totalBest = active.reduce(function (sum, item) { return sum + item.bestOption.adjustedValue; }, 0);
+  var totalFloor = active.reduce(function (sum, item) { return sum + item.floorOption.adjustedValue; }, 0);
+  var totalGap = Math.max(0, totalBest - totalFloor);
+  var allOptions = active.map(function (item) {
+    return item.options[0] ? Object.assign({ account: item.account }, item.options[0]) : null;
+  }).filter(Boolean);
+  var bestOverall = allOptions.slice().sort(function (left, right) { return right.modeScore - left.modeScore; })[0] || null;
+  var bestSimple = active.map(function (item) {
+    return Object.assign({ account: item.account }, item.bestSimple);
+  }).sort(function (left, right) { return right.modeScore - left.modeScore; })[0] || null;
+  var bestNonTravel = active.map(function (item) {
+    return Object.assign({ account: item.account }, item.bestNonTravel);
+  }).sort(function (left, right) { return right.modeScore - left.modeScore; })[0] || null;
+  var expiring = active.filter(function (item) { return item.expiration && item.expiration.atRisk; }).sort(function (left, right) {
+    return (left.expiration.daysRemaining || 9999) - (right.expiration.daysRemaining || 9999);
+  });
+  var sweetSpots = active.reduce(function (items, item) {
+    item.options.filter(function (option) {
+      return option.kind === 'transfer_partner' && option.rawCpp >= 1.8;
+    }).forEach(function (option) {
+      items.push({
+        account: item.account,
+        option: option
+      });
+    });
+    return items;
+  }, []).sort(function (left, right) {
+    return right.option.modeScore - left.option.modeScore;
+  });
+  return {
+    prefs: prefs,
+    household: household,
+    accounts: accounts,
+    activeAccounts: active,
+    totalBest: round(totalBest, 0),
+    totalFloor: round(totalFloor, 0),
+    totalGap: round(totalGap, 0),
+    bestOverall: bestOverall,
+    bestSimple: bestSimple,
+    bestNonTravel: bestNonTravel,
+    expiring: expiring,
+    sweetSpots: sweetSpots
+  };
+}
+
+function worthSavingCard(analysis) {
+  var liftPct = analysis.totalFloor > 0 ? (analysis.totalBest - analysis.totalFloor) / analysis.totalFloor : 0;
+  var urgent = analysis.expiring.some(function (item) {
+    return item.expiration && item.expiration.atRisk && (item.expiration.daysRemaining == null || item.expiration.daysRemaining <= 90);
+  });
+  if (!urgent && liftPct < 0.12) {
+    return {
+      state: 'wait',
+      title: 'Worth waiting',
+      body: 'Your best option is only ' + round(liftPct * 100, 0) + '% above floor value. Points are not under real pressure today, so patience costs very little.',
+      accent: 'muted'
+    };
+  }
+  if (!analysis.bestOverall) {
+    return {
+      state: 'wait',
+      title: 'Need more signal',
+      body: 'Add balances or travel preferences in the tracker before committing these points.',
+      accent: 'muted'
+    };
+  }
+  return {
+    state: 'use_now',
+    title: 'Strong opportunity',
+    body: analysis.bestOverall.account.program + ' is showing a meaningful edge right now via ' + analysis.bestOverall.label + '.',
+    accent: 'highlight',
+    option: analysis.bestOverall
+  };
+}
+
+function writeAgentResults(data, prefs) {
+  var household = readHousehold();
+  var analysis = buildAnalysis(data, prefs, household);
+  var result = {
+    generatedAt: new Date().toISOString(),
+    mode: prefs.mode,
+    userPreferences: prefs,
+    household: household,
+    totals: {
+      best: analysis.totalBest,
+      floor: analysis.totalFloor,
+      leftOnTable: analysis.totalGap
+    },
+    portfolio: analysis.activeAccounts.map(function (item) {
+      return {
+        program: item.account.program,
+        balance: item.account.balance,
+        bestOption: {
+          label: item.bestOption.label,
+          kind: item.bestOption.kind,
+          raw_cpp: item.bestOption.rawCpp,
+          net_cpp: item.bestOption.netCpp,
+          adjusted_value: item.bestOption.adjustedValue,
+          bfb_score: item.bestOption.modeScore,
+          sweet_spot: item.bestOption.sweetSpot || '',
+          cabin_type: item.bestOption.cabinType
+        },
+        floorOption: {
+          label: item.floorOption.label,
+          adjusted_value: item.floorOption.adjustedValue
+        },
+        leftOnTable: item.leftOnTable,
+        expiration: item.expiration,
+        householdBalance: item.householdBalance,
+        alternatives: item.options.slice(1, 4).map(function (option) {
+          return {
+            label: option.label,
+            kind: option.kind,
+            adjusted_value: option.adjustedValue,
+            bfb_score: option.modeScore,
+            wtp_adjusted: option.adjustedValue !== option.rawValue
+          };
+        })
+      };
+    })
+  };
   try {
     localStorage.setItem('valueAdvisorResults', JSON.stringify(result));
-  } catch (e) {
-    console.error('[ValueAdvisor] Failed to write agent results:', e);
+  } catch (error) {
+    // Ignore storage write failures.
   }
   return result;
 }
 
-// ═══════════════════════════════════════════════════════════
-// RENDERING
-// ═══════════════════════════════════════════════════════════
-
-function esc(str) {
-  const el = document.createElement('span');
-  el.textContent = str;
-  return el.innerHTML;
+function renderModeStrip(prefs) {
+  return '<section class="panel modes-panel" aria-label="Advisor modes">' +
+    '<div class="mini-label">Mode</div>' +
+    '<div class="section-copy">Each mode re-ranks the same option set. Switch modes when your constraints change.</div>' +
+    '<div class="mode-strip" role="tablist" aria-label="Recommendation modes">' + MODE_DEFS.map(function (mode) {
+      var active = mode.key === prefs.mode;
+      return '<button type="button" role="tab" class="mode-pill' + (active ? ' active' : '') + '" data-mode="' + mode.key + '" aria-selected="' + (active ? 'true' : 'false') + '" tabindex="' + (active ? '0' : '-1') + '">' +
+        '<strong>' + esc(mode.label) + '</strong><span>' + esc(mode.copy) + '</span></button>';
+    }).join('') + '</div>' +
+  '</section>';
 }
 
-function formatDollars(n) {
-  return '$' + n.toLocaleString();
+function renderHero(analysis) {
+  var activeCount = analysis.activeAccounts.length;
+  return '<section class="hero-grid">' +
+    '<div class="panel hero-card">' +
+      '<div class="mini-label">Best-mode portfolio value</div>' +
+      '<div class="hero-value">' + esc(formatDollars(analysis.totalBest)) + '</div>' +
+      '<div class="hero-copy">Mode: ' + esc(MODE_DEFS.find(function (mode) { return mode.key === analysis.prefs.mode; }).label) + ' across ' + activeCount + ' active account' + (activeCount === 1 ? '' : 's') + '.</div>' +
+      '<div class="summary-row">' +
+        '<div class="summary-chip">Floor value ' + esc(formatDollars(analysis.totalFloor)) + '</div>' +
+        '<div class="summary-chip">Household balances ' + analysis.household.length + '</div>' +
+        '<div class="summary-chip">Travel ' + (analysis.prefs.interestedInTravel ? 'on' : 'off') + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="panel delta-card">' +
+      '<div class="mini-label">Delta from floor</div>' +
+      '<div class="delta-figure">' + esc(formatDollars(analysis.totalGap)) + '</div>' +
+      '<div class="section-copy">This is the value gap between your current mode winners and the cash-like fallback floor.</div>' +
+      '<div class="delta-bars">' +
+        '<div class="delta-bar"><span class="mini-label">Best</span><div class="delta-track"><div class="delta-fill" style="width:100%;background:var(--gold)"></div></div><span>' + esc(formatDollars(analysis.totalBest)) + '</span></div>' +
+        '<div class="delta-bar"><span class="mini-label">Floor</span><div class="delta-track"><div class="delta-fill" style="width:' + (analysis.totalBest > 0 ? round(analysis.totalFloor / analysis.totalBest * 100, 0) : 0) + '%;background:var(--accent)"></div></div><span>' + esc(formatDollars(analysis.totalFloor)) + '</span></div>' +
+      '</div>' +
+    '</div>' +
+  '</section>';
 }
 
-function formatPoints(n) {
-  if (n >= 1000) return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k';
-  return n.toLocaleString();
+function renderLeftOnTable(analysis) {
+  if (!analysis.activeAccounts.length) return '';
+  return '<section class="panel section-panel">' +
+    '<div class="section-header"><div><div class="mini-label">Opportunity</div><h2>Left on table</h2><p class="section-copy">Where the current mode is still outperforming the cash floor by the most.</p></div></div>' +
+    '<div class="lot-grid">' + analysis.activeAccounts.map(function (item) {
+      var bestPct = item.bestOption.adjustedValue > 0 ? 100 : 0;
+      var floorPct = item.bestOption.adjustedValue > 0 ? round(item.floorOption.adjustedValue / item.bestOption.adjustedValue * 100, 0) : 0;
+      return '<article class="lot-item">' +
+        '<h3><span>' + esc(item.account.program) + '</span><span>' + esc(formatDollars(item.leftOnTable.gap)) + '</span></h3>' +
+        '<p>' + esc(item.leftOnTable.gapPercent + '% lift over the floor via ' + item.bestOption.label) + '</p>' +
+        '<div class="comparison-bar">' +
+          '<div class="comparison-row"><span class="mini-label">Winner</span><div class="comparison-track"><div class="comparison-fill" style="width:' + bestPct + '%;background:var(--gold)"></div></div><span>' + esc(formatDollars(item.bestOption.adjustedValue)) + '</span></div>' +
+          '<div class="comparison-row"><span class="mini-label">Floor</span><div class="comparison-track"><div class="comparison-fill" style="width:' + floorPct + '%;background:var(--accent)"></div></div><span>' + esc(formatDollars(item.floorOption.adjustedValue)) + '</span></div>' +
+        '</div>' +
+      '</article>';
+    }).join('') + '</div></section>';
+}
+
+function renderWarnings(analysis) {
+  if (!analysis.expiring.length) return '';
+  return '<section class="panel section-panel">' +
+    '<div class="section-header"><div><div class="mini-label">Urgency</div><h2>Expiration warnings</h2><p class="section-copy">Accounts with real inactivity pressure should usually outrank theoretical sweet spots.</p></div></div>' +
+    '<div class="warning-list">' + analysis.expiring.map(function (item) {
+      var expiration = item.expiration;
+      return '<article class="warning-card">' +
+        '<h3><span>' + esc(item.account.program) + '</span>' + (expiration.expired ? '<span class="expired-badge">Expired</span>' : '<span class="expired-badge">' + esc(expiration.message) + '</span>') + '</h3>' +
+        '<p>' + esc('Best practical option in this mode: ' + item.bestOption.label + ' worth ' + formatDollars(item.bestOption.adjustedValue)) + '</p>' +
+        '<p>' + esc('Last updated: ' + (item.account.lastUpdated || 'unknown') + (expiration.expiresAt ? ' • expected expiry ' + expiration.expiresAt : '')) + '</p>' +
+      '</article>';
+    }).join('') + '</div></section>';
+}
+
+function recCard(label, card, extraClass, featured) {
+  if (!card) return '';
+  var body = '';
+  if (card.account) {
+    body = card.account.program + ' • ' + (card.sweetSpot || 'Best fit for the current mode and constraints.');
+  } else {
+    body = card.body || '';
+  }
+  return '<article class="rec-card' + (featured ? ' featured' : '') + (extraClass ? ' ' + extraClass : '') + '">' +
+    '<div class="rec-label">' + esc(label) + '</div>' +
+    '<div class="rec-title">' + esc(card.label || card.title) + '</div>' +
+    (card.adjustedValue != null ? '<div class="rec-value">' + esc(formatDollars(card.adjustedValue)) + '</div>' : '') +
+    (card.modeScore != null ? '<div class="rec-score">BFB ' + esc(card.modeScore.toFixed(1)) + '</div>' : '') +
+    '<p class="section-copy">' + esc(body) + '</p>' +
+    (card.account ? '<p class="section-copy">' + esc(card.sweetSpot || ('Floor lift: ' + round(card.liftRatio * 100, 0) + '%')) + '</p>' : '') +
+  '</article>';
+}
+
+function renderRecommendations(analysis) {
+  var worthSaving = worthSavingCard(analysis);
+  return '<section class="panel section-panel">' +
+    '<div class="section-header"><div><div class="mini-label">Recommendations</div><h2>Decision-first cards</h2><p class="section-copy">These cards answer the question before the tables do.</p></div></div>' +
+    '<div class="recommendation-grid">' +
+      recCard('Best Overall', analysis.bestOverall, '', true) +
+      recCard('Best Simple', analysis.bestSimple, '', false) +
+      recCard('Best Non-Travel', analysis.bestNonTravel, '', false) +
+      '<article class="rec-card ' + (worthSaving.state === 'wait' ? 'wait' : '') + '">' +
+        '<div class="rec-label">Worth Saving</div>' +
+        '<div class="rec-title">' + esc(worthSaving.title) + '</div>' +
+        (worthSaving.option ? '<div class="rec-value">' + esc(formatDollars(worthSaving.option.adjustedValue)) + '</div>' : '') +
+        '<p class="section-copy">' + esc(worthSaving.body) + '</p>' +
+      '</article>' +
+    '</div>' +
+  '</section>';
+}
+
+function renderAccountOptions(item) {
+  var max = item.options.length ? item.options[0].adjustedValue : 1;
+  return item.options.slice(0, 4).map(function (option) {
+    var pct = max > 0 ? round(option.adjustedValue / max * 100, 0) : 0;
+    var color = option.kind === 'transfer_partner' ? 'var(--gold)' : (option.isNonTravel ? 'var(--success)' : 'var(--accent)');
+    return '<div class="option-row">' +
+      '<div class="option-copy"><strong>' + esc(option.label) + '</strong><span>' + esc(option.kind === 'transfer_partner' ? option.cabinType + ' • ' + option.ratio : option.type.replace(/_/g, ' ')) + '</span></div>' +
+      '<div class="option-track"><div class="option-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '<div class="option-values"><strong>' + esc(formatDollars(option.adjustedValue)) + '</strong><span>' + esc(option.netCpp.toFixed(2) + ' cpp') + '</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderAccountDetails(item) {
+  var details = '';
+  details += '<div class="detail-grid">' +
+    '<div class="metric-card"><div class="mini-label">Best option</div><div class="value">' + esc(formatDollars(item.bestOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.bestOption.label + ' • ' + item.bestOption.modeScore.toFixed(1) + ' BFB') + '</div></div>' +
+    '<div class="metric-card"><div class="mini-label">Floor option</div><div class="value">' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.floorOption.label) + '</div></div>' +
+  '</div>';
+  if (item.householdBalance > 0) {
+    details += '<div class="metric-card" style="margin-top:12px"><div class="mini-label">Household boost</div><div class="value">' + esc(formatPoints(item.householdBalance)) + '</div><div class="section-copy">Additional same-program balance available from player two.</div></div>';
+  }
+  details += '<div class="sweet-grid" style="margin-top:12px">' + item.options.slice(0, 4).map(function (option) {
+    return '<div class="sweet-card">' +
+      '<h3>' + esc(option.label) + '</h3>' +
+      '<p>' + esc(option.sweetSpot || 'Adjusted for WTP, surcharges, and booking complexity.') + '</p>' +
+      '<div class="tag-row">' +
+        '<span class="tag">' + esc(option.kind.replace('_', ' ')) + '</span>' +
+        '<span class="tag">' + esc(option.cabinType) + '</span>' +
+        '<span class="tag ' + (option.surcharges === 'high' ? 'warn' : 'success') + '">surcharges ' + esc(option.surcharges) + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('') + '</div>';
+  return details;
+}
+
+function renderByAccount(analysis) {
+  return '<section class="panel section-panel">' +
+    '<div class="section-header"><div><div class="mini-label">Portfolio</div><h2>By account</h2><p class="section-copy">Every account is scored once, then re-ranked by mode.</p></div></div>' +
+    '<div class="account-list">' + analysis.accounts.map(function (item) {
+      var expanded = !!state.expanded[item.account.id];
+      return '<article class="account-card">' +
+        '<div class="account-shell">' +
+          '<div class="account-header">' +
+            '<div><div class="account-name"><span class="type-dot ' + esc(item.account.type || 'other') + '"></span>' + esc(item.account.program) + '</div>' +
+            '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best mode winner: ' + esc(item.bestOption.label) + ' • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
+            '<div class="rec-score">BFB ' + esc(item.bestOption.modeScore.toFixed(1)) + '</div>' +
+          '</div>' +
+          '<div class="option-list">' + renderAccountOptions(item) + '</div>' +
+        '</div>' +
+        '<button type="button" class="expand-toggle" data-expand-account="' + esc(item.account.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '">' +
+          '<span>See detail and sweet spots</span><span>' + (expanded ? 'Hide' : 'Expand') + '</span></button>' +
+        '<div class="detail-panel' + (expanded ? ' open' : '') + '">' + renderAccountDetails(item) + '</div>' +
+      '</article>';
+    }).join('') + '</div>' +
+  '</section>';
+}
+
+function renderSweetSpots(analysis) {
+  if (!analysis.sweetSpots.length) return '';
+  return '<section class="panel section-panel">' +
+    '<div class="section-header"><div><div class="mini-label">Sweet spots</div><h2>Transfer opportunities</h2><p class="section-copy">Only the high-value partners survive into this list.</p></div></div>' +
+    '<div class="sweet-grid">' + analysis.sweetSpots.slice(0, 8).map(function (item) {
+      return '<article class="sweet-card">' +
+        '<h3>' + esc(item.account.program + ' → ' + item.option.label) + '</h3>' +
+        '<p>' + esc(item.option.sweetSpot || 'High-value transfer partner.') + '</p>' +
+        '<div class="tag-row">' +
+          '<span class="tag">' + esc(item.option.netCpp.toFixed(2) + ' cpp') + '</span>' +
+          '<span class="tag">' + esc(formatDollars(item.option.adjustedValue)) + '</span>' +
+          '<span class="tag ' + (item.option.availability === 'high' ? 'success' : 'warn') + '">' + esc(item.option.availability + ' availability') + '</span>' +
+        '</div>' +
+      '</article>';
+    }).join('') + '</div>' +
+  '</section>';
+}
+
+function renderHouseholdList(household) {
+  if (!household.length) {
+    return '<div class="empty-state"><strong>Add player two</strong>Household balances nudge recommendations upward when the same program can be pooled or booked toward one trip.</div>';
+  }
+  return '<div class="household-list">' + household.map(function (item) {
+    return '<article class="household-card">' +
+      '<h3><span>' + esc(item.memberName) + '</span><button type="button" class="btn btn-danger" data-remove-household="' + esc(item.id) + '">Remove</button></h3>' +
+      '<p>' + esc(item.program) + ' • ' + esc(formatPoints(item.balance)) + ' ' + esc(item.currency) + '</p>' +
+    '</article>';
+  }).join('') + '</div>';
+}
+
+function programSelectOptions() {
+  return getProgramEntries().map(function (entry) {
+    return '<option value="' + esc(entry.name) + '">' + esc(entry.name) + '</option>';
+  }).join('');
+}
+
+function renderSettings(analysis) {
+  var prefs = analysis.prefs;
+  return '<section class="panel section-panel settings-panel">' +
+    '<div class="section-header"><div><div class="mini-label">Settings</div><h2>Preference inputs</h2><p class="section-copy">These fields steer scoring and the WTP caps used to discount overly aspirational options.</p></div></div>' +
+    '<details>' +
+      '<summary>WTP, complexity, and household</summary>' +
+      '<div class="settings-body">' +
+        '<div class="settings-grid">' +
+          '<div class="setting-card field"><label for="pref-interestedInTravel">Interested in travel</label><select id="pref-interestedInTravel" data-pref="interestedInTravel"><option value="true"' + (prefs.interestedInTravel ? ' selected' : '') + '>Yes</option><option value="false"' + (!prefs.interestedInTravel ? ' selected' : '') + '>No</option></select></div>' +
+          '<div class="setting-card field"><label for="pref-complexityTolerance">Complexity tolerance</label><select id="pref-complexityTolerance" data-pref="complexityTolerance"><option value="low"' + (prefs.complexityTolerance === 'low' ? ' selected' : '') + '>Low</option><option value="medium"' + (prefs.complexityTolerance === 'medium' ? ' selected' : '') + '>Medium</option><option value="high"' + (prefs.complexityTolerance === 'high' ? ' selected' : '') + '>High</option></select></div>' +
+          '<div class="setting-card field"><label for="pref-cabinPref">Cabin preference</label><select id="pref-cabinPref" data-pref="cabinPref"><option value="economy"' + (prefs.cabinPref === 'economy' ? ' selected' : '') + '>Economy</option><option value="premiumEconomy"' + (prefs.cabinPref === 'premiumEconomy' ? ' selected' : '') + '>Premium economy</option><option value="business"' + (prefs.cabinPref === 'business' ? ' selected' : '') + '>Business</option><option value="first"' + (prefs.cabinPref === 'first' ? ' selected' : '') + '>First</option></select></div>' +
+          '<div class="setting-card field"><label for="pref-hotelPref">Hotel preference</label><select id="pref-hotelPref" data-pref="hotelPref"><option value="budgetHotel"' + (prefs.hotelPref === 'budgetHotel' ? ' selected' : '') + '>Budget</option><option value="midrangeHotel"' + (prefs.hotelPref === 'midrangeHotel' ? ' selected' : '') + '>Midrange</option><option value="luxuryHotel"' + (prefs.hotelPref === 'luxuryHotel' ? ' selected' : '') + '>Luxury</option><option value="resort"' + (prefs.hotelPref === 'resort' ? ' selected' : '') + '>Resort</option></select></div>' +
+        '</div>' +
+        '<div class="setting-card">' +
+          '<div class="mini-label">WTP caps</div>' +
+          '<div class="section-copy">If a redemption assumes you would happily pay luxury cash rates, the adjusted value soft-caps that optimism here.</div>' +
+          '<div class="caps-grid" style="margin-top:12px">' + Object.keys(prefs.wtpCaps).map(function (key) {
+            return '<div class="field"><label for="cap-' + esc(key) + '">' + esc(key) + '</label><input id="cap-' + esc(key) + '" type="number" min="1" step="10" data-wtp-key="' + esc(key) + '" value="' + esc(prefs.wtpCaps[key]) + '"></div>';
+          }).join('') + '</div>' +
+        '</div>' +
+        '<div class="setting-card">' +
+          '<div class="mini-label">Household</div>' +
+          '<div class="section-copy">Add player-two balances here. They live in a dedicated `osaka_household` key.</div>' +
+          '<form id="household-form" class="household-form-grid" style="margin-top:12px">' +
+            '<div class="field"><label for="household-name">Member</label><input id="household-name" name="memberName" type="text" placeholder="Player two"></div>' +
+            '<div class="field"><label for="household-program">Program</label><input id="household-program" name="program" type="text" list="household-program-list" placeholder="Chase Ultimate Rewards"></div>' +
+            '<div class="field"><label for="household-balance">Balance</label><input id="household-balance" name="balance" type="number" min="0" step="1" placeholder="25000"></div>' +
+            '<button type="submit" class="btn btn-primary">Add balance</button>' +
+          '</form>' +
+          '<datalist id="household-program-list">' + programSelectOptions() + '</datalist>' +
+          '<div style="margin-top:12px">' + renderHouseholdList(analysis.household) + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</details>' +
+  '</section>';
+}
+
+function renderFreshness() {
+  return '<div class="freshness">Program dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' • results saved to `valueAdvisorResults` • household key `osaka_household`</div>';
+}
+
+function renderEmptyState(title, copy) {
+  return '<section class="panel section-panel"><div class="empty-state"><strong>' + esc(title) + '</strong>' + esc(copy) + '</div></section>';
 }
 
 function render() {
-  const app = document.getElementById('app');
-  const data = readRewardsData();
-  const prefs = readPrefs();
-
+  var app = document.getElementById('app');
+  var data = readRewardsData();
   if (data === 'corrupted') {
-    app.innerHTML = '<div class="empty-state"><div class="emoji">&#9888;&#65039;</div><h3>Data could not be read</h3><p>Your rewards data appears to be corrupted. Try clearing it in the <a href="index.html">Rewards Tracker</a> and re-entering your accounts.</p></div>';
+    app.innerHTML = renderEmptyState('Data could not be read', 'Your tracker data appears corrupted. Open the tracker and export or repair the stored JSON.');
     return;
   }
-
-  if (!data || !data.accounts || data.accounts.length === 0) {
-    app.innerHTML = '<div class="empty-state"><div class="emoji">&#128176;</div><h3>No rewards data found</h3><p>Add your loyalty accounts in the <a href="index.html">Rewards Tracker</a> first, then come back here to see what they\'re worth.</p></div>';
+  if (!data || !data.accounts || !data.accounts.length) {
+    app.innerHTML = renderEmptyState('Add accounts in the tracker first', 'This page only becomes useful once `osaka_data` contains balances from the tracker.');
     return;
   }
-
-  const accounts = data.accounts;
-  const activeAccounts = accounts.filter(a => (a.balance || 0) > 0);
-  const agentResults = writeAgentResults(data, prefs);
-  const showTravel = prefs.interestedInTravel !== false;
-
-  let html = '';
-
-  // ── Hero: portfolio value ──
-  const totalBest = agentResults.totalPortfolioValue.best;
-  const totalCash = agentResults.totalPortfolioValue.cashBack;
-  const displayTotal = showTravel ? totalBest : totalCash;
-  const displayLabel = showTravel ? 'best redemption value' : 'cash back value';
-
-  html += '<div class="hero animate-in">';
-  html += '<div class="label">Your portfolio</div>';
-  html += '<div class="value">' + esc(formatDollars(displayTotal)) + '</div>';
-  html += '<div class="subtitle">at ' + esc(displayLabel) + ' across ' + esc(String(activeAccounts.length)) + ' account' + (activeAccounts.length !== 1 ? 's' : '') + '</div>';
-  if (showTravel && totalCash > 0) {
-    html += '<div class="subtitle" style="margin-top:2px">Cash back value: ' + esc(formatDollars(totalCash)) + '</div>';
+  var prefs = readPrefs();
+  var household = readHousehold();
+  var analysis = buildAnalysis(data, prefs, household);
+  writeAgentResults(data, prefs);
+  if (!analysis.activeAccounts.length) {
+    app.innerHTML = renderEmptyState('No active balances to score', 'Your accounts are present, but every balance is zero. Add points in the tracker to generate recommendations.');
+    return;
   }
-  html += '</div>';
-
-  // ── Left on table banner ──
-  const lotTotal = agentResults.leftOnTableTotal;
-  if (showTravel && lotTotal > 0) {
-    const lotPercent = totalCash > 0 ? Math.round((lotTotal / totalCash) * 100) : 0;
-    html += '<div class="left-on-table animate-in">';
-    html += '<div class="lot-title">&#9888;&#65039; Money left on the table</div>';
-    html += '<div class="lot-value">' + esc(formatDollars(lotTotal)) + '</div>';
-    html += '<div class="lot-detail">You\'re leaving ' + esc(formatDollars(lotTotal)) + ' (' + esc(String(lotPercent)) + '% more) on the table by cashing out instead of using transfer partners.</div>';
-    html += '</div>';
-  }
-
-  // ── Expiration warnings ──
-  const expirations = [];
-  for (const account of accounts) {
-    const exp = checkExpiration(account);
-    if (exp && exp.atRisk) {
-      expirations.push({ account, exp });
-    }
-  }
-  if (expirations.length > 0) {
-    expirations.sort((a, b) => (a.exp.daysRemaining || 0) - (b.exp.daysRemaining || 0));
-    for (const { account, exp } of expirations) {
-      html += '<div class="expiration-warning animate-in">';
-      html += '<div class="ew-icon">&#9200;</div>';
-      html += '<div>';
-      html += '<div class="ew-program">' + esc(account.program) + ' (' + esc(formatPoints(account.balance)) + ' ' + esc(account.currency || 'pts') + ')';
-      if (exp.expired) html += ' <span class="expired-badge">Expired</span>';
-      html += '</div>';
-      html += '<div class="ew-detail">' + esc(exp.message) + '</div>';
-      if (exp.dollarAtRisk > 0) {
-        html += '<div class="ew-value">Worth ' + esc(formatDollars(exp.dollarAtRisk)) + ' at best redemption</div>';
-      }
-      if (exp.tips) {
-        html += '<div class="ew-detail" style="margin-top:6px">';
-        for (const tip of exp.tips) html += '&bull; ' + esc(tip) + '<br>';
-        html += '</div>';
-      }
-      html += '</div></div>';
-    }
-  }
-
-  // ── Recommendation cards ──
-  html += '<div class="rec-section animate-in">';
-  html += '<h2>Recommendations</h2>';
-  html += '<div class="rec-cards">';
-
-  // Find best overall, best simple (no transfer), best non-travel
-  let bestOverallAcc = null, bestOverallVal = 0;
-  let bestSimpleAcc = null, bestSimpleVal = 0;
-  let bestNonTravelAcc = null, bestNonTravelVal = 0;
-
-  for (const account of activeAccounts) {
-    const v = getValuations(account);
-    if (v.bestOverall.dollarValue > bestOverallVal) {
-      bestOverallVal = v.bestOverall.dollarValue;
-      bestOverallAcc = { account, option: v.bestOverall, valuations: v };
-    }
-    if (v.bestFallback.dollarValue > bestSimpleVal) {
-      bestSimpleVal = v.bestFallback.dollarValue;
-      bestSimpleAcc = { account, option: v.bestFallback, valuations: v };
-    }
-    const cashOpt = v.fallbackOptions.find(fo => fo.type === 'cash_back' || fo.type === 'travel_booking');
-    if (cashOpt && cashOpt.dollarValue > bestNonTravelVal) {
-      bestNonTravelVal = cashOpt.dollarValue;
-      bestNonTravelAcc = { account, option: cashOpt, valuations: v };
-    }
-  }
-
-  const cards = showTravel
-    ? [
-        { label: "Best Overall", data: bestOverallAcc, isBest: true },
-        { label: "Best Simple", data: bestSimpleAcc, isBest: false },
-        { label: "Best Non-Travel", data: bestNonTravelAcc, isBest: false }
-      ]
-    : [
-        { label: "Best Option", data: bestNonTravelAcc || bestSimpleAcc, isBest: true },
-        { label: "Best Simple", data: bestSimpleAcc, isBest: false }
-      ];
-
-  for (const card of cards) {
-    if (!card.data) continue;
-    const d = card.data;
-    html += '<div class="rec-card' + (card.isBest ? ' best' : '') + '">';
-    html += '<div class="rc-label">' + esc(card.label) + '</div>';
-    html += '<div class="rc-type">' + esc(d.option.label || d.option.type) + '</div>';
-    html += '<div class="rc-cpp">' + esc(d.option.cpp.toFixed(1)) + '<small> cpp</small></div>';
-    html += '<div class="rc-value">' + esc(formatDollars(d.option.dollarValue)) + '</div>';
-    html += '<div class="rc-reason">' + esc(d.account.program) + ' &middot; ' + esc(formatPoints(d.account.balance)) + ' pts';
-    if (d.option.sweetSpot) html += '<br>' + esc(d.option.sweetSpot);
-    html += '</div></div>';
-  }
-  html += '</div></div>';
-
-  // ── Per-account detail ──
-  html += '<div class="account-section animate-in">';
-  html += '<h2>By Account</h2>';
-
-  for (const account of accounts) {
-    const balance = account.balance || 0;
-    const v = getValuations(account);
-    const lot = calcLeftOnTable(account);
-    const isZero = balance === 0;
-    const maxDollar = v.bestOverall.dollarValue || 1;
-
-    html += '<div class="account-card' + (isZero ? ' zero-balance' : '') + '">';
-
-    // Header
-    html += '<div class="ac-header">';
-    html += '<div class="ac-program"><span class="type-dot ' + esc(account.type || 'other') + '"></span>' + esc(account.program);
-    if (v.isEstimated) html += '<span class="estimated-badge">Estimated</span>';
-    html += '</div>';
-    html += '<div class="ac-balance">' + esc(formatPoints(balance)) + ' ' + esc(account.currency || 'pts') + '</div>';
-    html += '</div>';
-
-    if (isZero) {
-      html += '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">No balance to analyze</div>';
-      html += '</div>';
-      continue;
-    }
-
-    // Redemption rows — fallback options
-    for (const fo of v.fallbackOptions) {
-      const pct = maxDollar > 0 ? Math.round((fo.dollarValue / maxDollar) * 100) : 0;
-      const isBest = fo === v.bestOverall;
-      const barClass = fo.type.startsWith('travel') ? 'travel' : (fo.type === 'cash_back' ? 'cash' : 'other');
-      html += '<div class="redemption-row">';
-      html += '<div class="rr-type">' + (isBest ? '<span class="rr-star">&#9733;</span> ' : '') + esc(fo.label) + '</div>';
-      html += '<div class="rr-bar-wrap"><div class="rr-bar ' + barClass + '" style="width:' + pct + '%"></div></div>';
-      html += '<div class="rr-values"><div class="rr-dollar">' + esc(formatDollars(fo.dollarValue)) + '</div>';
-      html += '<div class="rr-equiv">= ' + esc(cashBackEquivalence(fo.cpp)) + '% eff.</div></div>';
-      html += '</div>';
-    }
-
-    // Transfer partners (if travel mode)
-    if (showTravel && v.transferPartners.length > 0) {
-      for (const tp of v.transferPartners) {
-        const pct = maxDollar > 0 ? Math.min(100, Math.round((tp.dollarValue / maxDollar) * 100)) : 0;
-        const isBest = v.bestOverall.label === tp.partner;
-        html += '<div class="redemption-row">';
-        html += '<div class="rr-type">' + (isBest ? '<span class="rr-star">&#9733;</span> ' : '') + '<span class="rr-transfer">&#8594; ' + esc(tp.partner) + '</span></div>';
-        html += '<div class="rr-bar-wrap"><div class="rr-bar travel" style="width:' + pct + '%"></div></div>';
-        html += '<div class="rr-values"><div class="rr-dollar">' + esc(formatDollars(tp.dollarValue)) + '</div>';
-        html += '<div class="rr-equiv">= ' + esc(cashBackEquivalence(tp.bestCpp)) + '% eff.</div></div>';
-        html += '</div>';
-      }
-    }
-
-    // Left on table for this account
-    if (showTravel && lot.gap > 0) {
-      html += '<div style="font-size:12px;color:var(--gold);padding:8px 0 0;font-weight:600">';
-      html += '&#9888;&#65039; ' + esc(formatDollars(lot.gap)) + ' more available via ' + esc(lot.best.label || lot.best.type) + ' vs cash back';
-      html += '</div>';
-    }
-
-    html += '</div>';
-  }
-  html += '</div>';
-
-  // ── Transfer partner sweet spots ──
-  if (showTravel) {
-    const allSweets = [];
-    for (const account of activeAccounts) {
-      const v = getValuations(account);
-      for (const tp of v.transferPartners) {
-        if (tp.bestCpp >= 1.8) {
-          allSweets.push({ account, partner: tp.partner, bestCpp: tp.bestCpp, sweetSpot: tp.sweetSpot, dollarValue: tp.dollarValue });
-        }
-      }
-    }
-    allSweets.sort((a, b) => b.bestCpp - a.bestCpp);
-
-    if (allSweets.length > 0) {
-      html += '<div class="sweet-spots animate-in">';
-      html += '<h3>&#127775; Your Best Transfer Sweet Spots</h3>';
-      for (const ss of allSweets.slice(0, 8)) {
-        html += '<div class="sweet-spot-item">';
-        html += '<div class="ss-header">';
-        html += '<div class="ss-route">' + esc(ss.account.program) + ' &#8594; ' + esc(ss.partner) + '</div>';
-        html += '<div class="ss-cpp">' + esc(ss.bestCpp.toFixed(1)) + ' cpp</div>';
-        html += '</div>';
-        html += '<div class="ss-detail">' + esc(ss.sweetSpot || '') + '</div>';
-        html += '<div class="ss-detail" style="color:var(--success)">Worth ' + esc(formatDollars(ss.dollarValue)) + ' with your ' + esc(formatPoints(ss.account.balance)) + ' points</div>';
-        html += '</div>';
-      }
-      html += '</div>';
-    }
-  }
-
-  // ── Settings ──
-  html += '<div class="settings-section animate-in">';
-  html += '<h3>Settings</h3>';
-  html += '<div class="setting-row">';
-  html += '<div><div class="setting-label">Interested in travel</div>';
-  html += '<div class="setting-desc">Show transfer partner recommendations and travel redemptions</div></div>';
-  html += '<label class="toggle"><input type="checkbox" id="travel-toggle"' + (showTravel ? ' checked' : '') + '><span class="slider"></span></label>';
-  html += '</div></div>';
-
-  // ── Data freshness ──
-  html += '<div class="freshness animate-in">Valuations last updated: ' + esc(VALUATIONS.lastUpdated) + ' &middot; Sources: TPG, NerdWallet, Upgraded Points</div>';
-
-  app.innerHTML = html;
-
-  // ── Event listeners ──
-  const travelToggle = document.getElementById('travel-toggle');
-  if (travelToggle) {
-    travelToggle.addEventListener('change', function() {
-      const p = readPrefs();
-      p.interestedInTravel = this.checked;
-      savePrefs(p);
-      render();
-    });
-  }
+  app.innerHTML = '' +
+    renderHero(analysis) +
+    renderModeStrip(prefs) +
+    renderLeftOnTable(analysis) +
+    renderWarnings(analysis) +
+    renderRecommendations(analysis) +
+    renderByAccount(analysis) +
+    renderSweetSpots(analysis) +
+    renderSettings(analysis) +
+    renderFreshness();
 }
 
-// ── Init ──
-document.addEventListener('DOMContentLoaded', render);
+function handleModeChange(mode) {
+  var prefs = readPrefs();
+  prefs.mode = mode;
+  savePrefs(prefs);
+  render();
+}
 
-// Re-render when localStorage changes (e.g., osaka-v2 updates in another tab)
-window.addEventListener('storage', function(e) {
-  if (e.key === 'rewardsData') render();
-});
+function handlePrefInput(target) {
+  var prefs = readPrefs();
+  var key = target.getAttribute('data-pref');
+  if (!key) return;
+  if (key === 'interestedInTravel') prefs[key] = target.value === 'true';
+  else prefs[key] = target.value;
+  savePrefs(prefs);
+  render();
+}
+
+function handleWtpInput(target) {
+  var prefs = readPrefs();
+  var key = target.getAttribute('data-wtp-key');
+  if (!key) return;
+  var value = Math.max(1, Math.floor(Number(target.value) || 0));
+  prefs.wtpCaps[key] = value;
+  savePrefs(prefs);
+  render();
+}
+
+function handleHouseholdSubmit(form) {
+  var memberName = form.memberName.value.trim() || 'Player two';
+  var programName = form.program.value.trim();
+  var balance = Math.max(0, Math.floor(Number(form.balance.value) || 0));
+  if (!programName || !balance) return false;
+  var program = findProgram(programName);
+  if (!program) {
+    window.alert('Choose a program from the shared dataset.');
+    return false;
+  }
+  var household = readHousehold();
+  household.push(normalizeHouseholdAccount({
+    id: genId(),
+    memberName: memberName,
+    program: program.name,
+    programSlug: program.slug,
+    balance: balance,
+    currency: program.currency,
+    type: program.type
+  }));
+  saveHousehold(household);
+  render();
+  return false;
+}
+
+function bindEvents() {
+  var app = document.getElementById('app');
+  app.addEventListener('click', function (event) {
+    var modeButton = event.target.closest('[data-mode]');
+    var expandButton = event.target.closest('[data-expand-account]');
+    var removeHousehold = event.target.closest('[data-remove-household]');
+    if (modeButton) {
+      handleModeChange(modeButton.getAttribute('data-mode'));
+      return;
+    }
+    if (expandButton) {
+      var id = expandButton.getAttribute('data-expand-account');
+      state.expanded[id] = !state.expanded[id];
+      render();
+      return;
+    }
+    if (removeHousehold) {
+      var household = readHousehold().filter(function (item) {
+        return item.id !== removeHousehold.getAttribute('data-remove-household');
+      });
+      saveHousehold(household);
+      render();
+    }
+  });
+  app.addEventListener('change', function (event) {
+    if (event.target.matches('[data-pref]')) {
+      handlePrefInput(event.target);
+      return;
+    }
+    if (event.target.matches('[data-wtp-key]')) {
+      handleWtpInput(event.target);
+    }
+  });
+  app.addEventListener('submit', function (event) {
+    if (event.target.id === 'household-form') {
+      event.preventDefault();
+      handleHouseholdSubmit(event.target);
+    }
+  });
+  app.addEventListener('keydown', function (event) {
+    var tab = event.target.closest('[data-mode]');
+    if (!tab) return;
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    event.preventDefault();
+    var index = MODE_DEFS.findIndex(function (mode) { return mode.key === tab.getAttribute('data-mode'); });
+    var next = event.key === 'ArrowRight' ? (index + 1) % MODE_DEFS.length : (index - 1 + MODE_DEFS.length) % MODE_DEFS.length;
+    handleModeChange(MODE_DEFS[next].key);
+    window.setTimeout(function () {
+      var button = document.querySelector('[data-mode="' + MODE_DEFS[next].key + '"]');
+      if (button) button.focus();
+    }, 20);
+  });
+  window.addEventListener('storage', function (event) {
+    if (event.key === STORAGE_KEY || event.key === PREFS_KEY || event.key === HOUSEHOLD_KEY) render();
+  });
+}
+
+window.OsakaAdvisor = {
+  DEFAULT_PREFS: DEFAULT_PREFS,
+  MODE_DEFS: MODE_DEFS,
+  readRewardsData: readRewardsData,
+  readPrefs: readPrefs,
+  savePrefs: savePrefs,
+  readHousehold: readHousehold,
+  saveHousehold: saveHousehold,
+  applyWTP: applyWTP,
+  calcNetCpp: calcNetCpp,
+  scoreBFB: scoreBFB,
+  rankByMode: rankByMode,
+  checkExpiration: checkExpiration,
+  buildAnalysis: buildAnalysis,
+  writeAgentResults: writeAgentResults,
+  render: render,
+  findProgram: findProgram
+};
+
+bindEvents();
+render();
 </script>
 </body>
 </html>

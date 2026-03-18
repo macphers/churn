@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Osaka Advisor Tests</title>
+<style>
+body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #0f1115; color: #f5f5f7; padding: 24px; }
+h1 { margin-bottom: 8px; }
+.muted { color: #8b8ea1; margin-bottom: 18px; }
+.pass { color: #34d399; }
+.fail { color: #ff4d6a; }
+.test { padding: 4px 0; }
+.summary { margin-top: 20px; font-size: 18px; font-weight: 700; padding: 12px 14px; border-radius: 8px; }
+.summary.all-pass { background: rgba(52,211,153,0.12); color: #34d399; }
+.summary.has-fail { background: rgba(255,77,106,0.12); color: #ff4d6a; }
+iframe { width: 0; height: 0; border: 0; position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<h1>Osaka Advisor Test Suite</h1>
+<p class="muted">Loads the actual advisor page, then asserts against the exported scoring helpers and rendered UI.</p>
+<div id="results"></div>
+<div id="summary"></div>
+<iframe id="advisor-frame" src="../value.html" title="advisor test frame"></iframe>
+<script>
+'use strict';
+
+var passed = 0;
+var failed = 0;
+var results = [];
+
+function assert(name, condition, detail) {
+  if (condition) {
+    passed += 1;
+    results.push('<div class="test pass">✓ ' + name + '</div>');
+  } else {
+    failed += 1;
+    results.push('<div class="test fail">✗ ' + name + (detail ? ' (' + detail + ')' : '') + '</div>');
+  }
+}
+
+function assertEqual(name, actual, expected) {
+  assert(name, actual === expected, 'got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected));
+}
+
+function renderResults() {
+  document.getElementById('results').innerHTML = results.join('');
+  var summary = document.getElementById('summary');
+  summary.className = 'summary ' + (failed ? 'has-fail' : 'all-pass');
+  summary.textContent = passed + ' passed, ' + failed + ' failed';
+}
+
+function run() {
+  var frame = document.getElementById('advisor-frame');
+  var win = frame.contentWindow;
+  var api = win.OsakaAdvisor;
+  var baseData = {
+    _version: 3,
+    accounts: [
+      {
+        id: 'acct-1',
+        program: 'Chase Ultimate Rewards',
+        programSlug: 'chase-ur',
+        type: 'flexible',
+        balance: 90000,
+        currency: 'points',
+        cpp: 2,
+        lastUpdated: '2026-02-01'
+      },
+      {
+        id: 'acct-2',
+        program: 'United MileagePlus',
+        programSlug: 'united-mp',
+        type: 'airline',
+        balance: 40000,
+        currency: 'miles',
+        cpp: 1.4,
+        lastUpdated: '2024-10-01'
+      }
+    ],
+    benefits: [],
+    profile: {
+      homeAirport: 'SFO',
+      preferredAlliances: ['Star Alliance'],
+      travelPreferences: { regions: ['Asia'], classPreference: 'business' }
+    }
+  };
+
+  win.localStorage.setItem('osaka_data', JSON.stringify(baseData));
+  win.localStorage.removeItem('valueAdvisorPrefs');
+  win.localStorage.removeItem('osaka_household');
+  win.localStorage.removeItem('valueAdvisorResults');
+
+  assert('advisor API exported', !!api);
+  assertEqual('mode list has seven entries', api.MODE_DEFS.length, 7);
+
+  var defaultPrefs = api.readPrefs();
+  assertEqual('default prefs mode is max_value', defaultPrefs.mode, 'max_value');
+  assertEqual('default prefs travel enabled', defaultPrefs.interestedInTravel, true);
+
+  api.savePrefs({ mode: 'simple', wtpCaps: { economy: 450 } });
+  var mergedPrefs = api.readPrefs();
+  assertEqual('prefs merge mode', mergedPrefs.mode, 'simple');
+  assertEqual('prefs merge keeps default business cap', mergedPrefs.wtpCaps.business, 2500);
+  assertEqual('prefs merge overrides economy cap', mergedPrefs.wtpCaps.economy, 450);
+
+  assertEqual('applyWTP below cap unchanged', api.applyWTP(400, 'economy', defaultPrefs), 400);
+  assert('applyWTP above cap discounted', api.applyWTP(4000, 'business', defaultPrefs) < 4000);
+  assertEqual('applyWTP resort uses hotel cap', api.applyWTP(900, 'resort', defaultPrefs), 835);
+
+  assert('calcNetCpp penalizes high surcharges', api.calcNetCpp(50000, 2.5, { surcharges: 'high', availability: 'low', flexibility: 'medium' }) < 2.5);
+  assert('calcNetCpp keeps low-surcharge close to best cpp', api.calcNetCpp(50000, 2.0, { surcharges: 'low', availability: 'high', flexibility: 'high' }) > 1.9);
+
+  var simpleRank = api.rankByMode([
+    { baseScore: 60, liftRatio: 0.2, kind: 'fallback', isSimple: true, isNonTravel: true, surcharges: 'low', availability: 'high', flexibility: 'high', complexity: 'low', cabinType: 'cash' },
+    { baseScore: 70, liftRatio: 0.3, kind: 'transfer_partner', isSimple: false, isNonTravel: false, surcharges: 'medium', availability: 'medium', flexibility: 'medium', complexity: 'high', cabinType: 'business' }
+  ], 'simple');
+  assertEqual('simple mode prefers simple option', simpleRank[0].kind, 'fallback');
+
+  var luxuryRank = api.rankByMode([
+    { baseScore: 70, liftRatio: 0.2, kind: 'fallback', isSimple: true, isNonTravel: false, surcharges: 'low', availability: 'high', flexibility: 'high', complexity: 'low', cabinType: 'economy' },
+    { baseScore: 68, liftRatio: 0.1, kind: 'transfer_partner', isSimple: false, isNonTravel: false, surcharges: 'medium', availability: 'medium', flexibility: 'medium', complexity: 'medium', cabinType: 'first' }
+  ], 'luxury');
+  assertEqual('luxury mode prefers premium cabin', luxuryRank[0].cabinType, 'first');
+
+  var noTravelRank = api.rankByMode([
+    { baseScore: 60, liftRatio: 0.1, kind: 'fallback', isSimple: true, isNonTravel: true, surcharges: 'low', availability: 'high', flexibility: 'high', complexity: 'low', cabinType: 'cash' },
+    { baseScore: 72, liftRatio: 0.4, kind: 'transfer_partner', isSimple: false, isNonTravel: false, surcharges: 'low', availability: 'medium', flexibility: 'medium', complexity: 'medium', cabinType: 'business' }
+  ], 'no_travel');
+  assertEqual('no travel mode prefers non-travel option', noTravelRank[0].kind, 'fallback');
+
+  assertEqual('checkExpiration ignores non-expiring Delta', api.checkExpiration({ program: 'Delta SkyMiles', lastUpdated: '2026-01-01' }), null);
+  var exp = api.checkExpiration({ program: 'United MileagePlus', lastUpdated: '2024-10-01' });
+  assert('checkExpiration flags at-risk account', !!exp && exp.atRisk);
+
+  var program = api.findProgram('Chase Ultimate Rewards');
+  assertEqual('findProgram by name returns chase slug', program.slug, 'chase-ur');
+  assertEqual('findProgram by slug returns hyatt', api.findProgram(null, 'hyatt-woh').slug, 'hyatt-woh');
+
+  assertEqual('default household is empty array', api.readHousehold().length, 0);
+  api.saveHousehold([{ memberName: 'Alex', program: 'Chase Ultimate Rewards', programSlug: 'chase-ur', balance: 25000, currency: 'points', type: 'flexible' }]);
+  assertEqual('household round trip count', api.readHousehold().length, 1);
+  assertEqual('household round trip slug', api.readHousehold()[0].programSlug, 'chase-ur');
+
+  api.savePrefs({ mode: 'max_value', interestedInTravel: true });
+  var analysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
+  assert('buildAnalysis finds active accounts', analysis.activeAccounts.length === 2);
+  assert('buildAnalysis total best beats floor', analysis.totalBest > analysis.totalFloor);
+  assert('buildAnalysis produces best overall', !!analysis.bestOverall);
+  assert('buildAnalysis finds sweet spots', analysis.sweetSpots.length > 0);
+  assertEqual('buildAnalysis carries household boost', analysis.activeAccounts[0].householdBalance, 25000);
+
+  api.savePrefs({ mode: 'no_travel', interestedInTravel: false });
+  var noTravelAnalysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
+  assert('no-travel analysis chooses fallback-style best option', noTravelAnalysis.activeAccounts[0].bestOption.kind === 'fallback');
+
+  var scored = api.scoreBFB({
+    adjustedValue: 1800,
+    rawValue: 2000,
+    kind: 'transfer_partner',
+    type: 'transfer_partner',
+    surcharges: 'medium',
+    availability: 'medium',
+    flexibility: 'high',
+    complexity: 'medium',
+    cabinType: 'business',
+    householdBalance: 0,
+    isSimple: false,
+    isNonTravel: false,
+    urgencyBoost: 0
+  }, { adjustedValue: 1200 }, api.readPrefs(), 'max_value');
+  assert('scoreBFB returns finite base score', isFinite(scored.baseScore));
+
+  api.savePrefs({ mode: 'expiring', interestedInTravel: true });
+  var expiringAnalysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
+  assert('expiring mode still produces best option', !!expiringAnalysis.activeAccounts[1].bestOption);
+
+  var results = api.writeAgentResults(baseData, api.readPrefs());
+  assertEqual('writeAgentResults stores mode', results.mode, 'expiring');
+  assert('writeAgentResults stores totals', results.totals.best > 0);
+  assert('valueAdvisorResults stored in localStorage', !!win.localStorage.getItem('valueAdvisorResults'));
+
+  win.localStorage.setItem('osaka_data', '{broken json');
+  assertEqual('readRewardsData returns corrupted sentinel', api.readRewardsData(), 'corrupted');
+  win.localStorage.setItem('osaka_data', JSON.stringify(baseData));
+
+  api.render();
+  assert('render produces mode tabs', win.document.querySelectorAll('[data-mode]').length === 7);
+  assert('render produces freshness footer', win.document.getElementById('app').textContent.indexOf('Program dataset updated') >= 0);
+  assert('render produces household section', win.document.getElementById('app').textContent.indexOf('Household') >= 0);
+
+  renderResults();
+}
+
+document.getElementById('advisor-frame').addEventListener('load', function () {
+  setTimeout(run, 80);
+});
+</script>
+</body>
+</html>
