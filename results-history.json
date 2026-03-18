@@ -1,0 +1,21 @@
+[
+  {
+    "timestamp": "2026-03-17T17:00:00Z",
+    "spec": "Osaka — Personal Credit Card Rewards Tracker",
+    "style": "marlinspike",
+    "parallel_runs": 3,
+    "total_rounds": 7,
+    "round_results": [
+      { "round": 1, "winner": "run-b", "winner_score": null, "all_scores": {} },
+      { "round": 2, "winner": "merged", "winner_score": null, "all_scores": {} },
+      { "round": 3, "winner": "run-c", "winner_score": 7.55, "all_scores": { "run-a": 7.2, "run-b": 7.1, "run-c": 7.55 } },
+      { "round": 4, "winner": "run-c", "winner_score": 8.6, "all_scores": { "run-a": 8.2, "run-b": 8.0, "run-c": 8.6 } },
+      { "round": 5, "winner": "run-a", "winner_score": 8.95, "all_scores": { "run-a": 8.95, "run-b": 8.65, "run-c": 8.75 } },
+      { "round": 6, "winner": "run-c", "winner_score": 8.55, "all_scores": { "run-a": 8.35, "run-b": 8.35, "run-c": 8.55 } },
+      { "round": 7, "winner": "run-c", "winner_score": 8.85, "all_scores": { "run-a": 8.65, "run-b": 8.65, "run-c": 8.85 } }
+    ],
+    "final_winner": "run-c",
+    "final_score": 8.85,
+    "branch": "realmm13/install-gstack"
+  }
+]
