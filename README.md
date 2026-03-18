@@ -2,28 +2,21 @@
 
 Churn is a local-first rewards portfolio for people who actively manage credit cards, airline miles, hotel points, and transferable currencies.
 
-It gives you a clean personal dashboard for balances, benefits, and redemption value today, while structuring that data so AI agents can reason about points, loyalty programs, and future trip planning workflows.
+It helps you answer a simple question: what is my rewards portfolio actually worth right now?
 
-This repository contains two connected systems:
+The app is designed for personal use, fast iteration, and eventual AI-assisted trip-planning workflows. Today it gives you a clean browser-based dashboard for balances, benefits, and value. Over time it can become the structured source of truth for more advanced redemption and travel intelligence.
 
-1. The Churn app itself, a pure HTML/CSS/JS product in `output/`
-2. Pattaya, an autonomous build-and-review pipeline with a local control surface called Mission Control
-
-If you only care about using or iterating on the app, start with `npm run dev`.
-
-## What Churn does
-
-Churn is designed to answer a simple question: what is my travel rewards portfolio actually worth right now?
+## What the app does
 
 Current product capabilities include:
 
 - Tracking loyalty accounts across airlines, hotels, and flexible bank programs
-- Storing balances, account metadata, and benefit details in a local-first data model
+- Storing balances, account metadata, and benefit details in a local-first model
 - Estimating cash-equivalent value for rewards balances
-- Surfacing a separate Value Advisor view for redemption guidance
+- Providing a separate Value Advisor view for redemption guidance
 - Keeping everything browser-local with no required backend
 
-The app is intentionally simple to run:
+The product is intentionally simple:
 
 - Pure HTML/CSS/JS
 - No framework
@@ -31,28 +24,16 @@ The app is intentionally simple to run:
 - No database
 - Browser storage via `localStorage`
 
-## Why this repo looks unusual
-
-This is not just an app repo.
-
-The app lives alongside the tooling used to generate, critique, score, and iterate on it. The repo includes the product output, the product spec, the autonomous pipeline prompts, and the local operator UI used to run and compare parallel build attempts.
-
-That split matters:
-
-- `npm run dev` is for the Churn product
-- `npm run dev:tool` is for Mission Control and the Pattaya pipeline
-
 ## Quick start
 
 ### Requirements
 
 - Node.js 22+
 - npm 10+
-- Python 3
 
 No `npm install` step is required for basic local product development because the app server uses only Node built-ins.
 
-### Run the Churn app locally
+### Run Churn locally
 
 Use a fixed port so the browser keeps the same `localStorage` origin:
 
@@ -78,17 +59,7 @@ Behavior:
 - `npm run dev -- --port 43110` is strict and will fail if `43110` is already in use
 - `npm run dev` will auto-find the next open port starting at `3000`
 
-### Run Mission Control locally
-
-Mission Control is the local UI for Pattaya configuration, pipeline monitoring, scoring, diffing, and result review.
-
-```bash
-npm run dev:tool
-```
-
-This is separate from the product app on purpose.
-
-## Data model and persistence
+## Data and persistence
 
 Churn is local-first.
 
@@ -108,24 +79,19 @@ If you want stable local data while developing, keep using the same URL consiste
 
 ```text
 .
-├── output/                    # Shippable Churn app
+├── output/
 │   ├── index.html             # Rewards Tracker
 │   ├── value.html             # Value Advisor
-│   ├── programs.js            # Shared program data
+│   ├── programs.js            # Shared reward-program data
 │   └── tests/                 # Browser-side validation pages
 ├── scripts/
-│   ├── churn-dev-server.mjs   # npm-run local server for the app
-│   ├── setup-server.py        # Mission Control / Pattaya server
-│   ├── open-local.py          # Local browser launcher helper
-│   └── send-email.py          # Result delivery for pipeline runs
-├── pipeline/                  # Pattaya phase prompts, styles, scoring
-├── docs/                      # Build notes and design docs
-├── product-spec.md            # Product source of truth
-├── CLAUDE.md                  # Pattaya orchestration instructions
+│   └── churn-dev-server.mjs   # Local dev server for the app
+├── docs/                      # Product and design notes
+├── product-spec.md            # Product direction and scope
 └── README.md
 ```
 
-## Churn product architecture
+## Product architecture
 
 The user-facing app is intentionally static and browser-native.
 
@@ -134,29 +100,12 @@ The user-facing app is intentionally static and browser-native.
 - `output/programs.js` contains shared reward-program metadata
 - State persists locally and is shared across views through browser storage
 
-The product is optimized for:
+This makes the app easy to:
 
-- Personal use
-- Fast local iteration
-- Easy static deployment
-- AI-readable structured data for future agent workflows
-
-## Pattaya and Mission Control
-
-Pattaya is the autonomous development pipeline in this repo.
-
-It takes a product spec, spawns parallel implementation runs, moves them through plan/build/review/QA/fix/score phases, and promotes the best result back into `output/`.
-
-Mission Control is the local operator UI that sits on top of that system. It handles:
-
-- Pipeline configuration
-- Email delivery configuration
-- Run monitoring
-- Round comparisons
-- Diff inspection
-- Winner selection and publish helpers
-
-If you are here to work on the Churn app itself, you can ignore most of this and stay inside `output/` plus `npm run dev`.
+- Run locally
+- Ship as a static site
+- Iterate on without tooling overhead
+- Extend with richer rewards intelligence over time
 
 ## Development workflow
 
@@ -167,26 +116,21 @@ For product work:
 3. Refresh the browser
 4. Keep the same origin if you want to preserve local test data
 
-For pipeline work:
-
-1. Run `npm run dev:tool`
-2. Open Mission Control
-3. Configure the pipeline
-4. Run the autonomous build/review loop
+The product lives in `output/`. In practice, that is where most UI and feature work should happen.
 
 ## Testing
 
 Current testing is lightweight and practical:
 
 - Browser test pages in `output/tests/`
-- Server and pipeline validation scripts in `tests/`
-- Manual local verification via fixed-port app runs
+- Local manual verification on a fixed port
+- Supporting validation scripts in `tests/`
 
-The repo is set up for fast iteration first, with pipeline QA layered on top.
+The repo is optimized for fast iteration first.
 
 ## Deployment
 
-The Churn app is easy to deploy because it is static.
+The Churn app is static, which makes deployment straightforward.
 
 Good deployment targets:
 
@@ -195,12 +139,12 @@ Good deployment targets:
 - Netlify
 - Any static host that can serve `output/`
 
-Recommended split:
+Recommended approach:
 
-- Deploy `output/` if you want a shareable product preview
-- Keep Mission Control local unless you intentionally want to expose internal pipeline tooling
+- Use `npm run dev -- --port 43110` for local development
+- Deploy `output/` when you want a shareable preview or production URL
 
-In other words: Vercel is a good fit for the product app, but it is not a substitute for a sane local development workflow.
+Vercel is a good fit for the product app, but it is not required for normal local development.
 
 ## Current constraints
 
@@ -212,7 +156,7 @@ By design, the current app does not include:
 - Cross-device persistence
 - Real-time external loyalty integrations
 
-That keeps the product fast, portable, and easy to reason about while the UX and reward model continue to evolve.
+That keeps the product fast, portable, and easy to reason about while the UX and rewards model continue to evolve.
 
 ## Roadmap direction
 
@@ -222,13 +166,8 @@ Planned and implied future work includes:
 - Transfer partner reasoning
 - Points expiration intelligence
 - Richer valuation logic
-- Potential hosted preview deployments for easier sharing
+- Hosted preview deployments for easier sharing
 
 ## Inspiration
 
-This repo borrows some of its ambition and operator-oriented framing from `gstack`, but it is focused on a different problem:
-
-- `gstack` is a general-purpose software factory
-- Churn is a rewards product repo with its own embedded factory
-
-The goal here is not just to ship a UI. It is to make the repo itself a durable operating environment for building, evaluating, and evolving that UI.
+This repository takes inspiration from product-minded, operator-friendly repos like `gstack`, but Churn is focused on a very different problem: building a durable, local-first rewards product rather than a general-purpose software factory.
