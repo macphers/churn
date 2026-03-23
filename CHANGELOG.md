@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.13.0] - 2026-03-23
+
+### Added
+- Trip Planner page (trips.html) — shows what flights and hotels your points can unlock
+- Resolver engine categorizes 27 sweet spots into Book Now / Almost There / Not Enough based on account balances and transfer paths
+- Sweet spots database (sweetSpots.json) with 15 flights and 12 hotels across 6 regions
+- Filter by type (flights/hotels), region, and free-text search
+- Transfer path receipts showing source program, ratio, and available points
+- Dark mode support matching existing design system
+- Mobile responsive layout at 375px
+- 53 new test assertions for resolver engine, rendering, and filters (trips-test.html)
+- "Trips" nav link on Tracker and Advisor pages
+
+### Fixed
+- Button padding on Advisor nav bar aligned with Tracker (11px 16px)
+
 ## [0.1.12.0] - 2026-03-18
 
 ### Added
