@@ -14,6 +14,7 @@ Current product capabilities include:
 - Storing balances, account metadata, and benefit details in a local-first model
 - Estimating cash-equivalent value for rewards balances
 - Providing a separate Value Advisor view for redemption guidance
+- Trip Planner showing which flights and hotels your points can unlock right now
 - Keeping everything browser-local with no required backend
 
 The product is intentionally simple:
@@ -82,7 +83,9 @@ If you want stable local data while developing, keep using the same URL consiste
 ├── output/
 │   ├── index.html             # Rewards Tracker
 │   ├── value.html             # Value Advisor
+│   ├── trips.html             # Trip Planner
 │   ├── programs.js            # Shared reward-program data
+│   ├── sweetSpots.json        # Curated flight/hotel redemptions
 │   └── tests/                 # Browser-side validation pages
 ├── scripts/
 │   └── churn-dev-server.mjs   # Local dev server for the app
@@ -97,7 +100,9 @@ The user-facing app is intentionally static and browser-native.
 
 - `output/index.html` is the main rewards tracker
 - `output/value.html` is the advisor view
+- `output/trips.html` is the trip planner (what can I book with my points?)
 - `output/programs.js` contains shared reward-program metadata
+- `output/sweetSpots.json` contains curated flight and hotel sweet spots
 - State persists locally and is shared across views through browser storage
 
 This makes the app easy to:
@@ -162,8 +167,8 @@ That keeps the product fast, portable, and easy to reason about while the UX and
 
 Planned and implied future work includes:
 
-- Better trip-planning and redemption recommendation flows
-- Transfer partner reasoning
+- Combined balance aggregation across transfer paths in Trip Planner
+- Transfer bonus ingestion for time-limited promotions
 - Points expiration intelligence
 - Richer valuation logic
 - Hosted preview deployments for easier sharing
