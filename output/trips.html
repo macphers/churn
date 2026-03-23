@@ -674,6 +674,11 @@ function loadAccounts() {
    RENDERING
    ══════════════════════════════════════════════════ */
 
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function formatNumber(n) {
   if (n == null) return '0';
   return Number(n).toLocaleString();
@@ -699,11 +704,11 @@ function renderTripCard(result, status) {
   if (result.bestPath) {
     var rows = '';
     if (!result.bestPath.isDirect) {
-      rows += '<div class="transfer-row"><span class="transfer-label">From</span><span class="transfer-value">' + result.bestPath.sourceName + '</span></div>';
-      rows += '<div class="transfer-row"><span class="transfer-label">Transfer to</span><span class="transfer-value">' + spot.program + '</span></div>';
-      rows += '<div class="transfer-row"><span class="transfer-label">Ratio</span><span class="transfer-value">' + result.bestPath.transferRatio + '</span></div>';
+      rows += '<div class="transfer-row"><span class="transfer-label">From</span><span class="transfer-value">' + esc(result.bestPath.sourceName) + '</span></div>';
+      rows += '<div class="transfer-row"><span class="transfer-label">Transfer to</span><span class="transfer-value">' + esc(spot.program) + '</span></div>';
+      rows += '<div class="transfer-row"><span class="transfer-label">Ratio</span><span class="transfer-value">' + esc(result.bestPath.transferRatio) + '</span></div>';
     } else {
-      rows += '<div class="transfer-row"><span class="transfer-label">Program</span><span class="transfer-value">' + spot.program + '</span></div>';
+      rows += '<div class="transfer-row"><span class="transfer-label">Program</span><span class="transfer-value">' + esc(spot.program) + '</span></div>';
     }
     rows += '<div class="transfer-row"><span class="transfer-label">Available</span><span class="transfer-value">' + formatNumber(result.available) + ' pts</span></div>';
     rows += '<div class="transfer-row"><span class="transfer-label">Required</span><span class="transfer-value">' + formatNumber(result.needed) + ' pts</span></div>';
@@ -728,12 +733,12 @@ function renderTripCard(result, status) {
 
   var cppHtml = spot.cpp_estimate ? '<div class="trip-cpp">' + spot.cpp_estimate.toFixed(1) + '\u00A2/pt</div>' : '';
   var cashHtml = spot.cash_value_estimate ? '<div class="trip-cash">~$' + formatNumber(spot.cash_value_estimate) + ' value</div>' : '';
-  var caveatHtml = spot.caveat ? '<div class="trip-caveat">' + spot.caveat + '</div>' : '';
+  var caveatHtml = spot.caveat ? '<div class="trip-caveat">' + esc(spot.caveat) + '</div>' : '';
 
-  return '<div class="trip-card ' + status + '" data-type="' + spot._type + '" data-region="' + (spot.region || '') + '" data-destination="' + (spot.destination || '').toLowerCase() + '" data-program="' + (spot.program || '').toLowerCase() + '" data-cabin="' + (spot.cabin || '') + '">' +
+  return '<div class="trip-card ' + status + '" data-type="' + esc(spot._type) + '" data-region="' + esc(spot.region || '') + '" data-destination="' + esc((spot.destination || '').toLowerCase()) + '" data-program="' + esc((spot.program || '').toLowerCase()) + '" data-cabin="' + esc(spot.cabin || '') + '">' +
     '<div class="trip-info">' +
-      '<div><span class="trip-type-icon">' + icon + '</span><span class="trip-destination">' + spot.destination + '</span></div>' +
-      '<div class="trip-route">' + (spot.route || (isHotel ? spot.program : '')) + (spot.direction === 'round_trip' ? ' (RT)' : spot.direction === 'one_way' ? ' (OW)' : '') + '</div>' +
+      '<div><span class="trip-type-icon">' + icon + '</span><span class="trip-destination">' + esc(spot.destination) + '</span></div>' +
+      '<div class="trip-route">' + esc(spot.route || (isHotel ? spot.program : '')) + (spot.direction === 'round_trip' ? ' (RT)' : spot.direction === 'one_way' ? ' (OW)' : '') + '</div>' +
       cabinOrCategory +
       transferHtml +
       progressHtml +

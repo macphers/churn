@@ -269,16 +269,16 @@
       "last_reviewed": "2026-03-23"
     },
     {
-      "id": "hyatt-bora-bora-3n",
-      "destination": "Conrad Bora Bora Nui",
-      "region": "south-pacific",
+      "id": "hyatt-kyoto-3n",
+      "destination": "Park Hyatt Kyoto",
+      "region": "asia",
       "category": 8,
       "nights": 3,
       "program": "World of Hyatt",
       "points_per_night": 30000,
       "points_required": 90000,
       "cash_value_estimate": 3000,
-      "caveat": "Hilton property bookable with Hyatt's Small Luxury Hotels partnership. Verify availability.",
+      "caveat": "Category 8. Stunning property in Higashiyama district. Very limited award availability.",
       "cpp_estimate": 3.3,
       "last_reviewed": "2026-03-23"
     },
@@ -305,7 +305,7 @@
       "points_per_night": 50000,
       "points_required": 200000,
       "cash_value_estimate": 1500,
-      "caveat": "5th night free with Hilton status. 250k gets 5 nights.",
+      "caveat": "5th night free with Hilton status. 200k gets 5 nights (pay for 4).",
       "cpp_estimate": 0.8,
       "last_reviewed": "2026-03-23"
     },
