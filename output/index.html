@@ -1282,6 +1282,7 @@ body {
       <button type="button" class="nav-tab" data-tab="benefits">Benefits</button>
       <button type="button" class="nav-tab" data-tab="profile">Profile</button>
       <button type="button" class="nav-tab" data-tab="advisor">Advisor</button>
+      <button type="button" class="nav-tab" data-tab="trips">Trips</button>
     </div>
     <div class="nav-end">
       <button type="button" class="nav-refresh" id="nav-refresh-btn" title="Refresh balances" aria-label="Refresh balances">
@@ -2397,6 +2398,10 @@ function renderDashboard(data) {
 function switchTab(tabName) {
   if (tabName === 'advisor') {
     window.location.href = 'value.html';
+    return;
+  }
+  if (tabName === 'trips') {
+    window.location.href = 'trips.html';
     return;
   }
   document.querySelectorAll('.nav-tab').forEach(function (btn) {

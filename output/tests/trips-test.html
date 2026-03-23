@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Churn Trip Planner Tests</title>
+<style>
+body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #F5F2ED; color: #1A1A1A; padding: 24px; }
+h1 { margin-bottom: 8px; }
+h2 { margin-top: 18px; margin-bottom: 6px; font-size: 14px; color: #6B6560; text-transform: uppercase; letter-spacing: 0.06em; }
+.muted { color: #6B6560; margin-bottom: 18px; }
+.pass { color: #2D7A4F; }
+.fail { color: #A63D40; }
+.test { padding: 4px 0; }
+.summary { margin-top: 20px; font-size: 18px; font-weight: 700; padding: 12px 14px; border-radius: 8px; }
+.summary.all-pass { background: rgba(45,122,79,0.12); color: #2D7A4F; }
+.summary.has-fail { background: rgba(166,61,64,0.12); color: #A63D40; }
+iframe { width: 0; height: 0; border: 0; position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<h1>Trip Planner Test Suite</h1>
+<p class="muted">Tests the resolver engine, filter logic, and rendering via a hidden iframe.</p>
+<div id="results"></div>
+<div id="summary"></div>
+<iframe id="trips-frame" src="../trips.html" title="trips test frame"></iframe>
+<script>
+'use strict';
+
+var passed = 0;
+var failed = 0;
+var results = [];
+
+function assert(name, condition, detail) {
+  if (condition) {
+    passed += 1;
+    results.push('<div class="test pass">\u2713 ' + name + '</div>');
+  } else {
+    failed += 1;
+    results.push('<div class="test fail">\u2717 ' + name + (detail ? ' (' + detail + ')' : '') + '</div>');
+  }
+}
+
+function assertEqual(name, actual, expected) {
+  assert(name, actual === expected, 'got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected));
+}
+
+function assertApprox(name, actual, expected, tolerance) {
+  tolerance = tolerance || 0.01;
+  assert(name, Math.abs(actual - expected) < tolerance, 'got ' + actual + ', expected ~' + expected);
+}
+
+function renderResults() {
+  document.getElementById('results').innerHTML = results.join('');
+  var summary = document.getElementById('summary');
+  summary.className = 'summary ' + (failed ? 'has-fail' : 'all-pass');
+  summary.textContent = passed + ' passed, ' + failed + ' failed';
+}
+
+function heading(text) {
+  results.push('<h2>' + text + '</h2>');
+}
+
+document.getElementById('trips-frame').addEventListener('load', function () {
+  var frame = document.getElementById('trips-frame');
+  var win = frame.contentWindow;
+  var TR = win.TripResolver;
+  var PROGRAMS = win.PROGRAMS;
+
+  // ─── Test Data ───────────────────────────────
+  var testSweetSpots = {
+    flights: [
+      {
+        id: 'test-flight-1',
+        destination: 'Tokyo',
+        region: 'asia',
+        route: 'US \u2192 Japan',
+        cabin: 'business',
+        direction: 'round_trip',
+        program: 'ANA Mileage Club',
+        points_required: 75000,
+        cash_value_estimate: 6000,
+        cpp_estimate: 7.7,
+        caveat: 'Test caveat'
+      },
+      {
+        id: 'test-flight-2',
+        destination: 'Paris',
+        region: 'europe',
+        route: 'US \u2192 France',
+        cabin: 'business',
+        direction: 'one_way',
+        program: 'Air France/KLM Flying Blue',
+        points_required: 55000,
+        cash_value_estimate: 3000,
+        cpp_estimate: 5.5,
+        caveat: ''
+      },
+      {
+        id: 'test-flight-3',
+        destination: 'US Domestic',
+        region: 'domestic-us',
+        route: 'US \u2192 US',
+        cabin: 'economy',
+        direction: 'round_trip',
+        program: 'United MileagePlus',
+        points_required: 25000,
+        cash_value_estimate: 400,
+        cpp_estimate: 1.6,
+        caveat: ''
+      }
+    ],
+    hotels: [
+      {
+        id: 'test-hotel-1',
+        destination: 'Park Hyatt Tokyo',
+        region: 'asia',
+        category: 7,
+        nights: 4,
+        program: 'World of Hyatt',
+        points_per_night: 25000,
+        points_required: 100000,
+        cash_value_estimate: 2400,
+        cpp_estimate: 2.4,
+        caveat: ''
+      },
+      {
+        id: 'test-hotel-2',
+        destination: 'Conrad Bali',
+        region: 'asia',
+        nights: 5,
+        program: 'Hilton Honors',
+        points_per_night: 50000,
+        points_required: 200000,
+        cash_value_estimate: 1500,
+        cpp_estimate: 0.8,
+        caveat: ''
+      }
+    ]
+  };
+
+  var programs = PROGRAMS ? PROGRAMS.programs : {};
+
+  // ─── parseRatio Tests ────────────────────────
+  heading('parseRatio');
+
+  assertEqual('1:1 ratio', TR.parseRatio('1:1'), 1);
+  assertEqual('1:2 ratio (Amex→Hilton)', TR.parseRatio('1:2'), 2);
+  assertApprox('3:1 ratio (Marriott→airline)', TR.parseRatio('3:1'), 1/3);
+  assertEqual('null ratio fallback', TR.parseRatio(null), 1);
+  assertEqual('empty string fallback', TR.parseRatio(''), 1);
+  assertEqual('malformed ratio fallback', TR.parseRatio('abc'), 1);
+  assertEqual('single number fallback', TR.parseRatio('5'), 1);
+
+  // ─── findPaths Tests ─────────────────────────
+  heading('findPaths');
+
+  // Direct airline balance
+  var directAirline = [{ program: 'ANA Mileage Club', type: 'airline', balance: 80000 }];
+  var pathsDirect = TR.findPaths(directAirline, programs, 'ANA Mileage Club');
+  assertEqual('direct airline: 1 path found', pathsDirect.length, 1);
+  assert('direct airline: isDirect', pathsDirect[0].isDirect);
+  assertEqual('direct airline: available = balance', pathsDirect[0].available, 80000);
+
+  // Direct hotel balance
+  var directHotel = [{ program: 'World of Hyatt', type: 'hotel', balance: 50000 }];
+  var pathsHotel = TR.findPaths(directHotel, programs, 'World of Hyatt');
+  assertEqual('direct hotel: 1 path found', pathsHotel.length, 1);
+  assert('direct hotel: isDirect', pathsHotel[0].isDirect);
+
+  // Flexible currency transfer path
+  var flexAcct = [{ program: 'Chase Ultimate Rewards', type: 'flexible', balance: 100000 }];
+  var pathsFlex = TR.findPaths(flexAcct, programs, 'World of Hyatt');
+  assertEqual('Chase UR → Hyatt: 1 path found', pathsFlex.length, 1);
+  assert('Chase UR → Hyatt: is NOT direct', !pathsFlex[0].isDirect);
+  assertEqual('Chase UR → Hyatt: 1:1 ratio = 100k available', pathsFlex[0].available, 100000);
+
+  // Amex MR → Hilton (1:2 ratio)
+  var amexAcct = [{ program: 'American Express Membership Rewards', type: 'flexible', balance: 100000 }];
+  var pathsHilton = TR.findPaths(amexAcct, programs, 'Hilton Honors');
+  assertEqual('Amex MR → Hilton: 1 path found', pathsHilton.length, 1);
+  assertEqual('Amex MR → Hilton: 1:2 doubles balance', pathsHilton[0].available, 200000);
+
+  // No matching program
+  var noMatch = [{ program: 'Random Program', type: 'flexible', balance: 50000 }];
+  var pathsNone = TR.findPaths(noMatch, programs, 'ANA Mileage Club');
+  assertEqual('no match: 0 paths found', pathsNone.length, 0);
+
+  // Zero balance returns no paths
+  var zeroBalance = [{ program: 'ANA Mileage Club', type: 'airline', balance: 0 }];
+  var pathsZero = TR.findPaths(zeroBalance, programs, 'ANA Mileage Club');
+  assertEqual('zero balance: 0 paths', pathsZero.length, 0);
+
+  // Multiple paths to same program (Chase UR + Amex MR → ANA via different partners)
+  var multiAcct = [
+    { program: 'American Express Membership Rewards', type: 'flexible', balance: 80000 },
+    { program: 'Chase Ultimate Rewards', type: 'flexible', balance: 50000 }
+  ];
+  // Chase UR transfers to ANA via Virgin Atlantic, not directly.
+  // Amex MR transfers to ANA directly at 1:1.
+  var pathsMulti = TR.findPaths(multiAcct, programs, 'ANA Mileage Club');
+  assert('multiple paths: at least 1 path found', pathsMulti.length >= 1);
+
+  // ─── resolveTrips Tests ──────────────────────
+  heading('resolveTrips');
+
+  // Empty accounts → all sweet spots in NOT_ENOUGH
+  var emptyResult = TR.resolveTrips([], programs, testSweetSpots);
+  assertEqual('empty accounts: bookNow empty', emptyResult.bookNow.length, 0);
+  assertEqual('empty accounts: almostThere empty', emptyResult.almostThere.length, 0);
+  assertEqual('empty accounts: all in notEnough', emptyResult.notEnough.length, 5);
+
+  // Direct airline covers flight → BOOK_NOW
+  var anaAcct = [{ program: 'ANA Mileage Club', type: 'airline', balance: 80000 }];
+  var anaResult = TR.resolveTrips(anaAcct, programs, testSweetSpots);
+  assert('direct ANA 80k: Tokyo flight in bookNow', anaResult.bookNow.some(function (r) { return r.spot.id === 'test-flight-1'; }));
+
+  // Direct hotel covers hotel → BOOK_NOW
+  var hyattAcct = [{ program: 'World of Hyatt', type: 'hotel', balance: 110000 }];
+  var hyattResult = TR.resolveTrips(hyattAcct, programs, testSweetSpots);
+  assert('direct Hyatt 110k: Park Hyatt Tokyo in bookNow', hyattResult.bookNow.some(function (r) { return r.spot.id === 'test-hotel-1'; }));
+
+  // Flexible currency transfer covers sweet spot → BOOK_NOW
+  var chaseAcct = [{ program: 'Chase Ultimate Rewards', type: 'flexible', balance: 110000 }];
+  var chaseResult = TR.resolveTrips(chaseAcct, programs, testSweetSpots);
+  assert('Chase UR 110k: Hyatt Tokyo in bookNow via transfer', chaseResult.bookNow.some(function (r) { return r.spot.id === 'test-hotel-1'; }));
+  // Verify transfer path is marked as not direct
+  var hyattBookNow = chaseResult.bookNow.filter(function (r) { return r.spot.id === 'test-hotel-1'; })[0];
+  if (hyattBookNow) {
+    assert('Chase → Hyatt: bestPath is NOT direct', !hyattBookNow.bestPath.isDirect);
+    assertEqual('Chase → Hyatt: sourceName is Chase UR', hyattBookNow.bestPath.sourceName, 'Chase Ultimate Rewards');
+  }
+
+  // Balance at 80% → ALMOST_THERE (within 30% threshold)
+  var hyattPartial = [{ program: 'World of Hyatt', type: 'hotel', balance: 80000 }];
+  var partialResult = TR.resolveTrips(hyattPartial, programs, testSweetSpots);
+  assert('Hyatt 80k/100k: Almost There', partialResult.almostThere.some(function (r) { return r.spot.id === 'test-hotel-1'; }));
+
+  // Balance at exactly 70% (boundary) → ALMOST_THERE (gap = 30% exactly)
+  var hyattBoundary = [{ program: 'World of Hyatt', type: 'hotel', balance: 70000 }];
+  var boundaryResult = TR.resolveTrips(hyattBoundary, programs, testSweetSpots);
+  assert('Hyatt 70k/100k: Almost There (boundary)', boundaryResult.almostThere.some(function (r) { return r.spot.id === 'test-hotel-1'; }));
+
+  // Balance at 50% → NOT_ENOUGH
+  var hyattHalf = [{ program: 'World of Hyatt', type: 'hotel', balance: 50000 }];
+  var halfResult = TR.resolveTrips(hyattHalf, programs, testSweetSpots);
+  assert('Hyatt 50k/100k: Not Enough', halfResult.notEnough.some(function (r) { return r.spot.id === 'test-hotel-1'; }));
+
+  // 1:2 transfer ratio doubles effective balance
+  var amexHilton = [{ program: 'American Express Membership Rewards', type: 'flexible', balance: 100000 }];
+  var hiltonResult = TR.resolveTrips(amexHilton, programs, testSweetSpots);
+  // 100k Amex × 2 = 200k Hilton, test-hotel-2 needs 200k → BOOK_NOW
+  assert('Amex 100k → Hilton 200k: bookNow', hiltonResult.bookNow.some(function (r) { return r.spot.id === 'test-hotel-2'; }));
+
+  // Multiple paths → best path selected (most points)
+  var multiAccounts = [
+    { program: 'Chase Ultimate Rewards', type: 'flexible', balance: 60000 },
+    { program: 'World of Hyatt', type: 'hotel', balance: 80000 }
+  ];
+  var multiResult = TR.resolveTrips(multiAccounts, programs, testSweetSpots);
+  var hyattTrip = null;
+  [multiResult.bookNow, multiResult.almostThere, multiResult.notEnough].forEach(function (arr) {
+    arr.forEach(function (r) { if (r.spot.id === 'test-hotel-1') hyattTrip = r; });
+  });
+  assert('multi-path: best path is direct Hyatt (80k > 60k via Chase)', hyattTrip && hyattTrip.bestPath.isDirect);
+
+  // Sort by cpp_estimate descending within category
+  var allNotEnough = TR.resolveTrips([], programs, testSweetSpots);
+  var cpps = allNotEnough.notEnough.map(function (r) { return r.spot.cpp_estimate; });
+  var isSorted = true;
+  for (var i = 1; i < cpps.length; i++) {
+    if (cpps[i] > cpps[i-1]) isSorted = false;
+  }
+  assert('not enough sorted by cpp desc', isSorted);
+
+  // ─── Rendering Tests ─────────────────────────
+  heading('Rendering');
+
+  // Check that TripResolver is exported
+  assert('TripResolver exported', !!TR);
+  assert('TripResolver.parseRatio is a function', typeof TR.parseRatio === 'function');
+  assert('TripResolver.findPaths is a function', typeof TR.findPaths === 'function');
+  assert('TripResolver.resolveTrips is a function', typeof TR.resolveTrips === 'function');
+
+  // Check PROGRAMS loaded
+  assert('PROGRAMS loaded in trips page', !!PROGRAMS);
+  assert('PROGRAMS has programs object', !!PROGRAMS.programs);
+
+  // Check page elements exist
+  var doc = win.document;
+  assert('search input exists', !!doc.getElementById('search-input'));
+  assert('filter pills exist', !!doc.getElementById('filter-pills'));
+  assert('trips content container exists', !!doc.getElementById('trips-content'));
+  assert('page title exists', !!doc.getElementById('page-title'));
+  assert('page subtitle exists', !!doc.getElementById('page-subtitle'));
+  assert('theme toggle exists', !!doc.getElementById('theme-toggle'));
+
+  // Check nav links
+  var navLinks = doc.querySelectorAll('.nav-links a');
+  assert('nav has 6 links', navLinks.length === 6);
+  var tripsLink = doc.querySelector('.nav-links a.active');
+  assert('Trips nav link is active', tripsLink && tripsLink.textContent.trim() === 'Trips');
+
+  // ─── Filter Pill Tests ───────────────────────
+  heading('Filter Pills');
+
+  var pills = doc.querySelectorAll('.filter-pill');
+  assert('filter pills rendered', pills.length > 0);
+  var allPill = doc.querySelector('.filter-pill[data-filter="all"]');
+  assert('All pill exists and is active', allPill && allPill.classList.contains('active'));
+
+  var flightPill = doc.querySelector('.filter-pill[data-filter="flight"]');
+  assert('Flights pill exists', !!flightPill);
+
+  var hotelPill = doc.querySelector('.filter-pill[data-filter="hotel"]');
+  assert('Hotels pill exists', !!hotelPill);
+
+  var asiaPill = doc.querySelector('.filter-pill[data-filter="asia"]');
+  assert('Asia pill exists', !!asiaPill);
+
+  // ─── Done ────────────────────────────────────
+  renderResults();
+});
+</script>
+</body>
+</html>

@@ -7,12 +7,15 @@
 **Depends on:** Scoring engine from Points Value Advisor plan
 **Added:** 2026-03-17
 
+## Completed
+
 ## P2 — "What Can I Afford?" Destination Browser
 **What:** Static database of ~50-100 popular routes with point requirements. Cross-reference user balances to show achievable destinations.
 **Why:** Inspires users to use points. Answers "I have 100k UR — where can I go?"
 **Effort:** L (human: ~1 week / CC: ~45 min)
 **Depends on:** Scoring engine, transfer partner database from Points Value Advisor plan
 **Added:** 2026-03-17
+**Completed:** v0.1.13.0 (2026-03-23) — Shipped as Trip Planner with 27 sweet spots, resolver engine, and tri-state categorization
 
 ## P3 — Redemption Journal
 **What:** Let users log past redemptions (program, points used, what they got, actual cash value). System learns real WTP thresholds over time.
@@ -41,6 +44,7 @@
 **Effort:** S (human: ~2 days / CC: ~30 min)
 **Depends on:** Nothing — can be done anytime
 **Added:** 2026-03-18
+**Completed:** v0.1.12.0 (2026-03-18) — DESIGN.md created with full design system spec
 
 ## Deferred from osaka-v2 CEO Review (2026-03-17)
 - Card application & approval tracking (5/24 status, signup bonus, minimum spend deadlines)
