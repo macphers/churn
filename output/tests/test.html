@@ -84,13 +84,14 @@ function run() {
   assertEqual('migrateData adds cards array', Array.isArray(migrated.accounts[0].cards), true);
   assertEqual('migrateData adds cpp', migrated.accounts[0].cpp, 2);
 
-  var repaired = api.repairAccount({ program: 'World of Hyatt', balance: 120000, cards: [{ name: 'Card', annualFee: 95, earnRates: { dining: 3 } }] });
-  assertEqual('repairAccount infers program slug', repaired.programSlug, 'hyatt-woh');
-  assertEqual('repairAccount infers hotel type', repaired.type, 'hotel');
-  assertEqual('repairAccount infers currency', repaired.currency, 'points');
-  assertEqual('repairAccount keeps card array', repaired.cards.length, 1);
-  assertEqual('calculateAccountValue uses cpp', api.calculateAccountValue({ balance: 85000, cpp: 2 }), 1700);
-  assertEqual('calculateAnnualFeeTotal sums fees', api.calculateAnnualFeeTotal({ cards: [{ annualFee: 95 }, { annualFee: 550 }] }), 645);
+	  var repaired = api.repairAccount({ program: 'World of Hyatt', balance: 120000, cards: [{ name: 'Card', annualFee: 95, earnRates: { dining: 3 } }] });
+	  assertEqual('repairAccount infers program slug', repaired.programSlug, 'hyatt-woh');
+	  assertEqual('repairAccount infers hotel type', repaired.type, 'hotel');
+	  assertEqual('repairAccount infers currency', repaired.currency, 'points');
+	  assertEqual('repairAccount keeps card array', repaired.cards.length, 1);
+	  assertEqual('repairAccount seeds last activity date', repaired.lastActivityDate, repaired.lastUpdated);
+	  assertEqual('calculateAccountValue uses cpp', api.calculateAccountValue({ balance: 85000, cpp: 2 }), 1700);
+	  assertEqual('calculateAnnualFeeTotal sums fees', api.calculateAnnualFeeTotal({ cards: [{ annualFee: 95 }, { annualFee: 550 }] }), 645);
 
   var programBySlug = api.getProgramBySlug('chase-ur');
   assertEqual('getProgramBySlug finds Chase', programBySlug.cpp, 2);
@@ -134,22 +135,33 @@ function run() {
     cpp: 2,
     cards: [programBySlug.cards[0]]
   }));
-  saved.benefits.push(api.repairBenefit({ id: 'ben-1', cardId: 'acct-1', name: 'DoorDash credit', used: false }));
-  api.saveData(saved);
-  var loaded = api.loadData();
-  assertEqual('save/load round trip keeps account', loaded.accounts[0].program, 'Chase Ultimate Rewards');
-  assertEqual('save/load round trip keeps benefit', loaded.benefits[0].name, 'DoorDash credit');
+	  saved.benefits.push(api.repairBenefit({ id: 'ben-1', cardId: 'acct-1', name: 'DoorDash credit', used: false }));
+	  api.saveData(saved);
+	  var loaded = api.loadData();
+	  assertEqual('save/load round trip keeps account', loaded.accounts[0].program, 'Chase Ultimate Rewards');
+	  assertEqual('save/load round trip keeps benefit', loaded.benefits[0].name, 'DoorDash credit');
+	  win.localStorage.setItem('valueAdvisorResults', JSON.stringify({ portfolio: [{ program: 'Chase Ultimate Rewards', balance: 100000 }], verdict: { title: 'Cached' } }));
+	  api.saveData(saved);
+	  assertEqual('saveData clears cached advisor results', win.localStorage.getItem('valueAdvisorResults'), null);
+	  win.localStorage.setItem('valueAdvisorResults', JSON.stringify({ portfolio: [{ program: 'Some Other Program', balance: 999 }], verdict: { title: 'Stale' } }));
+	  assertEqual('readAdvisorResults rejects stale portfolio mismatch', api.readAdvisorResults(api.loadData()), null);
+	  win.localStorage.setItem('valueAdvisorResults', JSON.stringify({ portfolio: [{ program: 'Chase Ultimate Rewards', balance: 100000 }], verdict: { title: 'Fresh' } }));
+	  assert('readAdvisorResults accepts matching portfolio', !!api.readAdvisorResults(api.loadData()));
 
-  win.document.getElementById('account-program-manual').value = 'Custom Program';
-  win.document.getElementById('account-type').value = 'other';
-  win.document.getElementById('account-currency').value = 'points';
-  win.document.getElementById('account-cpp').value = '1.5';
-  win.document.getElementById('account-balance').value = '12000';
-  win.document.getElementById('account-number').value = 'ABCD';
-  win.document.getElementById('account-notes').value = 'Manual entry';
-  api.collectAccountFormData();
-  assertEqual('program picker input uses combobox role', win.document.getElementById('program-picker-input').getAttribute('role'), 'combobox');
-  assertEqual('program picker references listbox', win.document.getElementById('program-picker-input').getAttribute('aria-controls'), 'program-picker-list');
+	  win.document.getElementById('account-program-manual').value = 'Custom Program';
+	  win.document.getElementById('account-type').value = 'other';
+	  win.document.getElementById('account-currency').value = 'points';
+	  win.document.getElementById('account-cpp').value = '1.5';
+	  win.document.getElementById('account-balance').value = '12000';
+	  win.document.getElementById('account-last-activity').value = '2026-02-14';
+	  win.document.getElementById('account-number').value = 'ABCD';
+	  win.document.getElementById('account-notes').value = 'Manual entry';
+	  var collected = api.collectAccountFormData();
+	  assertEqual('collectAccountFormData includes last activity date', collected.lastActivityDate, '2026-02-14');
+	  assertEqual('program picker input uses combobox role', win.document.getElementById('program-picker-input').getAttribute('role'), 'combobox');
+	  assertEqual('program picker references listbox', win.document.getElementById('program-picker-input').getAttribute('aria-controls'), 'program-picker-list');
+	  var expiration = api.getExpirationRisk({ program: 'United MileagePlus', lastUpdated: '2026-03-20', lastActivityDate: '2024-10-01' });
+	  assert('getExpirationRisk prefers last activity date over lastUpdated', !!expiration && typeof expiration.label === 'string' && expiration.label.indexOf('Expires') === 0);
 
   api.render();
   assert('rendered hero includes advisor link', win.document.getElementById('chart-card').textContent.indexOf('Open Value Advisor') >= 0);

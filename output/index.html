@@ -1008,6 +1008,78 @@ body {
   color: var(--text-dim);
   margin-left: 4px;
 }
+.advisor-verdict {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: grid;
+  gap: 10px;
+}
+.advisor-verdict.highlight {
+  border-color: rgba(139,94,16,0.22);
+  background: rgba(139,94,16,0.04);
+}
+.advisor-verdict.warn {
+  border-color: rgba(122,90,8,0.22);
+  background: rgba(122,90,8,0.05);
+}
+.advisor-verdict.wait {
+  background: var(--surface-2);
+}
+.advisor-verdict-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.advisor-verdict-copy strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.advisor-verdict-copy p {
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-size: 14px;
+}
+.advisor-verdict-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.verdict-chip,
+.expiry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.expiry-badge.warn {
+  border-color: rgba(122,90,8,0.2);
+  color: var(--warning);
+  background: rgba(122,90,8,0.08);
+}
+.expiry-badge.danger {
+  border-color: rgba(166,61,64,0.2);
+  color: var(--danger);
+  background: rgba(166,61,64,0.08);
+}
+.advisor-verdict-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+.advisor-verdict-link:hover { text-decoration: underline; }
 
 /* ── Dashboard account table ───────────────── */
 .dash-table {
@@ -1055,6 +1127,15 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.dash-table .program-cell {
+  display: grid;
+  gap: 6px;
+}
+.dash-table .program-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .dash-hero-number {
   font-family: var(--font-display);
@@ -1303,6 +1384,7 @@ body {
       </div>
     </div>
     <div id="dash-stat-cards" class="stat-cards-grid"></div>
+    <div id="dash-verdict-banner"></div>
     <div id="dash-account-table"></div>
     <div id="hero-card" style="display:none"></div>
     <div id="chart-card" style="display:none"></div>
@@ -1426,6 +1508,11 @@ body {
             <div class="field">
               <label for="account-balance">Balance</label>
               <input id="account-balance" type="number" min="0" max="999999999" step="1" inputmode="numeric" required>
+            </div>
+            <div class="field span-2">
+              <label for="account-last-activity">Last account activity</label>
+              <input id="account-last-activity" type="date">
+              <small>Used for expiration tracking. Updating a balance in Churn does not change this date.</small>
             </div>
             <div class="field span-2">
               <label for="account-number">Account number</label>
@@ -1586,6 +1673,7 @@ body {
 
 var STORAGE_KEY = 'churn_data';
 var LEGACY_STORAGE_KEY = 'osaka_data';
+var VALUE_RESULTS_KEY = 'valueAdvisorResults';
 var SCHEMA_VERSION = 3;
 var VALID_TYPES = ['flexible', 'airline', 'hotel', 'credit_card', 'other'];
 var VALID_CURRENCIES = ['points', 'miles'];
@@ -1697,6 +1785,19 @@ function formatCompactDollars(number) {
   return formatDollars(value);
 }
 
+function todayIsoDate() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function validateDateInput(value) {
+  var text = sanitize(value || '', 20);
+  if (!text) return '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return '';
+  var date = new Date(text + 'T00:00:00');
+  if (isNaN(date.getTime())) return '';
+  return text;
+}
+
 function timeAgo(dateString) {
   if (!dateString) return 'unknown';
   var date = new Date(dateString);
@@ -1744,6 +1845,56 @@ function countStale(data) {
     else if (s.level === 'aging') aging++;
   });
   return { stale: stale, aging: aging, needsRefresh: stale + aging };
+}
+
+function portfolioSignature(items) {
+  return (items || []).map(function (item) {
+    return [item.program || '', validateBalance(item.balance)].join('|');
+  }).sort().join('||');
+}
+
+function advisorResultsMatchData(results, data) {
+  if (!results || !data || !Array.isArray(data.accounts)) return true;
+  if (!Array.isArray(results.portfolio)) return false;
+  var activeAccounts = data.accounts.filter(function (account) {
+    return validateBalance(account.balance) > 0;
+  });
+  return portfolioSignature(results.portfolio) === portfolioSignature(activeAccounts);
+}
+
+function readAdvisorResults(data) {
+  try {
+    var raw = localStorage.getItem(VALUE_RESULTS_KEY);
+    if (!raw) return null;
+    var parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    if (!advisorResultsMatchData(parsed, data)) return null;
+    return parsed;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getExpirationRisk(account) {
+  var rule = window.PROGRAMS.expirationRules[account.program];
+  if (!rule || !rule.expires) return null;
+  var activityDate = account.lastActivityDate || '';
+  if (!activityDate) return null;
+  var lastActivity = new Date(activityDate);
+  if (isNaN(lastActivity.getTime())) return null;
+  var expiresAt = new Date(lastActivity);
+  expiresAt.setMonth(expiresAt.getMonth() + rule.inactivityMonths);
+  var daysRemaining = Math.ceil((expiresAt.getTime() - Date.now()) / 86400000);
+  if (daysRemaining <= 0) {
+    return { tone: 'danger', label: 'Expired', expiresAt: expiresAt.toISOString().split('T')[0], expired: true };
+  }
+  if (daysRemaining <= 30) {
+    return { tone: 'danger', label: 'Expires in ' + daysRemaining + 'd', expiresAt: expiresAt.toISOString().split('T')[0], expired: false };
+  }
+  if (daysRemaining <= 180) {
+    return { tone: 'warn', label: 'Expires in ' + daysRemaining + 'd', expiresAt: expiresAt.toISOString().split('T')[0], expired: false };
+  }
+  return null;
 }
 
 function daysUntil(dateString) {
@@ -1888,7 +2039,8 @@ function repairAccount(account) {
   fixed.balance = validateBalance(fixed.balance);
   fixed.cpp = validateCpp(fixed.cpp != null ? fixed.cpp : (program ? program.cpp : 1));
   fixed.accountNumber = sanitize(fixed.accountNumber || '', 50);
-  fixed.lastUpdated = sanitize(fixed.lastUpdated || new Date().toISOString().split('T')[0], 20);
+  fixed.lastUpdated = validateDateInput(fixed.lastUpdated) || todayIsoDate();
+  fixed.lastActivityDate = validateDateInput(fixed.lastActivityDate || fixed.lastUpdated);
   fixed.notes = sanitize(fixed.notes || '', MAX_NOTES);
   fixed.cards = normalizeCards(fixed.cards);
   return fixed;
@@ -1938,6 +2090,7 @@ function loadData() {
 function saveData(data) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.removeItem(VALUE_RESULTS_KEY);
     return true;
   } catch (error) {
     showBanner('error', 'Could not save — your browser storage may be full. Try exporting and clearing old data.');
@@ -2326,15 +2479,40 @@ function renderProfile(data) {
     }).join('') + '</div></div>';
 }
 
+function renderVerdictBanner(results) {
+  if (!results || !results.verdict) return '';
+  var verdict = results.verdict;
+  var tone = verdict.state === 'wait' ? 'wait' : (verdict.state === 'urgent' || verdict.state === 'expired' ? 'warn' : 'highlight');
+  var chips = [];
+  if (results.surfaceLabel) chips.push('<span class="verdict-chip">' + esc(results.surfaceLabel) + '</span>');
+  if (verdict.program) chips.push('<span class="verdict-chip">' + esc(verdict.program) + '</span>');
+  if (verdict.option_label) chips.push('<span class="verdict-chip">' + esc(verdict.option_label) + '</span>');
+  if (verdict.adjusted_value != null) chips.push('<span class="verdict-chip">' + esc(formatDollars(verdict.adjusted_value)) + '</span>');
+  if (results.generatedAt) chips.push('<span class="verdict-chip">Updated ' + esc(timeAgo(results.generatedAt)) + '</span>');
+  return '<div class="advisor-verdict ' + tone + '">' +
+    '<div class="advisor-verdict-header">' +
+      '<div class="advisor-verdict-copy">' +
+        '<div class="mini-label">Advisor verdict</div>' +
+        '<strong>' + esc(verdict.title) + '</strong>' +
+        '<p>' + esc(verdict.body) + '</p>' +
+      '</div>' +
+      '<a class="advisor-verdict-link" href="value.html">Open Advisor &rarr;</a>' +
+    '</div>' +
+    (chips.length ? '<div class="advisor-verdict-meta">' + chips.join('') + '</div>' : '') +
+  '</div>';
+}
+
 function renderDashboard(data) {
   var dashHero = document.getElementById('dash-hero');
   var statCards = document.getElementById('dash-stat-cards');
+  var verdictBanner = document.getElementById('dash-verdict-banner');
   var accountTable = document.getElementById('dash-account-table');
   if (!dashHero) return;
 
   if (!data.accounts.length) {
     dashHero.innerHTML = '<div class="dash-welcome"><h1>Track your loyalty points in real dollars.</h1><p>Add a program like Chase Ultimate Rewards or Delta SkyMiles. Churn fills in valuations, transfer partners, and card details automatically.</p></div>';
     statCards.innerHTML = '';
+    if (verdictBanner) verdictBanner.innerHTML = '';
     accountTable.innerHTML = '';
     return;
   }
@@ -2372,14 +2550,18 @@ function renderDashboard(data) {
     '</div>';
   });
   statCards.innerHTML = cardsHtml;
+  if (verdictBanner) verdictBanner.innerHTML = renderVerdictBanner(readAdvisorResults(data));
 
   // Account table
   var sorted = data.accounts.slice().sort(function (a, b) { return calculateAccountValue(b) - calculateAccountValue(a); });
   var tableHtml = '<table class="dash-table"><thead><tr><th>Program</th><th>Balance</th><th>Updated</th></tr></thead><tbody>';
   sorted.forEach(function (a) {
+    var expiration = getExpirationRisk(a);
     var dateStr = a.lastUpdated ? new Date(a.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
     tableHtml += '<tr>' +
-      '<td><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + '</span></td>' +
+      '<td><div class="program-cell"><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + '</span>' +
+      (expiration ? '<div class="program-badges"><span class="expiry-badge ' + esc(expiration.tone) + '">' + esc(expiration.label) + '</span></div>' : '') +
+      '</div></td>' +
       '<td>' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</td>' +
       '<td>' + dateStr + '</td>' +
     '</tr>';
@@ -2639,6 +2821,7 @@ function fillAccountForm(account) {
   document.getElementById('account-currency').value = account ? validateCurrency(account.currency) : 'points';
   document.getElementById('account-cpp').value = account ? validateCpp(account.cpp).toFixed(2) : '1.00';
   document.getElementById('account-balance').value = account ? validateBalance(account.balance) : '';
+  document.getElementById('account-last-activity').value = account ? (validateDateInput(account.lastActivityDate) || validateDateInput(account.lastUpdated)) : todayIsoDate();
   document.getElementById('account-number').value = account ? account.accountNumber || '' : '';
   document.getElementById('account-notes').value = account ? account.notes || '' : '';
   document.getElementById('cards-details').open = false;
@@ -2700,8 +2883,9 @@ function collectAccountFormData() {
     balance: validateBalance(document.getElementById('account-balance').value),
     currency: validateCurrency(document.getElementById('account-currency').value),
     cpp: validateCpp(document.getElementById('account-cpp').value),
+    lastActivityDate: validateDateInput(document.getElementById('account-last-activity').value),
     accountNumber: sanitize(document.getElementById('account-number').value, 50),
-    lastUpdated: new Date().toISOString().split('T')[0],
+    lastUpdated: todayIsoDate(),
     notes: sanitize(document.getElementById('account-notes').value, MAX_NOTES),
     cards: readCardSelections()
   };
@@ -3215,7 +3399,7 @@ function bindEvents() {
     }
   });
   window.addEventListener('storage', function (event) {
-    if (event.key === STORAGE_KEY) render();
+    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY) render();
   });
 }
 
@@ -3242,12 +3426,14 @@ window.ChurnTracker = {
   getProgramBySlug: getProgramBySlug,
   loadData: loadData,
   saveData: saveData,
+  readAdvisorResults: readAdvisorResults,
   render: render,
   collectAccountFormData: collectAccountFormData,
   getStaleness: getStaleness,
   getLoginUrl: getLoginUrl,
   getStalenessText: getStalenessText,
-  countStale: countStale
+  countStale: countStale,
+  getExpirationRisk: getExpirationRisk
 };
 
 bindEvents();

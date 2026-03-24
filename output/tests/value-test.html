@@ -93,17 +93,31 @@ function run() {
   win.localStorage.removeItem('valueAdvisorResults');
 
   assert('advisor API exported', !!api);
-  assertEqual('mode list has seven entries', api.MODE_DEFS.length, 7);
+  assertEqual('internal mode list still has seven entries', api.MODE_DEFS.length, 7);
+  assertEqual('surface mode list has three entries', api.SURFACE_MODES.length, 3);
 
   var defaultPrefs = api.readPrefs();
-  assertEqual('default prefs mode is max_value', defaultPrefs.mode, 'max_value');
+  var autoMode = api.autoSelectMode(baseData, api.DEFAULT_PREFS, []);
+  assertEqual('autoSelectMode picks use_soon for expiring account', autoMode.surfaceMode, 'use_soon');
+  assertEqual('autoSelectMode maps use_soon to expiring mode', autoMode.mode, 'expiring');
+  assertEqual('default prefs surface mode auto-selects to use_soon', defaultPrefs.surfaceMode, 'use_soon');
+  assertEqual('default prefs mode follows auto selection', defaultPrefs.mode, 'expiring');
   assertEqual('default prefs travel enabled', defaultPrefs.interestedInTravel, true);
 
   api.savePrefs({ mode: 'simple', wtpCaps: { economy: 450 } });
   var mergedPrefs = api.readPrefs();
+  assertEqual('legacy simple mode migrates to easy surface mode', mergedPrefs.surfaceMode, 'easy_win');
   assertEqual('prefs merge mode', mergedPrefs.mode, 'simple');
   assertEqual('prefs merge keeps default business cap', mergedPrefs.wtpCaps.business, 2500);
   assertEqual('prefs merge overrides economy cap', mergedPrefs.wtpCaps.economy, 450);
+
+  api.savePrefs({ surfaceMode: 'stretch_value', cabinPref: 'first', interestedInTravel: true });
+  var stretchPrefs = api.readPrefs();
+  assertEqual('stretch surface resolves luxury for premium prefs', stretchPrefs.mode, 'luxury');
+
+  api.savePrefs({ surfaceMode: 'easy_win', interestedInTravel: false });
+  var easyPrefs = api.readPrefs();
+  assertEqual('easy surface resolves no_travel when travel is off', easyPrefs.mode, 'no_travel');
 
   assertEqual('applyWTP below cap unchanged', api.applyWTP(400, 'economy', defaultPrefs), 400);
   assert('applyWTP above cap discounted', api.applyWTP(4000, 'business', defaultPrefs) < 4000);
@@ -130,9 +144,11 @@ function run() {
   ], 'no_travel');
   assertEqual('no travel mode prefers non-travel option', noTravelRank[0].kind, 'fallback');
 
-  assertEqual('checkExpiration ignores non-expiring Delta', api.checkExpiration({ program: 'Delta SkyMiles', lastUpdated: '2026-01-01' }), null);
-  var exp = api.checkExpiration({ program: 'United MileagePlus', lastUpdated: '2024-10-01' });
-  assert('checkExpiration flags at-risk account', !!exp && exp.atRisk);
+	  assertEqual('checkExpiration ignores non-expiring Delta', api.checkExpiration({ program: 'Delta SkyMiles', lastUpdated: '2026-01-01' }), null);
+	  var exp = api.checkExpiration({ program: 'United MileagePlus', lastUpdated: '2024-10-01' });
+	  assert('checkExpiration flags at-risk account', !!exp && exp.atRisk);
+	  var expFromActivity = api.checkExpiration({ program: 'United MileagePlus', lastUpdated: '2026-03-20', lastActivityDate: '2024-10-01' });
+	  assert('checkExpiration prefers lastActivityDate when present', !!expFromActivity && expFromActivity.atRisk);
 
   var program = api.findProgram('Chase Ultimate Rewards');
   assertEqual('findProgram by name returns chase slug', program.slug, 'chase-ur');
@@ -142,6 +158,8 @@ function run() {
   api.saveHousehold([{ memberName: 'Alex', program: 'Chase Ultimate Rewards', programSlug: 'chase-ur', balance: 25000, currency: 'points', type: 'flexible' }]);
   assertEqual('household round trip count', api.readHousehold().length, 1);
   assertEqual('household round trip slug', api.readHousehold()[0].programSlug, 'chase-ur');
+  assertEqual('scoreLabel humanizes high scores', api.scoreLabel(91), 'Very strong fit');
+  assertEqual('scoreLabel humanizes mid scores', api.scoreLabel(76), 'Good fit');
 
   api.savePrefs({ mode: 'max_value', interestedInTravel: true });
   var analysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
@@ -150,6 +168,7 @@ function run() {
   assert('buildAnalysis produces best overall', !!analysis.bestOverall);
   assert('buildAnalysis finds sweet spots', analysis.sweetSpots.length > 0);
   assertEqual('buildAnalysis carries household boost', analysis.activeAccounts[0].householdBalance, 25000);
+  assertEqual('buildAnalysis keeps surface mode after legacy max_value', analysis.prefs.surfaceMode, 'stretch_value');
 
   api.savePrefs({ mode: 'no_travel', interestedInTravel: false });
   var noTravelAnalysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
@@ -173,12 +192,15 @@ function run() {
   assert('scoreBFB returns finite base score', isFinite(scored.baseScore));
 
   api.savePrefs({ mode: 'expiring', interestedInTravel: true });
+  assertEqual('legacy expiring mode migrates to use_soon surface', api.readPrefs().surfaceMode, 'use_soon');
   var expiringAnalysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
   assert('expiring mode still produces best option', !!expiringAnalysis.activeAccounts[1].bestOption);
 
   var results = api.writeAgentResults(baseData, api.readPrefs());
   assertEqual('writeAgentResults stores mode', results.mode, 'expiring');
+  assertEqual('writeAgentResults stores surface mode', results.surfaceMode, 'use_soon');
   assert('writeAgentResults stores totals', results.totals.best > 0);
+  assert('writeAgentResults stores verdict payload', !!results.verdict && typeof results.verdict.title === 'string' && results.verdict.title.length > 0);
   assert('valueAdvisorResults stored in localStorage', !!win.localStorage.getItem('valueAdvisorResults'));
 
   win.localStorage.setItem('churn_data', '{broken json');
@@ -186,7 +208,9 @@ function run() {
   win.localStorage.setItem('churn_data', JSON.stringify(baseData));
 
   api.render();
-  assert('render produces mode tabs', win.document.querySelectorAll('[data-mode]').length === 7);
+  assert('render produces surface mode tabs', win.document.querySelectorAll('[data-mode]').length === 3);
+  assert('render produces verdict hero copy', win.document.getElementById('app').textContent.indexOf('Verdict') >= 0);
+  assert('render renames settings section', win.document.getElementById('app').textContent.indexOf('Tune recommendations') >= 0);
   assert('render produces freshness footer', win.document.getElementById('app').textContent.indexOf('Program dataset updated') >= 0);
   assert('render produces household section', win.document.getElementById('app').textContent.indexOf('Household') >= 0);
 
