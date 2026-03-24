@@ -163,6 +163,27 @@ function run() {
 	  var expiration = api.getExpirationRisk({ program: 'United MileagePlus', lastUpdated: '2026-03-20', lastActivityDate: '2024-10-01' });
 	  assert('getExpirationRisk prefers last activity date over lastUpdated', !!expiration && typeof expiration.label === 'string' && expiration.label.indexOf('Expires') === 0);
 
+  win.localStorage.setItem('valueAdvisorPrefs', JSON.stringify({ mode: 'simple' }));
+  api.render();
+  var complexitySelect = win.document.getElementById('pref-complexityTolerance');
+  complexitySelect.value = 'low';
+  complexitySelect.dispatchEvent(new win.Event('change', { bubbles: true }));
+  var storedPrefs = api.readStoredAdvisorPrefs();
+  assertEqual('profile recommendations preserve legacy advisor mode', storedPrefs.mode, 'simple');
+  assertEqual('profile recommendations update changed field only', storedPrefs.complexityTolerance, 'low');
+  assert('profile recommendations do not force surfaceMode into legacy prefs', !Object.prototype.hasOwnProperty.call(storedPrefs, 'surfaceMode'));
+
+  win.localStorage.setItem('valueAdvisorPrefs', JSON.stringify({ mode: 'simple' }));
+  win.localStorage.setItem('churn_household', JSON.stringify([{ id: 'hh-1', memberName: 'Alex', program: 'Chase Ultimate Rewards', programSlug: 'chase-ur', balance: 25000, currency: 'points', type: 'flexible' }]));
+  api.applyImportedSidecarData({
+    _version: 3,
+    accounts: [],
+    benefits: [],
+    profile: api.defaultData().profile
+  });
+  assertEqual('import without advisor sidecar keeps existing prefs', api.readStoredAdvisorPrefs().mode, 'simple');
+  assertEqual('import without household sidecar keeps existing household', api.readHouseholdData().length, 1);
+
   api.render();
   assert('rendered hero includes advisor link', win.document.getElementById('chart-card').textContent.indexOf('Open Value Advisor') >= 0);
   assert('rendered account card shows dollar approximation', win.document.getElementById('accounts-groups').textContent.indexOf('$2,000') >= 0);

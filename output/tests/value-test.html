@@ -51,10 +51,56 @@ function renderResults() {
   summary.textContent = passed + ' passed, ' + failed + ' failed';
 }
 
-function run() {
+function makeFetch(payload) {
+  return function () {
+    return Promise.resolve({
+      ok: true,
+      json: function () { return Promise.resolve(payload); }
+    });
+  };
+}
+
+function findAccountCard(doc, programName) {
+  var cards = doc.querySelectorAll('.account-card');
+  for (var i = 0; i < cards.length; i++) {
+    var name = cards[i].querySelector('.account-name');
+    if (name && name.textContent.indexOf(programName) >= 0) return cards[i];
+  }
+  return null;
+}
+
+async function run() {
   var frame = document.getElementById('advisor-frame');
   var win = frame.contentWindow;
   var api = win.ChurnAdvisor;
+  var sweetSpotsStub = {
+    flights: [
+      {
+        id: 'united-hawaii',
+        destination: 'Hawaii',
+        route: 'US → Hawaii',
+        cabin: 'economy',
+        direction: 'round_trip',
+        program: 'United MileagePlus',
+        points_required: 22500,
+        caveat: 'Saver award availability.',
+        cpp_estimate: 2.2
+      }
+    ],
+    hotels: [
+      {
+        id: 'hyatt-nyc',
+        destination: 'Park Hyatt New York',
+        region: 'domestic-us',
+        category: 8,
+        nights: 2,
+        program: 'World of Hyatt',
+        points_required: 60000,
+        caveat: 'Premium city hotel redemption.',
+        cpp_estimate: 2.7
+      }
+    ]
+  };
   var baseData = {
     _version: 3,
     accounts: [
@@ -77,6 +123,15 @@ function run() {
         currency: 'miles',
         cpp: 1.4,
         lastUpdated: '2024-10-01'
+      },
+      {
+        id: 'acct-3',
+        program: 'Local Rewards',
+        type: 'other',
+        balance: 15000,
+        currency: 'points',
+        cpp: 1,
+        lastUpdated: '2026-02-10'
       }
     ],
     benefits: [],
@@ -93,6 +148,11 @@ function run() {
   win.localStorage.removeItem('valueAdvisorResults');
 
   assert('advisor API exported', !!api);
+  if (!api) {
+    renderResults();
+    return;
+  }
+  await api.loadSweetSpots(makeFetch(sweetSpotsStub), true);
   assertEqual('internal mode list still has seven entries', api.MODE_DEFS.length, 7);
   assertEqual('surface mode list has three entries', api.SURFACE_MODES.length, 3);
 
@@ -163,7 +223,7 @@ function run() {
 
   api.savePrefs({ mode: 'max_value', interestedInTravel: true });
   var analysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
-  assert('buildAnalysis finds active accounts', analysis.activeAccounts.length === 2);
+  assert('buildAnalysis finds active accounts', analysis.activeAccounts.length === 3);
   assert('buildAnalysis total best beats floor', analysis.totalBest > analysis.totalFloor);
   assert('buildAnalysis produces best overall', !!analysis.bestOverall);
   assert('buildAnalysis finds sweet spots', analysis.sweetSpots.length > 0);
@@ -210,15 +270,36 @@ function run() {
   api.render();
   assert('render produces surface mode tabs', win.document.querySelectorAll('[data-mode]').length === 3);
   assert('render produces verdict hero copy', win.document.getElementById('app').textContent.indexOf('Verdict') >= 0);
-  assert('render renames settings section', win.document.getElementById('app').textContent.indexOf('Tune recommendations') >= 0);
   assert('render produces freshness footer', win.document.getElementById('app').textContent.indexOf('Program dataset updated') >= 0);
-  assert('render produces household section', win.document.getElementById('app').textContent.indexOf('Household') >= 0);
+
+  var chaseCard = findAccountCard(win.document, 'Chase Ultimate Rewards');
+  var unitedCard = findAccountCard(win.document, 'United MileagePlus');
+  var localCard = findAccountCard(win.document, 'Local Rewards');
+  var unitedBadge = unitedCard && unitedCard.querySelector('.account-expiry-badge');
+
+  assert('render shows transfer trip bridge match', !!chaseCard && chaseCard.textContent.indexOf('Park Hyatt New York') >= 0);
+  assert('render shows transfer path copy in trip bridge', !!chaseCard && chaseCard.textContent.indexOf('Transfer from Chase Ultimate Rewards at 1:1') >= 0);
+  assert('render shows direct program match in trip bridge', !!unitedCard && unitedCard.textContent.indexOf('Direct balance in United MileagePlus') >= 0);
+  assert('render shows expiry badge on expiring account', !!unitedBadge && unitedBadge.textContent.toLowerCase().indexOf('remaining') >= 0);
+  assert('render shows trip bridge empty state for unmatched account', !!localCard && localCard.textContent.indexOf('No current sweet spots matched to this account yet.') >= 0);
+
+  await api.loadSweetSpots(function () {
+    return Promise.reject(new Error('offline'));
+  }, true);
+  api.render();
+  chaseCard = findAccountCard(win.document, 'Chase Ultimate Rewards');
+  assert('trip bridge fetch failure degrades gracefully', !!chaseCard && chaseCard.textContent.indexOf('Trip ideas unavailable right now.') >= 0);
 
   renderResults();
 }
 
 document.getElementById('advisor-frame').addEventListener('load', function () {
-  setTimeout(run, 80);
+  setTimeout(function () {
+    run().catch(function (error) {
+      assert('test harness completed', false, error && error.message ? error.message : String(error));
+      renderResults();
+    });
+  }, 80);
 });
 </script>
 </body>

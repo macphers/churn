@@ -8,36 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600;1,9..144,700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-:root {
-  --bg: #F5F2ED; --surface: #FFFFFF; --surface-2: #FAF8F5; --border: #E8E4DF;
-  --border-strong: #D5D0CA;
-  --text: #1A1A1A; --text-muted: #6B6560; --text-dim: #9B9590;
-  --accent: #8B5E10; --accent-hover: #6B4A0C;
-  --accent-glow: rgba(139,94,16,0.12); --danger: #A63D40; --success: #2D7A4F;
-  --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
-  --card-color: #8B5E10; --accent-decorative: #C4841D; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
-  --gold: var(--accent-decorative);
-  --error-bg: rgba(166,61,64,0.06); --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
-  --nav-active-bg: rgba(139,94,16,0.06);
-}
-[data-theme="dark"] {
-  --bg: #0F0E0C; --surface: #1A1815; --surface-2: #141210; --border: #2A2723;
-  --border-strong: #3A3632;
-  --text: #E8E4DF; --text-muted: #9B9590; --text-dim: #6B6560;
-  --accent: #8B5E10; --accent-hover: #A47214;
-  --accent-glow: rgba(139,94,16,0.18); --danger: #D4585B; --success: #4DAF72;
-  --warning: #C49A2E; --airline-color: #5A9FD4; --hotel-color: #A873B8;
-  --card-color: #8B5E10; --accent-decorative: #C4841D; --other-color: #9B9590;
-  --error-bg: rgba(212,88,91,0.1); --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
-  --nav-active-bg: rgba(139,94,16,0.12);
-}
 
 html { background: var(--bg); }
 body {
@@ -625,6 +599,84 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
+}
+.recommendations-panel {
+  margin-top: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+}
+.recommendations-panel summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 20px;
+}
+.recommendations-panel summary::-webkit-details-marker { display: none; }
+.recommendations-panel[open] summary {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.recommendations-body {
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.recommendations-card, .household-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  background: var(--surface);
+}
+.caps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.caps-grid .field label {
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 11px;
+}
+.household-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr auto;
+  gap: 8px;
+  align-items: end;
+}
+.household-list {
+  display: grid;
+  gap: 8px;
+}
+.household-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.household-card p {
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-size: 13px;
+}
+.household-empty {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.household-empty strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 6px;
 }
 .profile-card, .data-card {
   border: 1px solid var(--border);
@@ -1227,7 +1279,7 @@ body {
 
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; }
-  .form-grid, .detail-grid, .rate-grid { grid-template-columns: 1fr; }
+  .form-grid, .detail-grid, .rate-grid, .recommendations-grid, .caps-grid, .household-form-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767px) {
@@ -1431,6 +1483,7 @@ body {
       </div>
     </div>
     <div id="profile-grid" class="profile-grid"></div>
+    <div id="profile-recommendations"></div>
     <div style="margin-top:32px">
       <div class="section-header" style="margin-bottom:16px">
         <div>
@@ -1674,6 +1727,9 @@ body {
 var STORAGE_KEY = 'churn_data';
 var LEGACY_STORAGE_KEY = 'osaka_data';
 var VALUE_RESULTS_KEY = 'valueAdvisorResults';
+var PREFS_KEY = 'valueAdvisorPrefs';
+var HOUSEHOLD_KEY = 'churn_household';
+var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var SCHEMA_VERSION = 3;
 var VALID_TYPES = ['flexible', 'airline', 'hotel', 'credit_card', 'other'];
 var VALID_CURRENCIES = ['points', 'miles'];
@@ -1688,6 +1744,24 @@ var TYPE_META = {
   airline: { label: 'Airline', color: 'var(--airline-color)' },
   hotel: { label: 'Hotel', color: 'var(--hotel-color)' },
   other: { label: 'Other', color: 'var(--other-color)' }
+};
+var DEFAULT_ADVISOR_PREFS = {
+  surfaceMode: 'auto',
+  mode: 'max_value',
+  interestedInTravel: true,
+  cabinPref: 'economy',
+  hotelPref: 'midrangeHotel',
+  complexityTolerance: 'medium',
+  wtpCaps: {
+    economy: 500,
+    premiumEconomy: 1000,
+    business: 2500,
+    first: 5000,
+    budgetHotel: 150,
+    midrangeHotel: 300,
+    luxuryHotel: 600,
+    resort: 800
+  }
 };
 var state = {
   expandedAccounts: {},
@@ -1757,6 +1831,52 @@ function defaultData() {
     benefits: [],
     profile: defaultProfile()
   };
+}
+
+function mergeAdvisorPrefs(raw) {
+  var prefs = JSON.parse(JSON.stringify(DEFAULT_ADVISOR_PREFS));
+  if (!raw || typeof raw !== 'object') return prefs;
+  Object.keys(raw).forEach(function (key) {
+    if (key === 'wtpCaps' && raw.wtpCaps && typeof raw.wtpCaps === 'object') {
+      Object.keys(raw.wtpCaps).forEach(function (capKey) {
+        var amount = Math.max(1, Math.floor(Number(raw.wtpCaps[capKey]) || 0));
+        if (amount) prefs.wtpCaps[capKey] = amount;
+      });
+      return;
+    }
+    if (raw[key] != null) prefs[key] = raw[key];
+  });
+  return prefs;
+}
+
+function readStoredAdvisorPrefs() {
+  try {
+    var raw = localStorage.getItem(PREFS_KEY);
+    if (!raw) return null;
+    var parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return parsed;
+  } catch (error) {
+    return null;
+  }
+}
+
+function readAdvisorPrefs() {
+  return mergeAdvisorPrefs(readStoredAdvisorPrefs());
+}
+
+function saveStoredAdvisorPrefs(prefs) {
+  if (!prefs || typeof prefs !== 'object' || Array.isArray(prefs)) {
+    localStorage.removeItem(PREFS_KEY);
+    localStorage.removeItem(VALUE_RESULTS_KEY);
+    return;
+  }
+  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  localStorage.removeItem(VALUE_RESULTS_KEY);
+}
+
+function saveAdvisorPrefs(prefs) {
+  saveStoredAdvisorPrefs(prefs);
 }
 
 function genId() {
@@ -1934,6 +2054,46 @@ function getProgramNameBySlug(slug) {
 function getProgramBySlug(slug) {
   var name = getProgramNameBySlug(slug);
   return name ? window.PROGRAMS.programs[name] : null;
+}
+
+function normalizeHouseholdAccount(item) {
+  if (!item || typeof item !== 'object') return null;
+  var rawProgramName = item.program || getProgramNameBySlug(item.programSlug) || '';
+  var guessedName = rawProgramName ? guessProgramName(rawProgramName) : '';
+  var programName = guessedName || rawProgramName;
+  var program = item.programSlug ? getProgramBySlug(item.programSlug) : (programName ? getProgramByName(programName) : null);
+  return {
+    id: typeof item.id === 'string' ? item.id : genId(),
+    memberName: typeof item.memberName === 'string' && item.memberName.trim() ? item.memberName.trim() : 'Player two',
+    program: programName || (program ? getProgramNameBySlug(program.slug) : ''),
+    programSlug: program ? program.slug : (item.programSlug || null),
+    balance: Math.max(0, Math.floor(Number(item.balance) || 0)),
+    currency: program ? program.currency : validateCurrency(item.currency),
+    type: program ? program.type : validateType(item.type)
+  };
+}
+
+function readHouseholdData() {
+  try {
+    var raw = localStorage.getItem(HOUSEHOLD_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_HOUSEHOLD_KEY);
+      if (raw) { localStorage.setItem(HOUSEHOLD_KEY, raw); localStorage.removeItem(LEGACY_HOUSEHOLD_KEY); }
+    }
+    if (!raw) return [];
+    var parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(normalizeHouseholdAccount).filter(Boolean);
+    if (parsed && Array.isArray(parsed.accounts)) return parsed.accounts.map(normalizeHouseholdAccount).filter(Boolean);
+    return [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveHouseholdData(items) {
+  var list = Array.isArray(items) ? items : [];
+  localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify(list.map(normalizeHouseholdAccount).filter(Boolean)));
+  localStorage.removeItem(VALUE_RESULTS_KEY);
 }
 
 function guessProgramName(name) {
@@ -2463,8 +2623,62 @@ function renderBenefits(data) {
   });
 }
 
+function renderHouseholdList(household) {
+  if (!household.length) {
+    return '<div class="household-empty"><strong>Add a household member</strong>Pooling balances here lets the advisor spot better redemption paths without changing your main tracker accounts.</div>';
+  }
+  return '<div class="household-list">' + household.map(function (item) {
+    return '<article class="household-card">' +
+      '<h3><span>' + esc(item.memberName) + '</span><button type="button" class="btn btn-danger" data-remove-household="' + esc(item.id) + '">Remove</button></h3>' +
+      '<p>' + esc(item.program) + ' • ' + formatPoints(item.balance) + ' ' + esc(item.currency || 'points') + '</p>' +
+    '</article>';
+  }).join('') + '</div>';
+}
+
+function renderRecommendationSettings() {
+  var prefs = readAdvisorPrefs();
+  var household = readHouseholdData();
+  return '<details class="recommendations-panel" open>' +
+    '<summary>' +
+      '<div class="mini-label">Recommendations</div>' +
+      '<div style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;margin-top:8px">Advisor inputs</div>' +
+      '<p class="section-copy">Travel interest, booking complexity, spending caps, and household balances all feed the Advisor page.</p>' +
+    '</summary>' +
+    '<div class="recommendations-body">' +
+      '<div class="recommendations-grid">' +
+        '<div class="recommendations-card field"><label for="pref-interestedInTravel">Interested in travel</label><select id="pref-interestedInTravel" data-advisor-pref="interestedInTravel"><option value="true"' + (prefs.interestedInTravel ? ' selected' : '') + '>Yes</option><option value="false"' + (!prefs.interestedInTravel ? ' selected' : '') + '>No</option></select></div>' +
+        '<div class="recommendations-card field"><label for="pref-complexityTolerance">How many steps you\u0027ll tolerate</label><select id="pref-complexityTolerance" data-advisor-pref="complexityTolerance"><option value="low"' + (prefs.complexityTolerance === 'low' ? ' selected' : '') + '>Low</option><option value="medium"' + (prefs.complexityTolerance === 'medium' ? ' selected' : '') + '>Medium</option><option value="high"' + (prefs.complexityTolerance === 'high' ? ' selected' : '') + '>High</option></select></div>' +
+        '<div class="recommendations-card field"><label for="pref-cabinPref">Cabin preference</label><select id="pref-cabinPref" data-advisor-pref="cabinPref"><option value="economy"' + (prefs.cabinPref === 'economy' ? ' selected' : '') + '>Economy</option><option value="premiumEconomy"' + (prefs.cabinPref === 'premiumEconomy' ? ' selected' : '') + '>Premium economy</option><option value="business"' + (prefs.cabinPref === 'business' ? ' selected' : '') + '>Business</option><option value="first"' + (prefs.cabinPref === 'first' ? ' selected' : '') + '>First</option></select></div>' +
+        '<div class="recommendations-card field"><label for="pref-hotelPref">Hotel preference</label><select id="pref-hotelPref" data-advisor-pref="hotelPref"><option value="budgetHotel"' + (prefs.hotelPref === 'budgetHotel' ? ' selected' : '') + '>Budget</option><option value="midrangeHotel"' + (prefs.hotelPref === 'midrangeHotel' ? ' selected' : '') + '>Midrange</option><option value="luxuryHotel"' + (prefs.hotelPref === 'luxuryHotel' ? ' selected' : '') + '>Luxury</option><option value="resort"' + (prefs.hotelPref === 'resort' ? ' selected' : '') + '>Resort</option></select></div>' +
+      '</div>' +
+      '<div class="recommendations-card">' +
+        '<div class="mini-label">Spending caps</div>' +
+        '<p class="section-copy">Cap redemptions at prices you would realistically pay in cash so the advisor does not overstate luxury value.</p>' +
+        '<div class="caps-grid" style="margin-top:12px">' + Object.keys(prefs.wtpCaps).map(function (key) {
+          return '<div class="field"><label for="cap-' + esc(key) + '">' + esc(key) + '</label><input id="cap-' + esc(key) + '" type="number" min="1" step="10" data-advisor-cap="' + esc(key) + '" value="' + esc(prefs.wtpCaps[key]) + '"></div>';
+        }).join('') + '</div>' +
+      '</div>' +
+      '<div class="recommendations-card">' +
+        '<div class="mini-label">Household</div>' +
+        '<p class="section-copy">Store shared balances here so the advisor can factor in pooled points without altering your own tracked accounts.</p>' +
+        '<form id="profile-household-form" class="household-form-grid" style="margin-top:12px">' +
+          '<div class="field"><label for="profile-household-name">Member</label><input id="profile-household-name" name="memberName" type="text" placeholder="e.g. Partner, spouse"></div>' +
+          '<div class="field"><label for="profile-household-program">Program</label><input id="profile-household-program" name="program" type="text" list="profile-household-program-list" placeholder="Chase Ultimate Rewards"></div>' +
+          '<div class="field"><label for="profile-household-balance">Balance</label><input id="profile-household-balance" name="balance" type="number" min="0" step="1" placeholder="25000"></div>' +
+          '<button type="submit" class="btn btn-primary">Add balance</button>' +
+        '</form>' +
+        '<datalist id="profile-household-program-list">' + getProgramEntries().map(function (entry) {
+          return '<option value="' + esc(entry.name) + '">' + esc(entry.name) + '</option>';
+        }).join('') + '</datalist>' +
+        '<div style="margin-top:12px">' + renderHouseholdList(household) + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</details>';
+}
+
 function renderProfile(data) {
   var grid = document.getElementById('profile-grid');
+  var recommendations = document.getElementById('profile-recommendations');
   var profile = data.profile || defaultProfile();
   var alliances = profile.preferredAlliances.length ? profile.preferredAlliances : ['None selected'];
   var regions = profile.travelPreferences.regions.length ? profile.travelPreferences.regions : ['None selected'];
@@ -2477,6 +2691,7 @@ function renderProfile(data) {
     '<div class="profile-card"><div class="mini-label">Regions</div><div class="profile-list">' + regions.map(function (item) {
       return '<span class="tag">' + esc(item) + '</span>';
     }).join('') + '</div></div>';
+  if (recommendations) recommendations.innerHTML = renderRecommendationSettings();
 }
 
 function renderVerdictBanner(results) {
@@ -3034,8 +3249,66 @@ function saveProfile(event) {
   }
 }
 
+function handleAdvisorPrefInput(target) {
+  var prefs = readStoredAdvisorPrefs() || {};
+  var key = target.getAttribute('data-advisor-pref');
+  if (!key) return;
+  prefs[key] = key === 'interestedInTravel' ? target.value === 'true' : target.value;
+  saveStoredAdvisorPrefs(prefs);
+  render();
+}
+
+function handleAdvisorCapInput(target) {
+  var prefs = readStoredAdvisorPrefs() || {};
+  var key = target.getAttribute('data-advisor-cap');
+  if (!key) return;
+  prefs.wtpCaps = prefs.wtpCaps && typeof prefs.wtpCaps === 'object' && !Array.isArray(prefs.wtpCaps)
+    ? Object.assign({}, prefs.wtpCaps)
+    : {};
+  prefs.wtpCaps[key] = Math.max(1, Math.floor(Number(target.value) || 0));
+  saveStoredAdvisorPrefs(prefs);
+  render();
+}
+
+function handleHouseholdSubmit(event) {
+  event.preventDefault();
+  var form = event.target;
+  var memberName = form.memberName.value.trim() || 'Player two';
+  var programName = form.program.value.trim();
+  var balance = Math.max(0, Math.floor(Number(form.balance.value) || 0));
+  if (!programName || !balance) return;
+  var guessedName = guessProgramName(programName);
+  var program = guessedName ? getProgramByName(guessedName) : null;
+  if (!program) {
+    window.alert('Choose a program from the shared dataset.');
+    return;
+  }
+  var household = readHouseholdData();
+  household.push(normalizeHouseholdAccount({
+    id: genId(),
+    memberName: memberName,
+    program: guessedName,
+    programSlug: program.slug,
+    balance: balance,
+    currency: program.currency,
+    type: program.type
+  }));
+  saveHouseholdData(household);
+  render();
+}
+
+function removeHouseholdMember(id) {
+  saveHouseholdData(readHouseholdData().filter(function (item) {
+    return item.id !== id;
+  }));
+  render();
+}
+
 function exportData() {
-  var blob = new Blob([JSON.stringify(loadData(), null, 2)], { type: 'application/json' });
+  var backup = loadData();
+  backup.valueAdvisorPrefs = readStoredAdvisorPrefs();
+  backup.churn_household = readHouseholdData();
+  var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var link = document.createElement('a');
   link.href = url;
@@ -3045,6 +3318,22 @@ function exportData() {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
   showBanner('success', 'Backup exported.');
+}
+
+function applyImportedSidecarData(parsed) {
+  if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'valueAdvisorPrefs')) {
+    if (parsed.valueAdvisorPrefs == null) localStorage.removeItem(PREFS_KEY);
+    else saveStoredAdvisorPrefs(parsed.valueAdvisorPrefs);
+  }
+  if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'churn_household')) {
+    if (parsed.churn_household == null) {
+      localStorage.removeItem(HOUSEHOLD_KEY);
+      localStorage.removeItem(LEGACY_HOUSEHOLD_KEY);
+      localStorage.removeItem(VALUE_RESULTS_KEY);
+    } else {
+      saveHouseholdData(parsed.churn_household);
+    }
+  }
 }
 
 function importData(event) {
@@ -3063,6 +3352,7 @@ function importData(event) {
       if (!window.confirm('This will replace all your current tracker data with the imported file. Continue?')) return;
       var clean = sanitizeImport(parsed);
       if (saveData(clean)) {
+        applyImportedSidecarData(parsed);
         render();
         showBanner('success', 'Import complete.');
       }
@@ -3285,6 +3575,21 @@ function bindEvents() {
   document.getElementById('hero-open-benefit').addEventListener('click', function () { openBenefitModal(); });
   document.getElementById('benefits-add-button').addEventListener('click', function () { openBenefitModal(); });
   document.getElementById('profile-edit-button').addEventListener('click', openProfileModal);
+  document.getElementById('profile-recommendations').addEventListener('change', function (event) {
+    if (event.target.matches('[data-advisor-pref]')) {
+      handleAdvisorPrefInput(event.target);
+      return;
+    }
+    if (event.target.matches('[data-advisor-cap]')) handleAdvisorCapInput(event.target);
+  });
+  document.getElementById('profile-recommendations').addEventListener('submit', function (event) {
+    if (event.target.id === 'profile-household-form') handleHouseholdSubmit(event);
+  });
+  document.getElementById('profile-recommendations').addEventListener('click', function (event) {
+    var remove = event.target.closest('[data-remove-household]');
+    if (!remove) return;
+    removeHouseholdMember(remove.getAttribute('data-remove-household'));
+  });
   document.getElementById('export-button').addEventListener('click', exportData);
   document.getElementById('import-button').addEventListener('click', function () {
     document.getElementById('import-file').click();
@@ -3399,7 +3704,7 @@ function bindEvents() {
     }
   });
   window.addEventListener('storage', function (event) {
-    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY) render();
+    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY || event.key === HOUSEHOLD_KEY) render();
   });
 }
 
@@ -3424,6 +3729,13 @@ window.ChurnTracker = {
   formatEarnRates: formatEarnRates,
   getProgramByName: getProgramByName,
   getProgramBySlug: getProgramBySlug,
+  readStoredAdvisorPrefs: readStoredAdvisorPrefs,
+  readAdvisorPrefs: readAdvisorPrefs,
+  saveStoredAdvisorPrefs: saveStoredAdvisorPrefs,
+  saveAdvisorPrefs: saveAdvisorPrefs,
+  readHouseholdData: readHouseholdData,
+  saveHouseholdData: saveHouseholdData,
+  applyImportedSidecarData: applyImportedSidecarData,
   loadData: loadData,
   saveData: saveData,
   readAdvisorResults: readAdvisorResults,
