@@ -1182,6 +1182,35 @@ body {
   font-weight: 500;
   font-size: 13px;
 }
+.balance-clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: background 0.15s;
+}
+.balance-clickable:hover {
+  background: var(--hover, rgba(0,0,0,0.04));
+}
+.balance-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  border: 1px solid var(--border-strong, #D5D0CA);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -3px -5px;
+  width: 120px;
+  background: var(--surface, #FFFFFF);
+  color: var(--text, #1A1A1A);
+}
+.balance-input:focus {
+  outline: 2px solid rgba(139, 94, 16, 0.3);
+  outline-offset: -1px;
+  border-color: var(--accent, #8B5E10);
+}
 .dash-table tbody td:nth-child(3) {
   color: var(--text-dim);
   font-size: 11px;
@@ -2794,12 +2823,51 @@ function renderDashboard(data) {
       '<td><div class="program-cell"><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + (a.owner ? '<span class="account-owner-tag">' + esc(a.owner) + '</span>' : '') + '</span>' +
       (expiration ? '<div class="program-badges"><span class="expiry-badge ' + esc(expiration.tone) + '">' + esc(expiration.label) + '</span></div>' : '') +
       '</div></td>' +
-      '<td>' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</td>' +
+      '<td><span class="balance-clickable" data-account-id="' + esc(a.id) + '" data-raw-balance="' + esc(validateBalance(a.balance)) + '">' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</span></td>' +
       '<td>' + dateStr + '</td>' +
     '</tr>';
   });
   tableHtml += '</tbody></table>';
   accountTable.innerHTML = tableHtml;
+
+  // Inline balance editing
+  accountTable.querySelectorAll('.balance-clickable').forEach(function (span) {
+    span.addEventListener('click', function () {
+      var accountId = span.getAttribute('data-account-id');
+      var rawBalance = span.getAttribute('data-raw-balance');
+      var td = span.parentNode;
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'balance-input';
+      input.value = rawBalance;
+      input.setAttribute('inputmode', 'numeric');
+      td.innerHTML = '';
+      td.appendChild(input);
+      input.focus();
+      input.select();
+
+      var committed = false;
+      function commit() {
+        if (committed) return;
+        committed = true;
+        var newVal = validateBalance(input.value.replace(/[^0-9]/g, ''));
+        if (newVal === Number(rawBalance)) { render(); return; }
+        var d = loadData();
+        var acct = d.accounts.find(function (a) { return a.id === accountId; });
+        if (acct) {
+          acct.balance = newVal;
+          acct.lastUpdated = new Date().toISOString().slice(0, 10);
+          saveData(d);
+        }
+        render();
+      }
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { committed = true; render(); }
+      });
+      input.addEventListener('blur', commit);
+    });
+  });
 }
 
 function switchTab(tabName) {
