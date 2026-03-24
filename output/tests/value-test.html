@@ -153,31 +153,26 @@ async function run() {
     return;
   }
   await api.loadSweetSpots(makeFetch(sweetSpotsStub), true);
-  assertEqual('internal mode list still has seven entries', api.MODE_DEFS.length, 7);
-  assertEqual('surface mode list has three entries', api.SURFACE_MODES.length, 3);
-
   var defaultPrefs = api.readPrefs();
-  var autoMode = api.autoSelectMode(baseData, api.DEFAULT_PREFS, []);
-  assertEqual('autoSelectMode picks use_soon for expiring account', autoMode.surfaceMode, 'use_soon');
-  assertEqual('autoSelectMode maps use_soon to expiring mode', autoMode.mode, 'expiring');
-  assertEqual('default prefs surface mode auto-selects to use_soon', defaultPrefs.surfaceMode, 'use_soon');
-  assertEqual('default prefs mode follows auto selection', defaultPrefs.mode, 'expiring');
+  assertEqual('auto-detect picks expiring for expiring account', defaultPrefs.mode, 'expiring');
   assertEqual('default prefs travel enabled', defaultPrefs.interestedInTravel, true);
 
-  api.savePrefs({ mode: 'simple', wtpCaps: { economy: 450 } });
+  api.savePrefs({ wtpCaps: { economy: 450 } });
   var mergedPrefs = api.readPrefs();
-  assertEqual('legacy simple mode migrates to easy surface mode', mergedPrefs.surfaceMode, 'easy_win');
-  assertEqual('prefs merge mode', mergedPrefs.mode, 'simple');
   assertEqual('prefs merge keeps default business cap', mergedPrefs.wtpCaps.business, 2500);
   assertEqual('prefs merge overrides economy cap', mergedPrefs.wtpCaps.economy, 450);
 
-  api.savePrefs({ surfaceMode: 'stretch_value', cabinPref: 'first', interestedInTravel: true });
-  var stretchPrefs = api.readPrefs();
-  assertEqual('stretch surface resolves luxury for premium prefs', stretchPrefs.mode, 'luxury');
+  api.savePrefs({ cabinPref: 'first', interestedInTravel: true });
+  var luxuryPrefs = api.readPrefs();
+  assertEqual('auto-detect resolves luxury for premium prefs', luxuryPrefs.mode, 'luxury');
 
-  api.savePrefs({ surfaceMode: 'easy_win', interestedInTravel: false });
-  var easyPrefs = api.readPrefs();
-  assertEqual('easy surface resolves no_travel when travel is off', easyPrefs.mode, 'no_travel');
+  api.savePrefs({ interestedInTravel: false });
+  var noTravelPrefs = api.readPrefs();
+  assertEqual('auto-detect resolves no_travel when travel is off', noTravelPrefs.mode, 'no_travel');
+
+  api.savePrefs({ interestedInTravel: true, complexityTolerance: 'low' });
+  var simplePrefs = api.readPrefs();
+  assertEqual('auto-detect resolves simple for low complexity', simplePrefs.mode, 'simple');
 
   assertEqual('applyWTP below cap unchanged', api.applyWTP(400, 'economy', defaultPrefs), 400);
   assert('applyWTP above cap discounted', api.applyWTP(4000, 'business', defaultPrefs) < 4000);
@@ -252,15 +247,16 @@ async function run() {
   assert('scoreBFB returns finite base score', isFinite(scored.baseScore));
 
   api.savePrefs({ mode: 'expiring', interestedInTravel: true });
-  assertEqual('legacy expiring mode migrates to use_soon surface', api.readPrefs().surfaceMode, 'use_soon');
+  assertEqual('detectAutoMode picks expiring for expiring prefs', api.readPrefs().mode, 'expiring');
   var expiringAnalysis = api.buildAnalysis(baseData, api.readPrefs(), api.readHousehold());
   assert('expiring mode still produces best option', !!expiringAnalysis.activeAccounts[1].bestOption);
 
   var results = api.writeAgentResults(baseData, api.readPrefs());
   assertEqual('writeAgentResults stores mode', results.mode, 'expiring');
-  assertEqual('writeAgentResults stores surface mode', results.surfaceMode, 'use_soon');
   assert('writeAgentResults stores totals', results.totals.best > 0);
   assert('writeAgentResults stores verdict payload', !!results.verdict && typeof results.verdict.title === 'string' && results.verdict.title.length > 0);
+  assert('writeAgentResults stores verdict summary', typeof results.verdict.summary === 'string' && results.verdict.summary === results.verdict.title);
+  assert('writeAgentResults stores verdict state', typeof results.verdict.state === 'string');
   assert('valueAdvisorResults stored in localStorage', !!win.localStorage.getItem('valueAdvisorResults'));
 
   win.localStorage.setItem('churn_data', '{broken json');
@@ -268,9 +264,9 @@ async function run() {
   win.localStorage.setItem('churn_data', JSON.stringify(baseData));
 
   api.render();
-  assert('render produces surface mode tabs', win.document.querySelectorAll('[data-mode]').length === 3);
-  assert('render produces verdict hero copy', win.document.getElementById('app').textContent.indexOf('Verdict') >= 0);
-  assert('render produces freshness footer', win.document.getElementById('app').textContent.indexOf('Program dataset updated') >= 0);
+  assert('render produces no mode tabs (removed)', win.document.querySelectorAll('[data-mode]').length === 0);
+  assert('render produces verdict line', win.document.getElementById('app').textContent.indexOf('Best opportunity') >= 0 || win.document.getElementById('app').textContent.indexOf('expiring') >= 0);
+  assert('render produces freshness footer', win.document.getElementById('app').textContent.indexOf('Dataset updated') >= 0);
 
   var chaseCard = findAccountCard(win.document, 'Chase Ultimate Rewards');
   var unitedCard = findAccountCard(win.document, 'United MileagePlus');
@@ -281,7 +277,7 @@ async function run() {
   assert('render shows transfer path copy in trip bridge', !!chaseCard && chaseCard.textContent.indexOf('Transfer from Chase Ultimate Rewards at 1:1') >= 0);
   assert('render shows direct program match in trip bridge', !!unitedCard && unitedCard.textContent.indexOf('Direct balance in United MileagePlus') >= 0);
   assert('render shows expiry badge on expiring account', !!unitedBadge && unitedBadge.textContent.toLowerCase().indexOf('remaining') >= 0);
-  assert('render shows trip bridge empty state for unmatched account', !!localCard && localCard.textContent.indexOf('No current sweet spots matched to this account yet.') >= 0);
+  assert('render shows trip bridge empty state for unmatched account', !!localCard && localCard.textContent.indexOf('No matching sweet spots yet.') >= 0);
 
   await api.loadSweetSpots(function () {
     return Promise.reject(new Error('offline'));
