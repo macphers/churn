@@ -12,12 +12,19 @@ A personal dashboard for tracking credit card points, miles, and benefits across
 4. **Points Summary Dashboard** — At-a-glance view of total points across all programs, organized by type (airline, hotel, flexible currency)
 5. **Manual Balance Updates** — Edit balances as they change; track last-updated date per account
 
-### Future Features (v2+)
-- Trip booking assessment: AI agent reads your balances and cross-references award availability APIs to suggest what trips you can book with points
-- Trip recommendations: proactive suggestions based on your point balances and travel preferences
-- Points expiration alerts
-- Transfer partner mapping (e.g., Chase UR → Hyatt, United, etc.)
-- Earn rate tracking per card per spend category
+### Shipped Since v1
+- **Value Advisor** (value.html) — personalized redemption recommendations with scoring engine, WTP caps, and household support
+- **Trip Planner** (trips.html) — shows bookable flights and hotels based on your balances and transfer paths
+- **Transfer partner mapping** — built into programs.js with ratios, sweet spots, and path resolution
+- **Points expiration tracking** — staleness badges, activity dates, and expiration warnings across all views
+- **Earn rate tracking** — per-card earn rates stored in programs.js for all major cards
+
+### Future Features
+- Combined balance aggregation across transfer paths in Trip Planner
+- Transfer bonus ingestion for time-limited promotions
+- Screenshot AI import for balance sync
+- Chrome extension for auto-sync from loyalty program websites
+- Redemption journal for tracking past bookings and learning real WTP thresholds
 
 ## AI Agent Interface
 The app stores all data in a structured JSON format in localStorage. An AI agent can:
@@ -66,14 +73,13 @@ The app stores all data in a structured JSON format in localStorage. An AI agent
 - Pure HTML/CSS/JS — no frameworks, no build step
 - All data stored in localStorage (no backend)
 - Must work well on mobile (responsive, touch-friendly)
-- Single `index.html` file (or minimal file count)
+- Minimal file count (currently 3 pages + shared data files)
 - Clean, modern UI — dark mode preferred
 
 ## Pages / Views
-1. **Dashboard** — summary of all accounts and total points by type
-2. **Accounts** — list/add/edit/delete loyalty accounts
-3. **Benefits** — list/add/edit/delete card benefits, with used/unused status
-4. **Profile** — travel preferences for AI agent context (home airport, preferred airlines, etc.)
+1. **Rewards Tracker** (index.html) — dashboard with accounts, benefits, profile, balance refresh, advisor verdict banner
+2. **Value Advisor** (value.html) — scoring engine with WTP caps, recommendation cards, household support, expiration tracking
+3. **Trip Planner** (trips.html) — resolver engine showing bookable flights/hotels from your points via sweet spots and transfer paths
 
 ## Non-Goals (v1)
 - No backend or authentication

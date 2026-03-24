@@ -84,11 +84,14 @@ If you want stable local data while developing, keep using the same URL consiste
 │   ├── index.html             # Rewards Tracker
 │   ├── value.html             # Value Advisor
 │   ├── trips.html             # Trip Planner
+│   ├── shared.css             # Shared design tokens (colors, typography)
 │   ├── programs.js            # Shared reward-program data
 │   ├── sweetSpots.json        # Curated flight/hotel redemptions
 │   └── tests/                 # Browser-side validation pages
 ├── scripts/
 │   └── churn-dev-server.mjs   # Local dev server for the app
+├── serve.sh                   # Quick-start local server
+├── Start Churn.command         # macOS double-click launcher
 ├── docs/                      # Product and design notes
 ├── product-spec.md            # Product direction and scope
 └── README.md
@@ -101,6 +104,7 @@ The user-facing app is intentionally static and browser-native.
 - `output/index.html` is the main rewards tracker
 - `output/value.html` is the advisor view
 - `output/trips.html` is the trip planner (what can I book with my points?)
+- `output/shared.css` is the shared design token stylesheet (colors, typography)
 - `output/programs.js` contains shared reward-program metadata
 - `output/sweetSpots.json` contains curated flight and hotel sweet spots
 - State persists locally and is shared across views through browser storage
@@ -127,9 +131,10 @@ The product lives in `output/`. In practice, that is where most UI and feature w
 
 Current testing is lightweight and practical:
 
-- Browser test pages in `output/tests/`
+- `output/tests/test.html` — Tracker tests (schema migration, import/export, account management)
+- `output/tests/value-test.html` — Advisor tests (scoring engine, WTP, household, recommendations)
+- `output/tests/trips-test.html` — Trip Planner tests (resolver engine, filters, rendering)
 - Local manual verification on a fixed port
-- Supporting validation scripts in `tests/`
 
 The repo is optimized for fast iteration first.
 
@@ -137,19 +142,19 @@ The repo is optimized for fast iteration first.
 
 The Churn app is static, which makes deployment straightforward.
 
-Good deployment targets:
+The app is deployed to GitHub Pages via a workflow in `.github/workflows/pages.yml`. Every push to `master` publishes the `output/` directory.
+
+Other deployment targets that work:
 
 - Vercel
-- GitHub Pages
 - Netlify
 - Any static host that can serve `output/`
 
 Recommended approach:
 
 - Use `npm run dev -- --port 43110` for local development
-- Deploy `output/` when you want a shareable preview or production URL
-
-Vercel is a good fit for the product app, but it is not required for normal local development.
+- Push to `master` for automatic GitHub Pages deployment
+- Or deploy `output/` to any static host for a shareable preview
 
 ## Current constraints
 
@@ -172,6 +177,10 @@ Planned and implied future work includes:
 - Points expiration intelligence
 - Richer valuation logic
 - Hosted preview deployments for easier sharing
+
+## Design system
+
+The visual design system is documented in [DESIGN.md](DESIGN.md) — colors, typography, spacing, and motion. All CSS values should reference DESIGN.md as the source of truth.
 
 ## Inspiration
 

@@ -44,14 +44,6 @@
 **Depends on:** Phase 1 shipped. Start with top 5 programs (Chase, Amex, United, Delta, Marriott).
 **Added:** 2026-03-18
 
-## P3 — Separate Activity Date Field
-**What:** Add an `lastActivityDate` field to accounts, separate from `lastUpdated`. `lastUpdated` tracks when the user last refreshed the balance in Churn. `lastActivityDate` tracks when the account itself last had activity (earning, redeeming, login).
-**Why:** Expiration checking currently uses `lastUpdated` as a proxy for account activity, but refreshing your balance in Churn resets the expiration clock even though the actual loyalty account may still be inactive. This leads to false "safe" signals.
-**Effort:** S (human: ~1 day / CC: ~10 min)
-**Depends on:** Nothing — can be done anytime. Would improve expiration accuracy in both Advisor and Dashboard badges.
-**Context:** Identified during CEO review (2026-03-23). Current checkExpiration() in value.html uses lastUpdated + program's inactivityMonths to estimate expiry. This conflates "I updated Churn" with "I used my loyalty account." Low priority because the current heuristic is conservative (warns too early rather than too late).
-**Added:** 2026-03-23
-
 ## Completed
 
 ### P2 — "What Can I Afford?" Destination Browser
@@ -61,6 +53,13 @@
 **Depends on:** Scoring engine, transfer partner database from Points Value Advisor plan
 **Added:** 2026-03-17
 **Completed:** v0.1.13.0 (2026-03-23) — Shipped as Trip Planner with 27 sweet spots, resolver engine, and tri-state categorization
+
+### P3 — Separate Activity Date Field
+**What:** Add an `lastActivityDate` field to accounts, separate from `lastUpdated`.
+**Why:** Expiration checking used `lastUpdated` as a proxy for account activity, leading to false "safe" signals.
+**Effort:** S (human: ~1 day / CC: ~10 min)
+**Added:** 2026-03-23
+**Completed:** v0.1.14.0 (2026-03-23) — Expiration tracking now preserves a separate last-activity date
 
 ### P2 — Create DESIGN.md (Formal Design System)
 **What:** Run `/design-consultation` to document Churn's implicit design system — colors, typography, spacing, component vocabulary, animation language.

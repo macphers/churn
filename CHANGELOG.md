@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.1.15.0] - 2026-03-24
 
 ### Added
-- Shared theme stylesheet (`output/shared.css`) so Tracker, Advisor, and Trips all consume one source of truth for core color and typography tokens
+- Shared theme stylesheet (`output/shared.css`) keeps color and typography tokens consistent across Tracker, Advisor, and Trips
 - Advisor trip bridge cards that map each account to current sweet spots from the Trips dataset, including direct-balance and transfer-path matches
 - 24 browser test assertions covering tracker-side recommendation migration, non-destructive sidecar imports, advisor trip bridge rendering, and fetch-failure degradation
 
