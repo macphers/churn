@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.14.0] - 2026-03-23
+
+### Added
+- Advisor verdict banner on the Tracker dashboard with one-click jump back to the Value Advisor
+- Expiration tracking now preserves a separate last-activity date so balance refreshes no longer reset inactivity estimates
+- 7 updated browser test assertions covering advisor cache invalidation, last-activity handling, and the new tracker/advisor integration paths
+
+### Changed
+- Value Advisor now surfaces 3 user-facing recommendation styles instead of 7 internal scoring modes
+- Advisor layout now leads with a verdict hero, plain-English recommendation cards, and clearer score labels
+- Tracker hides stale advisor verdicts when balances change instead of showing cached guidance from an older portfolio
+
+### Fixed
+- Dashboard expiration badges now follow account activity dates instead of piggybacking on the last balance refresh timestamp
+- Advisor expiration logic now prefers explicit activity dates when they exist
+
 ## [0.1.13.0] - 2026-03-23
 
 ### Added
