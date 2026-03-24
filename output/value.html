@@ -480,7 +480,7 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
-.metric-card, .sweet-card, .household-card, .setting-card {
+.metric-card, .sweet-card, .setting-card {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -551,7 +551,7 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
-.settings-grid .field, .household-form-grid .field {
+.settings-grid .field {
   display: grid;
   gap: 6px;
 }
@@ -586,27 +586,6 @@ body {
   text-transform: none;
   font-size: 11px;
 }
-.household-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 0.8fr auto;
-  gap: 8px;
-  align-items: end;
-}
-.household-list {
-  display: grid;
-  gap: 8px;
-}
-.household-card h3 {
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-.household-card p {
-  color: var(--text-muted);
-  margin-top: 4px;
-  font-size: 13px;
 }
 
 .btn {
@@ -649,7 +628,6 @@ body {
   .settings-grid, .caps-grid, .detail-grid {
     grid-template-columns: 1fr;
   }
-  .household-form-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767px) {
@@ -708,8 +686,6 @@ body {
 var STORAGE_KEY = 'churn_data';
 var LEGACY_STORAGE_KEY = 'osaka_data';
 var PREFS_KEY = 'valueAdvisorPrefs';
-var HOUSEHOLD_KEY = 'churn_household';
-var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var state = { expanded: {} };
 var sweetSpotsState = { status: 'loading', data: null, error: null };
 var sweetSpotsPromise = null;
@@ -841,45 +817,6 @@ function savePrefs(prefs) {
   localStorage.setItem(PREFS_KEY, JSON.stringify(normalizePrefs(prefs, readRewardsData())));
 }
 
-function normalizeHouseholdAccount(item) {
-  if (!item || typeof item !== 'object') return null;
-  var programName = item.program || getProgramNameBySlug(item.programSlug) || '';
-  var program = findProgram(programName, item.programSlug);
-  return {
-    id: typeof item.id === 'string' ? item.id : genId(),
-    memberName: typeof item.memberName === 'string' && item.memberName.trim() ? item.memberName.trim() : 'Player two',
-    program: programName,
-    programSlug: program ? program.slug : (item.programSlug || null),
-    balance: Math.max(0, Math.floor(Number(item.balance) || 0)),
-    currency: program ? program.currency : (item.currency || 'points'),
-    type: program ? program.type : (item.type || 'other')
-  };
-}
-
-function readHousehold() {
-  try {
-    var raw = localStorage.getItem(HOUSEHOLD_KEY);
-    if (!raw) {
-      raw = localStorage.getItem(LEGACY_HOUSEHOLD_KEY);
-      if (raw) { localStorage.setItem(HOUSEHOLD_KEY, raw); localStorage.removeItem(LEGACY_HOUSEHOLD_KEY); }
-    }
-    if (!raw) return [];
-    var parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed.map(normalizeHouseholdAccount).filter(Boolean);
-    }
-    if (parsed && Array.isArray(parsed.accounts)) {
-      return parsed.accounts.map(normalizeHouseholdAccount).filter(Boolean);
-    }
-    return [];
-  } catch (error) {
-    return [];
-  }
-}
-
-function saveHousehold(items) {
-  localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify(items.map(normalizeHouseholdAccount).filter(Boolean)));
-}
 
 function genId() {
   try {
@@ -1076,7 +1013,6 @@ function normalizeBaseOption(option, floor, prefs) {
   var preferenceComponent = preferenceFit(option.cabinType, prefs) * 100;
   var surchargeComponent = surchargeScore(option.surcharges) * 100;
   var baseScore = valueComponent * 0.38 + simplicityComponent * 0.16 + availabilityComponent * 0.16 + flexibilityComponent * 0.12 + preferenceComponent * 0.1 + surchargeComponent * 0.08;
-  if (option.householdBalance > 0) baseScore += 4;
   return Object.assign({}, option, {
     floorValue: floorValue,
     liftRatio: round(liftRatio, 3),
@@ -1130,7 +1066,7 @@ function fallbackCabinType(program, fallbackType, prefs) {
   return prefs.cabinPref || 'economy';
 }
 
-function buildFallbackOptions(account, program, prefs, householdBalance) {
+function buildFallbackOptions(account, program, prefs) {
   var fallbackOptions = program && Array.isArray(program.fallbackOptions) && program.fallbackOptions.length
     ? program.fallbackOptions
     : [{ type: 'cash_back', cpp: account.cpp || 1, label: 'Cash back' }];
@@ -1160,13 +1096,12 @@ function buildFallbackOptions(account, program, prefs, householdBalance) {
       isTravel: item.type.indexOf('travel') === 0 || item.type === 'travel_booking' || item.type === 'pay_with_points',
       isSimple: true,
       isNonTravel: item.type === 'cash_back' || item.type === 'gift_cards' || item.type === 'merchandise',
-      householdBalance: householdBalance || 0,
       urgencyBoost: 0
     };
   });
 }
 
-function buildTransferOptions(account, program, prefs, householdBalance) {
+function buildTransferOptions(account, program, prefs) {
   if (!program || !Array.isArray(program.transferPartners) || !program.transferPartners.length) return [];
   return program.transferPartners.map(function (partner) {
     var netCpp = calcNetCpp(account.balance, partner.bestCpp, partner);
@@ -1198,7 +1133,6 @@ function buildTransferOptions(account, program, prefs, householdBalance) {
       isTravel: true,
       isSimple: false,
       isNonTravel: false,
-      householdBalance: householdBalance || 0,
       urgencyBoost: 0
     };
   });
@@ -1221,19 +1155,14 @@ function checkExpiration(account) {
   return null;
 }
 
-function analyzeAccount(rawAccount, prefs, household) {
+function analyzeAccount(rawAccount, prefs) {
   var account = Object.assign({}, rawAccount);
   account.balance = Math.max(0, Number(account.balance) || 0);
   account.cpp = Number(account.cpp) || 1;
   var program = programFromAccount(account);
-  var householdBalance = household.filter(function (member) {
-    return member.programSlug && account.programSlug && member.programSlug === account.programSlug;
-  }).reduce(function (sum, member) {
-    return sum + member.balance;
-  }, 0);
-  var fallbackOptions = buildFallbackOptions(account, program, prefs, householdBalance);
+  var fallbackOptions = buildFallbackOptions(account, program, prefs);
   var cashFloor = fallbackOptions.find(function (option) { return option.type === 'cash_back'; }) || fallbackOptions[0];
-  var transferOptions = prefs.interestedInTravel === false ? [] : buildTransferOptions(account, program, prefs, householdBalance);
+  var transferOptions = prefs.interestedInTravel === false ? [] : buildTransferOptions(account, program, prefs);
   var expiration = checkExpiration(account);
   var urgencyBoost = expiration && expiration.atRisk ? (expiration.expired ? 24 : 16) : 0;
   var options = fallbackOptions.concat(transferOptions).map(function (option) {
@@ -1251,7 +1180,6 @@ function analyzeAccount(rawAccount, prefs, household) {
   return {
     account: account,
     program: program,
-    householdBalance: householdBalance,
     floorOption: cashFloor,
     bestOption: bestOption,
     bestSimple: bestSimple,
@@ -1267,10 +1195,10 @@ function analyzeAccount(rawAccount, prefs, household) {
   };
 }
 
-function buildAnalysis(data, prefs, household) {
+function buildAnalysis(data, prefs) {
   prefs = normalizePrefs(prefs, data);
   var accounts = (data.accounts || []).map(function (account) {
-    return analyzeAccount(account, prefs, household);
+    return analyzeAccount(account, prefs);
   });
   var active = accounts.filter(function (item) { return item.account.balance > 0; });
   var totalBest = active.reduce(function (sum, item) { return sum + item.bestOption.adjustedValue; }, 0);
@@ -1304,7 +1232,6 @@ function buildAnalysis(data, prefs, household) {
   });
   return {
     prefs: prefs,
-    household: household,
     accounts: accounts,
     activeAccounts: active,
     totalBest: round(totalBest, 0),
@@ -1342,8 +1269,7 @@ function buildVerdictLine(analysis) {
 }
 
 function writeAgentResults(data, prefs) {
-  var household = readHousehold();
-  var analysis = buildAnalysis(data, prefs, household);
+  var analysis = buildAnalysis(data, prefs);
   var best = analysis.bestOverall || analysis.bestSimple || analysis.bestNonTravel || null;
   var urgent = analysis.expiring[0] || null;
   var primary = (urgent && urgent.expiration && urgent.expiration.atRisk) ? urgent.bestOption : best;
@@ -1353,7 +1279,6 @@ function writeAgentResults(data, prefs) {
     generatedAt: new Date().toISOString(),
     mode: analysis.prefs.mode,
     userPreferences: analysis.prefs,
-    household: household,
     verdict: {
       state: state,
       title: summaryLine,
@@ -1389,7 +1314,6 @@ function writeAgentResults(data, prefs) {
         },
         leftOnTable: item.leftOnTable,
         expiration: item.expiration,
-        householdBalance: item.householdBalance,
         alternatives: item.options.slice(1, 4).map(function (option) {
           return {
             label: option.label,
@@ -1544,9 +1468,6 @@ function renderAccountDetails(item) {
     '<div class="metric-card"><div class="mini-label">Best option</div><div class="value">' + esc(formatDollars(item.bestOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.bestOption.label + ' • ' + formatScoreLabel(item.bestOption.modeScore)) + '</div></div>' +
     '<div class="metric-card"><div class="mini-label">Floor option</div><div class="value">' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.floorOption.label) + '</div></div>' +
   '</div>';
-  if (item.householdBalance > 0) {
-    details += '<div class="metric-card" style="margin-top:12px"><div class="mini-label">Household balance</div><div class="value">' + esc(formatPoints(item.householdBalance)) + '</div><div class="section-copy">From household member in same program.</div></div>';
-  }
   details += '<div class="sweet-grid" style="margin-top:12px">' + item.options.slice(0, 4).map(function (option) {
     return '<div class="sweet-card">' +
       '<h3>' + esc(option.label) + '</h3>' +
@@ -1607,8 +1528,7 @@ function render() {
     return;
   }
   var prefs = readPrefs();
-  var household = readHousehold();
-  var analysis = buildAnalysis(data, prefs, household);
+  var analysis = buildAnalysis(data, prefs);
   writeAgentResults(data, prefs);
   if (!analysis.activeAccounts.length) {
     app.innerHTML = renderEmptyState('All balances are zero', 'Update your point totals in the tracker to see recommendations.', 'index.html', 'Update balances');
@@ -1632,7 +1552,7 @@ function bindEvents() {
     }
   });
   window.addEventListener('storage', function (event) {
-    if (event.key === STORAGE_KEY || event.key === PREFS_KEY || event.key === HOUSEHOLD_KEY) render();
+    if (event.key === STORAGE_KEY || event.key === PREFS_KEY) render();
   });
 }
 
