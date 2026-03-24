@@ -14,9 +14,10 @@ Extend value.html with a personal recommendation engine: willingness-to-pay mode
 ```
 readRewardsData() ──► getValuations() ──► applyWTP() ──► calcNetCpp()
 readHousehold()  ──┘                                         │
-readPrefs()  ────────────────────────────────────► scoreBFB() ──► rankByMode()
+readPrefs()  ──► detectAutoMode() ──────────────► scoreBFB() ──► rankByMode()
                                                                       │
-                                                              renderRecCards()
+                                                              renderVerdictLine()
+                                                              renderByAccount()
                                                               writeAgentResults()
 ```
 
@@ -36,14 +37,13 @@ Per-cabin-class caps (~8 settings): economy, premium economy, business, first + 
 bang_for_buck = value_over_floor + cash_saved + preference_fit + ease - penalties
 ```
 
-**7 User Modes** (change scoring weights):
-1. Max value — prioritize highest personal-value gain over fallback
-2. Min cash — prioritize lowest out-of-pocket spend
-3. Simple redemption — prioritize ease and certainty
-4. Travel now — optimize live flights and hotels
-5. No travel — surface best non-travel uses
-6. Use expiring points — prioritize balances with expiry risk
-7. Luxury trip — allow higher WTP cap
+**Auto-Detected Modes** (v0.1.16.0 — previously 7 user-selected modes, now auto-detected):
+Modes are selected automatically by `detectAutoMode()` based on account state and preferences, in priority order:
+1. Expiring — if any account has at-risk balance within 90 days
+2. No travel — if `interestedInTravel` is false
+3. Simple — if `complexityTolerance` is 'low'
+4. Luxury — if cabin/hotel preferences indicate premium (business/first/luxury/resort)
+5. Max value — default fallback
 
 **Surcharge/Hidden Cost Modeling:**
 Per transfer partner: fuel surcharges, booking fees, flexibility rating, availability confidence. Used in calcNetCpp() to produce honest CPP.
@@ -51,30 +51,27 @@ Per transfer partner: fuel surcharges, booking fees, flexibility rating, availab
 **Household Support:**
 Separate localStorage key for player-two accounts. Value advisor combines balances across players for recommendations. Index.html stays unchanged.
 
-### Decision-First Recommendation Cards
-4 cards answering different questions:
-1. **Best Overall Use** — highest bang-for-buck score
-2. **Best Simple Option** — no transfers, no complexity
-3. **Best Non-Travel Option** — cash-like redemptions only
-4. **Worth Saving For Later?** — hold vs redeem guidance
-
-Each card shows: estimated value, value vs fallback, cash required, points required, confidence, and one-line explanation of why it ranks here.
+### Inline Account Recommendations (v0.1.16.0 — replaced Decision-First Recommendation Cards)
+Previously 4 recommendation cards (Best Overall, Best Simple, Best Non-Travel, Worth Saving). Replaced with:
+- One-line verdict sentence at the top of the page
+- Per-account best option shown inline in account card headers
+- Detailed options visible via expand toggle per account
 
 ## Scope Decisions
 
 | # | Feature | Decision |
 |---|---------|----------|
-| 1 | 7 User Modes | ACCEPTED |
+| 1 | 7 User Modes → Auto-Detected (v0.1.16.0) | SIMPLIFIED |
 | 2 | Personal Willingness-to-Pay Model | ACCEPTED |
 | 3 | Bang-for-Buck Scoring Engine | ACCEPTED |
 | 4 | User Settings (cabin, hotel, WTP caps, complexity) | ACCEPTED |
 | 5 | Household/Player-Two Support | ACCEPTED |
 | 6 | Surcharge/Hidden Cost Modeling | ACCEPTED |
-| 7 | Decision-First Recommendation Cards | ACCEPTED |
+| 7 | Decision-First Recommendation Cards → Inline (v0.1.16.0) | SIMPLIFIED |
 | 8 | Transfer Bonus Ingestion | DEFERRED |
 
 ## Code Quality Decision
-Refactor monolithic render() into composable section functions: renderHero(), renderLeftOnTable(), renderExpirations(), renderModeSelector(), renderRecCards(), renderAccountDetails(), renderSweets(), renderSettings(), renderHousehold().
+Refactor monolithic render() into composable section functions. As of v0.1.16.0: renderVerdictLine(), renderByAccount(), renderAccountOptions(), renderAccountDetails(), renderTripBridge(), renderSettings(), renderHousehold(), renderFreshness().
 
 ## Deferred
 - Transfer bonus ingestion → TODOS.md
