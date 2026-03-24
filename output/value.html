@@ -795,6 +795,7 @@ var HOUSEHOLD_KEY = 'churn_household';
 var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var state = { expanded: {} };
 var DEFAULT_PREFS = {
+  surfaceMode: 'auto',
   mode: 'max_value',
   interestedInTravel: true,
   cabinPref: 'economy',
@@ -820,6 +821,35 @@ var MODE_DEFS = [
   { key: 'expiring', label: 'Expiring', copy: 'Urgency beats perfect theoretical value.' },
   { key: 'luxury', label: 'Luxury', copy: 'Bias toward premium cabins and resorts.' }
 ];
+var SURFACE_MODES = [
+  {
+    key: 'stretch_value',
+    label: 'Stretch for value',
+    copy: 'Accept a transfer or a few extra steps when the upside is real.',
+    explain: 'Use this when you want the best realistic upside, not just the easiest cash-out.'
+  },
+  {
+    key: 'easy_win',
+    label: 'Easy win',
+    copy: 'Favor lower-friction options you would actually book today.',
+    explain: 'Use this when you want fewer steps, lower fees, and less booking uncertainty.'
+  },
+  {
+    key: 'use_soon',
+    label: 'Use soon',
+    copy: 'Push expiring balances and near-term wins to the top.',
+    explain: 'Use this when time matters more than chasing the perfect theoretical redemption.'
+  }
+];
+var LEGACY_MODE_TO_SURFACE = {
+  max_value: 'stretch_value',
+  luxury: 'stretch_value',
+  simple: 'easy_win',
+  min_cash: 'easy_win',
+  no_travel: 'easy_win',
+  travel_now: 'use_soon',
+  expiring: 'use_soon'
+};
 var TYPE_COLORS = {
   flexible: 'var(--card-color)',
   credit_card: 'var(--card-color)',
@@ -874,6 +904,68 @@ function mergePrefs(raw) {
   return prefs;
 }
 
+function getSurfaceMode(key) {
+  return SURFACE_MODES.find(function (mode) { return mode.key === key; }) || null;
+}
+
+function detectAutoSurfaceMode(data, prefs) {
+  var accounts = data && Array.isArray(data.accounts) ? data.accounts : [];
+  var urgent = accounts.some(function (account) {
+    var expiration = checkExpiration(account);
+    return expiration && expiration.atRisk && (expiration.daysRemaining == null || expiration.daysRemaining <= 90);
+  });
+  if (urgent) return 'use_soon';
+  if (prefs && (prefs.interestedInTravel === false || prefs.complexityTolerance === 'low')) return 'easy_win';
+  return 'stretch_value';
+}
+
+function resolveInternalMode(surfaceMode, data, prefs) {
+  var accounts = data && Array.isArray(data.accounts) ? data.accounts : [];
+  var hasExpiring = accounts.some(function (account) {
+    var expiration = checkExpiration(account);
+    return expiration && expiration.atRisk;
+  });
+  if (surfaceMode === 'use_soon') {
+    if (hasExpiring) return 'expiring';
+    return prefs && prefs.interestedInTravel === false ? 'no_travel' : 'travel_now';
+  }
+  if (surfaceMode === 'easy_win') {
+    return prefs && prefs.interestedInTravel === false ? 'no_travel' : 'simple';
+  }
+  if (prefs && prefs.interestedInTravel === false) return 'no_travel';
+  if (prefs && (prefs.cabinPref === 'business' || prefs.cabinPref === 'first' || prefs.hotelPref === 'luxuryHotel' || prefs.hotelPref === 'resort')) {
+    return 'luxury';
+  }
+  return 'max_value';
+}
+
+function autoSelectMode(data, prefs) {
+  var normalized = mergePrefs(prefs);
+  var requested = normalized.surfaceMode;
+  var surfaceMode = requested && requested !== 'auto' && getSurfaceMode(requested)
+    ? requested
+    : detectAutoSurfaceMode(data, normalized);
+  return {
+    surfaceMode: surfaceMode,
+    mode: resolveInternalMode(surfaceMode, data, normalized)
+  };
+}
+
+function normalizePrefs(raw, data) {
+  var prefs = mergePrefs(raw);
+  var hasExplicitSurface = !!(raw && typeof raw === 'object' && raw.surfaceMode != null && raw.surfaceMode !== '');
+  if (!hasExplicitSurface) {
+    var legacyMode = raw && typeof raw === 'object' ? raw.mode : null;
+    prefs.surfaceMode = LEGACY_MODE_TO_SURFACE[legacyMode] || 'auto';
+  } else if (!getSurfaceMode(prefs.surfaceMode) && prefs.surfaceMode !== 'auto') {
+    prefs.surfaceMode = 'auto';
+  }
+  var selected = autoSelectMode(data, prefs);
+  prefs.surfaceMode = selected.surfaceMode;
+  prefs.mode = selected.mode;
+  return prefs;
+}
+
 function readRewardsData() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
@@ -891,17 +983,18 @@ function readRewardsData() {
 }
 
 function readPrefs() {
+  var data = readRewardsData();
   try {
     var raw = localStorage.getItem(PREFS_KEY);
-    if (!raw) return deepClone(DEFAULT_PREFS);
-    return mergePrefs(JSON.parse(raw));
+    if (!raw) return normalizePrefs(null, data);
+    return normalizePrefs(JSON.parse(raw), data);
   } catch (error) {
-    return deepClone(DEFAULT_PREFS);
+    return normalizePrefs(null, data);
   }
 }
 
 function savePrefs(prefs) {
-  localStorage.setItem(PREFS_KEY, JSON.stringify(mergePrefs(prefs)));
+  localStorage.setItem(PREFS_KEY, JSON.stringify(normalizePrefs(prefs, readRewardsData())));
 }
 
 function normalizeHouseholdAccount(item) {
@@ -1209,8 +1302,9 @@ function buildTransferOptions(account, program, prefs, householdBalance) {
 function checkExpiration(account) {
   var rule = window.PROGRAMS.expirationRules[account.program];
   if (!rule || !rule.expires) return null;
-  if (!account.lastUpdated) return { atRisk: true, expired: false, daysRemaining: null, message: 'Unknown last activity date.' };
-  var lastUpdated = new Date(account.lastUpdated);
+  var activityDate = account.lastActivityDate || account.lastUpdated;
+  if (!activityDate) return { atRisk: true, expired: false, daysRemaining: null, message: 'Unknown last activity date.' };
+  var lastUpdated = new Date(activityDate);
   if (isNaN(lastUpdated.getTime())) return { atRisk: true, expired: false, daysRemaining: null, message: 'Unknown last activity date.' };
   var expiresAt = new Date(lastUpdated);
   expiresAt.setMonth(expiresAt.getMonth() + rule.inactivityMonths);
@@ -1269,6 +1363,7 @@ function analyzeAccount(rawAccount, prefs, household) {
 }
 
 function buildAnalysis(data, prefs, household) {
+  prefs = normalizePrefs(prefs, data);
   var accounts = (data.accounts || []).map(function (account) {
     return analyzeAccount(account, prefs, household);
   });
@@ -1348,14 +1443,105 @@ function worthSavingCard(analysis) {
   };
 }
 
+function scoreLabel(score) {
+  if (!isFinite(score)) return 'Unscored';
+  if (score >= 90) return 'Very strong fit';
+  if (score >= 82) return 'Strong fit';
+  if (score >= 72) return 'Good fit';
+  if (score >= 62) return 'Worth considering';
+  return 'Backup option';
+}
+
+function formatScoreLabel(score) {
+  return scoreLabel(score) + ' • ' + Number(score || 0).toFixed(1);
+}
+
+function explainRecommendation(card) {
+  if (!card || !card.account) return '';
+  if (card.kind === 'transfer_partner') {
+    return card.account.program + ' wins because ' + card.label + ' still has real upside after fees, availability, and friction are discounted.';
+  }
+  if (card.isNonTravel) {
+    return card.account.program + ' wins because the cash-like option stays close enough that simplicity beats chasing a transfer.';
+  }
+  if (card.isSimple) {
+    return card.account.program + ' wins because it is easy to use without giving up much value.';
+  }
+  return card.account.program + ' wins because it balances value, availability, and ease better than the alternatives.';
+}
+
+function buildVerdict(analysis) {
+  var surface = getSurfaceMode(analysis.prefs.surfaceMode) || SURFACE_MODES[0];
+  var worthSaving = worthSavingCard(analysis);
+  var urgent = analysis.expiring[0] || null;
+  var best = analysis.bestOverall || analysis.bestSimple || analysis.bestNonTravel || null;
+  if (surface.key === 'use_soon' && urgent) {
+    return {
+      state: urgent.expiration && urgent.expiration.expired ? 'expired' : 'urgent',
+      title: 'Use ' + urgent.account.program + ' soon',
+      body: urgent.account.program + ' is showing ' + (urgent.expiration ? urgent.expiration.message.toLowerCase() : 'real urgency') + '. The best practical move right now is ' + urgent.bestOption.label + ' for about ' + formatDollars(urgent.bestOption.adjustedValue) + '.',
+      option: urgent.bestOption,
+      program: urgent.account.program
+    };
+  }
+  if (worthSaving.state === 'wait') {
+    return {
+      state: 'wait',
+      title: 'Save for a better moment',
+      body: worthSaving.body,
+      option: null,
+      program: null
+    };
+  }
+  if (!best) {
+    return {
+      state: 'wait',
+      title: 'Need more signal',
+      body: 'Add more balances or update your preferences to get a stronger recommendation.',
+      option: null,
+      program: null
+    };
+  }
+  if (surface.key === 'easy_win') {
+    return {
+      state: 'easy',
+      title: 'Take the easy win',
+      body: best.account.program + ' has the cleanest answer right now: ' + best.label + ' for about ' + formatDollars(best.adjustedValue) + '.',
+      option: best,
+      program: best.account.program
+    };
+  }
+  return {
+    state: 'stretch',
+    title: 'Stretch for more value',
+    body: best.account.program + ' has enough upside through ' + best.label + ' to justify the extra steps right now.',
+    option: best,
+    program: best.account.program
+  };
+}
+
 function writeAgentResults(data, prefs) {
   var household = readHousehold();
   var analysis = buildAnalysis(data, prefs, household);
+  var verdict = buildVerdict(analysis);
+  var surface = getSurfaceMode(analysis.prefs.surfaceMode) || SURFACE_MODES[0];
   var result = {
     generatedAt: new Date().toISOString(),
-    mode: prefs.mode,
-    userPreferences: prefs,
+    mode: analysis.prefs.mode,
+    surfaceMode: analysis.prefs.surfaceMode,
+    surfaceLabel: surface.label,
+    userPreferences: analysis.prefs,
     household: household,
+    verdict: {
+      state: verdict.state,
+      title: verdict.title,
+      body: verdict.body,
+      program: verdict.program,
+      surfaceLabel: surface.label,
+      adjusted_value: verdict.option ? verdict.option.adjustedValue : null,
+      option_label: verdict.option ? verdict.option.label : null,
+      score_label: verdict.option ? scoreLabel(verdict.option.modeScore) : null
+    },
     totals: {
       best: analysis.totalBest,
       floor: analysis.totalFloor,
@@ -1403,11 +1589,12 @@ function writeAgentResults(data, prefs) {
 }
 
 function renderModeStrip(prefs) {
+  var activeSurface = getSurfaceMode(prefs.surfaceMode) || SURFACE_MODES[0];
   return '<section class="panel modes-panel" aria-label="Advisor modes">' +
-    '<div class="mini-label">Mode</div>' +
-    '<div class="section-copy">Each mode re-ranks the same option set. Switch modes when your constraints change.</div>' +
-    '<div class="mode-strip" role="tablist" aria-label="Recommendation modes">' + MODE_DEFS.map(function (mode) {
-      var active = mode.key === prefs.mode;
+    '<div class="mini-label">Recommendation style</div>' +
+    '<div class="section-copy">' + esc(activeSurface.explain) + '</div>' +
+    '<div class="mode-strip" role="tablist" aria-label="Recommendation styles">' + SURFACE_MODES.map(function (mode) {
+      var active = mode.key === prefs.surfaceMode;
       return '<button type="button" role="tab" class="mode-pill' + (active ? ' active' : '') + '" data-mode="' + mode.key + '" aria-selected="' + (active ? 'true' : 'false') + '" tabindex="' + (active ? '0' : '-1') + '">' +
         '<strong>' + esc(mode.label) + '</strong><span>' + esc(mode.copy) + '</span></button>';
     }).join('') + '</div>' +
@@ -1415,40 +1602,45 @@ function renderModeStrip(prefs) {
 }
 
 function renderHero(analysis) {
+  var verdict = buildVerdict(analysis);
+  var surface = getSurfaceMode(analysis.prefs.surfaceMode) || SURFACE_MODES[0];
   var activeCount = analysis.activeAccounts.length;
   return '<section class="hero-grid">' +
     '<div class="panel hero-card">' +
-      '<div class="mini-label">Best-mode portfolio value</div>' +
-      '<div class="hero-value">' + esc(formatDollars(analysis.totalBest)) + '</div>' +
-      '<div class="hero-copy">Mode: ' + esc(MODE_DEFS.find(function (mode) { return mode.key === analysis.prefs.mode; }).label) + ' across ' + activeCount + ' active account' + (activeCount === 1 ? '' : 's') + '.</div>' +
+      '<div class="mini-label">Verdict</div>' +
+      '<div class="hero-value">' + esc(verdict.title) + '</div>' +
+      '<div class="hero-copy">' + esc(verdict.body) + '</div>' +
       '<div class="summary-row">' +
-        '<div class="summary-chip">Floor value ' + esc(formatDollars(analysis.totalFloor)) + '</div>' +
+        '<div class="summary-chip">' + esc(surface.label) + '</div>' +
+        (verdict.option ? '<div class="summary-chip">' + esc(verdict.option.label + ' • ' + formatDollars(verdict.option.adjustedValue)) + '</div>' : '') +
+        '<div class="summary-chip">' + activeCount + ' active account' + (activeCount === 1 ? '' : 's') + '</div>' +
         '<div class="summary-chip">Household balances ' + analysis.household.length + '</div>' +
         '<div class="summary-chip">Travel ' + (analysis.prefs.interestedInTravel ? 'on' : 'off') + '</div>' +
       '</div>' +
     '</div>' +
     '<div class="panel delta-card">' +
-      '<div class="mini-label">Delta from floor</div>' +
-      '<div class="delta-figure">' + esc(formatDollars(analysis.totalGap)) + '</div>' +
-      '<div class="section-copy">This is the value gap between your current mode winners and the cash-like fallback floor.</div>' +
+      '<div class="mini-label">Portfolio at this setting</div>' +
+      '<div class="delta-figure">' + esc(formatDollars(analysis.totalBest)) + '</div>' +
+      '<div class="section-copy">' + esc(surface.explain) + '</div>' +
       '<div class="delta-bars">' +
         '<div class="delta-bar"><span class="mini-label">Best</span><div class="delta-track"><div class="delta-fill" style="width:100%;background:var(--gold)"></div></div><span>' + esc(formatDollars(analysis.totalBest)) + '</span></div>' +
         '<div class="delta-bar"><span class="mini-label">Floor</span><div class="delta-track"><div class="delta-fill" style="width:' + (analysis.totalBest > 0 ? round(analysis.totalFloor / analysis.totalBest * 100, 0) : 0) + '%;background:var(--accent)"></div></div><span>' + esc(formatDollars(analysis.totalFloor)) + '</span></div>' +
       '</div>' +
+      '<div class="section-copy">' + esc('That puts about ' + formatDollars(analysis.totalGap) + ' of extra value above the cash-like floor.') + '</div>' +
     '</div>' +
-  '</section>';
+  '</section>' + renderModeStrip(analysis.prefs);
 }
 
 function renderLeftOnTable(analysis) {
   if (!analysis.activeAccounts.length) return '';
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Opportunity</div><h2>Unrealized value</h2><p class="section-copy">Programs where the current mode beats the cash-equivalent floor by the widest margin.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Opportunity</div><h2>Unrealized value</h2><p class="section-copy">If you defaulted to the cash-like floor instead, this is the upside you would leave behind.</p></div></div>' +
     '<div class="lot-grid">' + analysis.activeAccounts.map(function (item) {
       var bestPct = item.bestOption.adjustedValue > 0 ? 100 : 0;
       var floorPct = item.bestOption.adjustedValue > 0 ? round(item.floorOption.adjustedValue / item.bestOption.adjustedValue * 100, 0) : 0;
       return '<article class="lot-item">' +
         '<h3><span>' + esc(item.account.program) + '</span><span>' + esc(formatDollars(item.leftOnTable.gap)) + '</span></h3>' +
-        '<p>' + esc(item.leftOnTable.gapPercent + '% lift over the floor via ' + item.bestOption.label) + '</p>' +
+        '<p>' + esc(item.bestOption.label + ' is about ' + item.leftOnTable.gapPercent + '% better than the floor for this account.') + '</p>' +
         '<div class="comparison-bar">' +
           '<div class="comparison-row"><span class="mini-label">Winner</span><div class="comparison-track"><div class="comparison-fill" style="width:' + bestPct + '%;background:var(--gold)"></div></div><span>' + esc(formatDollars(item.bestOption.adjustedValue)) + '</span></div>' +
           '<div class="comparison-row"><span class="mini-label">Floor</span><div class="comparison-track"><div class="comparison-fill" style="width:' + floorPct + '%;background:var(--accent)"></div></div><span>' + esc(formatDollars(item.floorOption.adjustedValue)) + '</span></div>' +
@@ -1460,12 +1652,12 @@ function renderLeftOnTable(analysis) {
 function renderWarnings(analysis) {
   if (!analysis.expiring.length) return '';
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Urgency</div><h2>Expiration warnings</h2><p class="section-copy">Accounts at risk of expiring should usually be redeemed before chasing higher-value options elsewhere.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Urgency</div><h2>Expiration warnings</h2><p class="section-copy">These accounts need attention before you optimize anything else.</p></div></div>' +
     '<div class="warning-list">' + analysis.expiring.map(function (item) {
       var expiration = item.expiration;
       return '<article class="warning-card">' +
         '<h3><span>' + esc(item.account.program) + '</span>' + (expiration.expired ? '<span class="expired-badge">Expired</span>' : '<span class="expired-badge">' + esc(expiration.message) + '</span>') + '</h3>' +
-        '<p>' + esc('Best practical option in this mode: ' + item.bestOption.label + ' worth ' + formatDollars(item.bestOption.adjustedValue)) + '</p>' +
+        '<p>' + esc('If you act now, the cleanest move is ' + item.bestOption.label + ' for about ' + formatDollars(item.bestOption.adjustedValue) + '.') + '</p>' +
         '<p>' + esc('Last updated: ' + (item.account.lastUpdated || 'unknown') + (expiration.expiresAt ? ' • expected expiry ' + expiration.expiresAt : '')) + '</p>' +
       '</article>';
     }).join('') + '</div></section>';
@@ -1473,32 +1665,27 @@ function renderWarnings(analysis) {
 
 function recCard(label, card, extraClass, featured) {
   if (!card) return '';
-  var body = '';
-  if (card.account) {
-    body = card.account.program + ' • ' + (card.sweetSpot || 'Best fit for the current mode and constraints.');
-  } else {
-    body = card.body || '';
-  }
+  var body = card.account ? explainRecommendation(card) : (card.body || '');
   return '<article class="rec-card' + (featured ? ' featured' : '') + (extraClass ? ' ' + extraClass : '') + '">' +
     '<div class="rec-label">' + esc(label) + '</div>' +
     '<div class="rec-title">' + esc(card.label || card.title) + '</div>' +
     (card.adjustedValue != null ? '<div class="rec-value">' + esc(formatDollars(card.adjustedValue)) + '</div>' : '') +
-    (card.modeScore != null ? '<div class="rec-score">Score ' + esc(card.modeScore.toFixed(1)) + '</div>' : '') +
+    (card.modeScore != null ? '<div class="rec-score">' + esc(formatScoreLabel(card.modeScore)) + '</div>' : '') +
     '<p class="section-copy">' + esc(body) + '</p>' +
-    (card.account ? '<p class="section-copy">' + esc(card.sweetSpot || ('Value over floor: ' + round(card.liftRatio * 100, 0) + '%')) + '</p>' : '') +
+    (card.account ? '<p class="section-copy">' + esc(card.sweetSpot || ('About ' + round(card.liftRatio * 100, 0) + '% above the cash-like floor.')) + '</p>' : '') +
   '</article>';
 }
 
 function renderRecommendations(analysis) {
   var worthSaving = worthSavingCard(analysis);
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Recommendations</div><h2>Decision-first cards</h2><p class="section-copy">These cards answer the question before the tables do.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Recommendations</div><h2>Plain-English options</h2><p class="section-copy">Start here if you just want the shortest answer before digging into the tables.</p></div></div>' +
     '<div class="recommendation-grid">' +
       recCard('Best Overall', analysis.bestOverall, '', true) +
-      recCard('Best Simple', analysis.bestSimple, '', false) +
-      recCard('Best Non-Travel', analysis.bestNonTravel, '', false) +
+      recCard('Easy Option', analysis.bestSimple, '', false) +
+      recCard('Cash-like Option', analysis.bestNonTravel, '', false) +
       '<article class="rec-card ' + (worthSaving.state === 'wait' ? 'wait' : '') + '">' +
-        '<div class="rec-label">Worth Saving</div>' +
+        '<div class="rec-label">Save or Use</div>' +
         '<div class="rec-title">' + esc(worthSaving.title) + '</div>' +
         (worthSaving.option ? '<div class="rec-value">' + esc(formatDollars(worthSaving.option.adjustedValue)) + '</div>' : '') +
         '<p class="section-copy">' + esc(worthSaving.body) + '</p>' +
@@ -1515,7 +1702,7 @@ function renderAccountOptions(item) {
     return '<div class="option-row">' +
       '<div class="option-copy"><strong>' + esc(option.label) + '</strong><span>' + esc(option.kind === 'transfer_partner' ? option.cabinType + ' • ' + option.ratio : option.type.replace(/_/g, ' ')) + '</span></div>' +
       '<div class="option-track"><div class="option-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
-      '<div class="option-values"><strong>' + esc(formatDollars(option.adjustedValue)) + '</strong><span>' + esc(option.netCpp.toFixed(2) + ' cpp') + '</span></div>' +
+      '<div class="option-values"><strong>' + esc(formatDollars(option.adjustedValue)) + '</strong><span>' + esc(formatScoreLabel(option.modeScore) + ' • ' + option.netCpp.toFixed(2) + ' cpp') + '</span></div>' +
     '</div>';
   }).join('');
 }
@@ -1523,7 +1710,7 @@ function renderAccountOptions(item) {
 function renderAccountDetails(item) {
   var details = '';
   details += '<div class="detail-grid">' +
-    '<div class="metric-card"><div class="mini-label">Best option</div><div class="value">' + esc(formatDollars(item.bestOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.bestOption.label + ' • ' + item.bestOption.modeScore.toFixed(1) + ' score') + '</div></div>' +
+    '<div class="metric-card"><div class="mini-label">Best option</div><div class="value">' + esc(formatDollars(item.bestOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.bestOption.label + ' • ' + formatScoreLabel(item.bestOption.modeScore)) + '</div></div>' +
     '<div class="metric-card"><div class="mini-label">Floor option</div><div class="value">' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.floorOption.label) + '</div></div>' +
   '</div>';
   if (item.householdBalance > 0) {
@@ -1545,15 +1732,15 @@ function renderAccountDetails(item) {
 
 function renderByAccount(analysis) {
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Portfolio</div><h2>By account</h2><p class="section-copy">Every account is scored once, then re-ranked by mode.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Portfolio</div><h2>By account</h2><p class="section-copy">Open any account to see the plain-English why, the cash-like floor, and the next-best alternatives.</p></div></div>' +
     '<div class="account-list">' + analysis.accounts.map(function (item) {
       var expanded = !!state.expanded[item.account.id];
       return '<article class="account-card">' +
         '<div class="account-shell">' +
           '<div class="account-header">' +
             '<div><div class="account-name"><span class="type-dot ' + esc(item.account.type || 'other') + '"></span>' + esc(item.account.program) + '</div>' +
-            '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best mode winner: ' + esc(item.bestOption.label) + ' • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
-            '<div class="rec-score">Score ' + esc(item.bestOption.modeScore.toFixed(1)) + '</div>' +
+            '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best answer here: ' + esc(item.bestOption.label) + ' • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
+            '<div class="rec-score">' + esc(formatScoreLabel(item.bestOption.modeScore)) + '</div>' +
           '</div>' +
           '<div class="option-list">' + renderAccountOptions(item) + '</div>' +
         '</div>' +
@@ -1604,7 +1791,7 @@ function programSelectOptions() {
 function renderSettings(analysis) {
   var prefs = analysis.prefs;
   return '<section class="panel section-panel settings-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Settings</div><h2>Preference inputs</h2><p class="section-copy">These fields steer scoring. Spending caps discount options that assume you\u0027d pay more than you actually would.</p></div></div>' +
+    '<div class="section-header"><div><div class="mini-label">Tune recommendations</div><h2>Tune recommendations</h2><p class="section-copy">Travel preferences, spending caps, and household balances all change what counts as a good redemption.</p></div></div>' +
     '<details>' +
       '<summary>Spending caps, complexity, and household</summary>' +
       '<div class="settings-body">' +
@@ -1672,11 +1859,10 @@ function render() {
   }
   app.innerHTML = '' +
     renderHero(analysis) +
-    renderModeStrip(prefs) +
-    renderLeftOnTable(analysis) +
-    renderWarnings(analysis) +
     renderRecommendations(analysis) +
     renderByAccount(analysis) +
+    renderLeftOnTable(analysis) +
+    renderWarnings(analysis) +
     renderSweetSpots(analysis) +
     renderSettings(analysis) +
     renderFreshness();
@@ -1685,7 +1871,7 @@ function render() {
 
 function handleModeChange(mode) {
   var prefs = readPrefs();
-  prefs.mode = mode;
+  prefs.surfaceMode = mode;
   savePrefs(prefs);
   render();
 }
@@ -1793,11 +1979,11 @@ function bindEvents() {
     if (!tab) return;
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
     event.preventDefault();
-    var index = MODE_DEFS.findIndex(function (mode) { return mode.key === tab.getAttribute('data-mode'); });
-    var next = event.key === 'ArrowRight' ? (index + 1) % MODE_DEFS.length : (index - 1 + MODE_DEFS.length) % MODE_DEFS.length;
-    handleModeChange(MODE_DEFS[next].key);
+    var index = SURFACE_MODES.findIndex(function (mode) { return mode.key === tab.getAttribute('data-mode'); });
+    var next = event.key === 'ArrowRight' ? (index + 1) % SURFACE_MODES.length : (index - 1 + SURFACE_MODES.length) % SURFACE_MODES.length;
+    handleModeChange(SURFACE_MODES[next].key);
     window.setTimeout(function () {
-      var button = document.querySelector('[data-mode="' + MODE_DEFS[next].key + '"]');
+      var button = document.querySelector('[data-mode="' + SURFACE_MODES[next].key + '"]');
       if (button) button.focus();
     }, 20);
   });
@@ -1809,6 +1995,7 @@ function bindEvents() {
 window.ChurnAdvisor = {
   DEFAULT_PREFS: DEFAULT_PREFS,
   MODE_DEFS: MODE_DEFS,
+  SURFACE_MODES: SURFACE_MODES,
   readRewardsData: readRewardsData,
   readPrefs: readPrefs,
   savePrefs: savePrefs,
@@ -1818,6 +2005,8 @@ window.ChurnAdvisor = {
   calcNetCpp: calcNetCpp,
   scoreBFB: scoreBFB,
   rankByMode: rankByMode,
+  autoSelectMode: autoSelectMode,
+  scoreLabel: scoreLabel,
   checkExpiration: checkExpiration,
   buildAnalysis: buildAnalysis,
   writeAgentResults: writeAgentResults,
