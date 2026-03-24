@@ -144,15 +144,6 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--panel-shadow);
 }
-.hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.85fr);
-  gap: 20px;
-}
-.hero-card, .delta-card {
-  padding: 24px;
-  animation: fadeInUp 220ms ease-out;
-}
 .mini-label {
   font-size: 11px;
   color: var(--text-muted);
@@ -160,120 +151,10 @@ body {
   letter-spacing: 0.14em;
   font-weight: 700;
 }
-.hero-value {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 6vw, 3.8rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
-  margin-top: 8px;
-  color: var(--text);
-}
-.hero-copy {
-  margin-top: 8px;
-  font-size: 14px;
+.verdict-line {
   color: var(--text-muted);
-}
-.summary-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-.summary-chip {
-  padding: 7px 10px;
-  border-radius: 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  font-size: 13px;
-  color: var(--text-muted);
-}
-.delta-card {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-}
-.delta-figure {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--accent);
-}
-.delta-bars {
-  display: grid;
-  gap: 10px;
-}
-.delta-bar {
-  display: grid;
-  grid-template-columns: 100px 1fr auto;
-  gap: 10px;
-  align-items: center;
-}
-.delta-track {
-  height: 14px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-.delta-fill {
-  height: 100%;
-  border-radius: 999px;
-}
-
-.modes-panel {
-  padding: 20px 22px 22px;
-  animation: fadeInUp 280ms ease-out;
-}
-.mode-strip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-  margin-top: 10px;
-  -webkit-overflow-scrolling: touch;
-}
-@media (max-width: 640px) {
-  .mode-strip {
-    mask-image: linear-gradient(to right, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
-  }
-  .mode-strip.scrolled-end {
-    mask-image: linear-gradient(to left, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to left, black 85%, transparent 100%);
-  }
-  .mode-strip.scrolled-mid {
-    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-  }
-}
-.mode-strip::-webkit-scrollbar { display: none; }
-.mode-pill {
-  flex: 0 0 auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text-muted);
-  padding: 10px 14px;
-  min-width: 136px;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease;
-}
-.mode-pill.active {
-  border-color: var(--accent);
-  background: rgba(139,94,16,0.06);
-  color: var(--text);
-}
-.mode-pill strong {
-  display: block;
-  font-size: 14px;
-}
-.mode-pill span {
-  display: block;
-  margin-top: 2px;
-  font-size: 12px;
+  font-size: 15px;
+  margin-bottom: 4px;
 }
 
 .section-panel {
@@ -378,57 +259,7 @@ body {
   font-weight: 700;
 }
 
-.recommendation-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.rec-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px;
-  background: var(--surface);
-  display: grid;
-  gap: 8px;
-}
-.rec-card.featured {
-  border-color: var(--accent);
-  background: rgba(139,94,16,0.03);
-}
-.rec-card.wait {
-  border-color: var(--border);
-  opacity: 0.8;
-}
-.rec-label {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-.rec-title {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-.rec-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--success);
-}
-.rec-score {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--text-muted);
-}
+
 
 .account-list {
   display: grid;
@@ -804,27 +635,24 @@ body {
 .empty-state strong { display: block; color: var(--text); margin-bottom: 6px; }
 
 @media (max-width: 980px) {
-  .hero-grid, .recommendation-grid, .settings-grid, .caps-grid, .detail-grid {
+  .settings-grid, .caps-grid, .detail-grid {
     grid-template-columns: 1fr;
   }
-  .recommendation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .recommendation-grid .featured { grid-column: 1 / -1; }
   .household-form-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767px) {
   .container, .app-nav-inner { width: calc(100vw - 24px); }
   .page-header { flex-direction: column; align-items: flex-start; padding-top: 28px; }
-  .mode-pill { min-width: 128px; }
-  .recommendation-grid, .caps-grid { grid-template-columns: 1fr; }
+  .caps-grid { grid-template-columns: 1fr; }
   .trip-bridge-header, .trip-bridge-top {
     flex-direction: column;
     align-items: flex-start;
   }
-  .option-row, .comparison-row, .delta-bar {
+  .option-row, .comparison-row {
     grid-template-columns: 1fr;
   }
-  .option-values, .delta-bar > :last-child { text-align: left; min-width: 0; }
+  .option-values { text-align: left; min-width: 0; }
 }
 </style>
 </head>
@@ -848,9 +676,9 @@ body {
 
 <header class="container page-header">
   <div>
-    <div class="eyebrow">Decision Layer</div>
-    <h1>Value advice that respects how you actually redeem.</h1>
-    <p>Your spending limits, travel preferences, and household balances all shape the answer. This page turns raw points math into the recommendation you would actually follow.</p>
+    <div class="eyebrow">Advisor</div>
+    <h1>Your Recommendations</h1>
+    <p>Personalized redemption advice based on your balances, preferences, and spending caps.</p>
   </div>
 </header>
 
@@ -870,7 +698,6 @@ var sweetSpotsState = { status: 'loading', data: null, error: null };
 var sweetSpotsPromise = null;
 var sweetSpotsRequestId = 0;
 var DEFAULT_PREFS = {
-  surfaceMode: 'auto',
   mode: 'max_value',
   interestedInTravel: true,
   cabinPref: 'economy',
@@ -886,44 +713,6 @@ var DEFAULT_PREFS = {
     luxuryHotel: 600,
     resort: 800
   }
-};
-var MODE_DEFS = [
-  { key: 'max_value', label: 'Max Value', copy: 'Best possible cents-per-point.' },
-  { key: 'min_cash', label: 'Min Cash', copy: 'Lower out-of-pocket and low fees.' },
-  { key: 'simple', label: 'Simple', copy: 'Few moving parts, easier redemptions.' },
-  { key: 'travel_now', label: 'Travel Now', copy: 'Prioritize bookable options fast.' },
-  { key: 'no_travel', label: 'No Travel', copy: 'Ignore transfer-heavy travel plays.' },
-  { key: 'expiring', label: 'Expiring', copy: 'Urgency beats perfect theoretical value.' },
-  { key: 'luxury', label: 'Luxury', copy: 'Bias toward premium cabins and resorts.' }
-];
-var SURFACE_MODES = [
-  {
-    key: 'stretch_value',
-    label: 'Stretch for value',
-    copy: 'Accept a transfer or a few extra steps when the upside is real.',
-    explain: 'Use this when you want the best realistic upside, not just the easiest cash-out.'
-  },
-  {
-    key: 'easy_win',
-    label: 'Easy win',
-    copy: 'Favor lower-friction options you would actually book today.',
-    explain: 'Use this when you want fewer steps, lower fees, and less booking uncertainty.'
-  },
-  {
-    key: 'use_soon',
-    label: 'Use soon',
-    copy: 'Push expiring balances and near-term wins to the top.',
-    explain: 'Use this when time matters more than chasing the perfect theoretical redemption.'
-  }
-];
-var LEGACY_MODE_TO_SURFACE = {
-  max_value: 'stretch_value',
-  luxury: 'stretch_value',
-  simple: 'easy_win',
-  min_cash: 'easy_win',
-  no_travel: 'easy_win',
-  travel_now: 'use_soon',
-  expiring: 'use_soon'
 };
 var TYPE_COLORS = {
   flexible: 'var(--card-color)',
@@ -979,65 +768,28 @@ function mergePrefs(raw) {
   return prefs;
 }
 
-function getSurfaceMode(key) {
-  return SURFACE_MODES.find(function (mode) { return mode.key === key; }) || null;
-}
-
-function detectAutoSurfaceMode(data, prefs) {
-  var accounts = data && Array.isArray(data.accounts) ? data.accounts : [];
-  var urgent = accounts.some(function (account) {
-    var expiration = checkExpiration(account);
-    return expiration && expiration.atRisk && (expiration.daysRemaining == null || expiration.daysRemaining <= 90);
-  });
-  if (urgent) return 'use_soon';
-  if (prefs && (prefs.interestedInTravel === false || prefs.complexityTolerance === 'low')) return 'easy_win';
-  return 'stretch_value';
-}
-
-function resolveInternalMode(surfaceMode, data, prefs) {
+function detectAutoMode(data, prefs) {
   var accounts = data && Array.isArray(data.accounts) ? data.accounts : [];
   var hasExpiring = accounts.some(function (account) {
     var expiration = checkExpiration(account);
     return expiration && expiration.atRisk;
   });
-  if (surfaceMode === 'use_soon') {
-    if (hasExpiring) return 'expiring';
-    return prefs && prefs.interestedInTravel === false ? 'no_travel' : 'travel_now';
-  }
-  if (surfaceMode === 'easy_win') {
-    return prefs && prefs.interestedInTravel === false ? 'no_travel' : 'simple';
-  }
+  var urgent = hasExpiring && accounts.some(function (account) {
+    var expiration = checkExpiration(account);
+    return expiration && expiration.atRisk && (expiration.daysRemaining == null || expiration.daysRemaining <= 90);
+  });
+  if (urgent) return 'expiring';
   if (prefs && prefs.interestedInTravel === false) return 'no_travel';
+  if (prefs && prefs.complexityTolerance === 'low') return 'simple';
   if (prefs && (prefs.cabinPref === 'business' || prefs.cabinPref === 'first' || prefs.hotelPref === 'luxuryHotel' || prefs.hotelPref === 'resort')) {
     return 'luxury';
   }
   return 'max_value';
 }
 
-function autoSelectMode(data, prefs) {
-  var normalized = mergePrefs(prefs);
-  var requested = normalized.surfaceMode;
-  var surfaceMode = requested && requested !== 'auto' && getSurfaceMode(requested)
-    ? requested
-    : detectAutoSurfaceMode(data, normalized);
-  return {
-    surfaceMode: surfaceMode,
-    mode: resolveInternalMode(surfaceMode, data, normalized)
-  };
-}
-
 function normalizePrefs(raw, data) {
   var prefs = mergePrefs(raw);
-  var hasExplicitSurface = !!(raw && typeof raw === 'object' && raw.surfaceMode != null && raw.surfaceMode !== '');
-  if (!hasExplicitSurface) {
-    var legacyMode = raw && typeof raw === 'object' ? raw.mode : null;
-    prefs.surfaceMode = LEGACY_MODE_TO_SURFACE[legacyMode] || 'auto';
-  } else if (!getSurfaceMode(prefs.surfaceMode) && prefs.surfaceMode !== 'auto') {
-    prefs.surfaceMode = 'auto';
-  }
-  var selected = autoSelectMode(data, prefs);
-  prefs.surfaceMode = selected.surfaceMode;
-  prefs.mode = selected.mode;
+  prefs.mode = detectAutoMode(data, prefs);
   return prefs;
 }
 
@@ -1549,36 +1301,6 @@ function buildAnalysis(data, prefs, household) {
   };
 }
 
-function worthSavingCard(analysis) {
-  var liftPct = analysis.totalFloor > 0 ? (analysis.totalBest - analysis.totalFloor) / analysis.totalFloor : 0;
-  var urgent = analysis.expiring.some(function (item) {
-    return item.expiration && item.expiration.atRisk && (item.expiration.daysRemaining == null || item.expiration.daysRemaining <= 90);
-  });
-  if (!urgent && liftPct < 0.12) {
-    return {
-      state: 'wait',
-      title: 'Worth waiting',
-      body: 'Your best option is only ' + round(liftPct * 100, 0) + '% above floor value. Points are not under real pressure today, so patience costs very little.',
-      accent: 'muted'
-    };
-  }
-  if (!analysis.bestOverall) {
-    return {
-      state: 'wait',
-      title: 'Need more signal',
-      body: 'Add more balances or set travel preferences in the tracker to get a stronger recommendation.',
-      accent: 'muted'
-    };
-  }
-  return {
-    state: 'use_now',
-    title: 'Strong opportunity',
-    body: analysis.bestOverall.account.program + ' is showing a meaningful edge right now via ' + analysis.bestOverall.label + '.',
-    accent: 'highlight',
-    option: analysis.bestOverall
-  };
-}
-
 function scoreLabel(score) {
   if (!isFinite(score)) return 'Unscored';
   if (score >= 90) return 'Very strong fit';
@@ -1592,91 +1314,38 @@ function formatScoreLabel(score) {
   return scoreLabel(score) + ' • ' + Number(score || 0).toFixed(1);
 }
 
-function explainRecommendation(card) {
-  if (!card || !card.account) return '';
-  if (card.kind === 'transfer_partner') {
-    return card.account.program + ' wins because ' + card.label + ' still has real upside after fees, availability, and friction are discounted.';
-  }
-  if (card.isNonTravel) {
-    return card.account.program + ' wins because the cash-like option stays close enough that simplicity beats chasing a transfer.';
-  }
-  if (card.isSimple) {
-    return card.account.program + ' wins because it is easy to use without giving up much value.';
-  }
-  return card.account.program + ' wins because it balances value, availability, and ease better than the alternatives.';
-}
-
-function buildVerdict(analysis) {
-  var surface = getSurfaceMode(analysis.prefs.surfaceMode) || SURFACE_MODES[0];
-  var worthSaving = worthSavingCard(analysis);
-  var urgent = analysis.expiring[0] || null;
+function buildVerdictLine(analysis) {
   var best = analysis.bestOverall || analysis.bestSimple || analysis.bestNonTravel || null;
-  if (surface.key === 'use_soon' && urgent) {
-    return {
-      state: urgent.expiration && urgent.expiration.expired ? 'expired' : 'urgent',
-      title: 'Use ' + urgent.account.program + ' soon',
-      body: urgent.account.program + ' is showing ' + (urgent.expiration ? urgent.expiration.message.toLowerCase() : 'real urgency') + '. The best practical move right now is ' + urgent.bestOption.label + ' for about ' + formatDollars(urgent.bestOption.adjustedValue) + '.',
-      option: urgent.bestOption,
-      program: urgent.account.program
-    };
+  var urgent = analysis.expiring[0] || null;
+  if (urgent && urgent.expiration && urgent.expiration.atRisk) {
+    return urgent.account.program + ': ' + (urgent.expiration.message || 'expiring') + '. Best move: ' + urgent.bestOption.label + ' (' + formatDollars(urgent.bestOption.adjustedValue) + ').';
   }
-  if (worthSaving.state === 'wait') {
-    return {
-      state: 'wait',
-      title: 'Save for a better moment',
-      body: worthSaving.body,
-      option: null,
-      program: null
-    };
-  }
-  if (!best) {
-    return {
-      state: 'wait',
-      title: 'Need more signal',
-      body: 'Add more balances or update your preferences to get a stronger recommendation.',
-      option: null,
-      program: null
-    };
-  }
-  if (surface.key === 'easy_win') {
-    return {
-      state: 'easy',
-      title: 'Take the easy win',
-      body: best.account.program + ' has the cleanest answer right now: ' + best.label + ' for about ' + formatDollars(best.adjustedValue) + '.',
-      option: best,
-      program: best.account.program
-    };
-  }
-  return {
-    state: 'stretch',
-    title: 'Stretch for more value',
-    body: best.account.program + ' has enough upside through ' + best.label + ' to justify the extra steps right now.',
-    option: best,
-    program: best.account.program
-  };
+  if (!best) return 'Add more balances or update preferences for recommendations.';
+  return 'Best opportunity: ' + best.account.program + ' via ' + best.label + ' (' + formatDollars(best.adjustedValue) + ').';
 }
 
 function writeAgentResults(data, prefs) {
   var household = readHousehold();
   var analysis = buildAnalysis(data, prefs, household);
-  var verdict = buildVerdict(analysis);
-  var surface = getSurfaceMode(analysis.prefs.surfaceMode) || SURFACE_MODES[0];
+  var best = analysis.bestOverall || analysis.bestSimple || analysis.bestNonTravel || null;
+  var urgent = analysis.expiring[0] || null;
+  var primary = (urgent && urgent.expiration && urgent.expiration.atRisk) ? urgent.bestOption : best;
+  var summaryLine = buildVerdictLine(analysis);
+  var state = !primary ? 'wait' : (urgent && urgent.expiration && urgent.expiration.atRisk ? 'urgent' : 'stretch');
   var result = {
     generatedAt: new Date().toISOString(),
     mode: analysis.prefs.mode,
-    surfaceMode: analysis.prefs.surfaceMode,
-    surfaceLabel: surface.label,
     userPreferences: analysis.prefs,
     household: household,
     verdict: {
-      state: verdict.state,
-      title: verdict.title,
-      body: verdict.body,
-      program: verdict.program,
-      surfaceLabel: surface.label,
-      adjusted_value: verdict.option ? verdict.option.adjustedValue : null,
-      option_label: verdict.option ? verdict.option.label : null,
-      score_label: verdict.option ? scoreLabel(verdict.option.modeScore) : null
+      state: state,
+      title: summaryLine,
+      body: '',
+      summary: summaryLine,
+      program: primary ? primary.account.program : null,
+      adjusted_value: primary ? primary.adjustedValue : null,
+      option_label: primary ? primary.label : null,
+      score_label: primary ? scoreLabel(primary.modeScore) : null
     },
     totals: {
       best: analysis.totalBest,
@@ -1807,11 +1476,11 @@ function renderTripBridge(item) {
   var matches = findTripBridgeMatches(item, sweetSpotsState.data);
   if (!matches.length) {
     return '<div class="trip-bridge' + toneClass + '">' +
-      '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">No current sweet spots matched to this account yet.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
+      '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">No matching sweet spots yet.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
     '</div>';
   }
   return '<div class="trip-bridge' + toneClass + '">' +
-    '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">Where this balance can go next, using the same trip sweet spots as the Trips page.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
+    '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">How this balance connects to your trips.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
     '<div class="trip-bridge-grid">' + matches.slice(0, 3).map(function (match) {
       var descriptor = match.spot._type === 'hotel'
         ? 'Cat ' + esc(match.spot.category) + ' hotel' + (match.spot.nights ? ' • ' + esc(match.spot.nights) + ' nights' : '')
@@ -1835,78 +1504,8 @@ function renderTripBridge(item) {
   '</div>';
 }
 
-function renderModeStrip(prefs) {
-  var activeSurface = getSurfaceMode(prefs.surfaceMode) || SURFACE_MODES[0];
-  return '<section class="panel modes-panel" aria-label="Advisor modes">' +
-    '<div class="mini-label">Recommendation style</div>' +
-    '<div class="section-copy">' + esc(activeSurface.explain) + '</div>' +
-    '<div class="mode-strip" role="tablist" aria-label="Recommendation styles">' + SURFACE_MODES.map(function (mode) {
-      var active = mode.key === prefs.surfaceMode;
-      return '<button type="button" role="tab" class="mode-pill' + (active ? ' active' : '') + '" data-mode="' + mode.key + '" aria-selected="' + (active ? 'true' : 'false') + '" tabindex="' + (active ? '0' : '-1') + '">' +
-        '<strong>' + esc(mode.label) + '</strong><span>' + esc(mode.copy) + '</span></button>';
-    }).join('') + '</div>' +
-  '</section>';
-}
-
-function renderHero(analysis) {
-  var verdict = buildVerdict(analysis);
-  var surface = getSurfaceMode(analysis.prefs.surfaceMode) || SURFACE_MODES[0];
-  var activeCount = analysis.activeAccounts.length;
-  return '<section class="hero-grid">' +
-    '<div class="panel hero-card">' +
-      '<div class="mini-label">Verdict</div>' +
-      '<div class="hero-value">' + esc(verdict.title) + '</div>' +
-      '<div class="hero-copy">' + esc(verdict.body) + '</div>' +
-      '<div class="summary-row">' +
-        '<div class="summary-chip">' + esc(surface.label) + '</div>' +
-        (verdict.option ? '<div class="summary-chip">' + esc(verdict.option.label + ' • ' + formatDollars(verdict.option.adjustedValue)) + '</div>' : '') +
-        '<div class="summary-chip">' + activeCount + ' active account' + (activeCount === 1 ? '' : 's') + '</div>' +
-        '<div class="summary-chip">Household balances ' + analysis.household.length + '</div>' +
-        '<div class="summary-chip">Travel ' + (analysis.prefs.interestedInTravel ? 'on' : 'off') + '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="panel delta-card">' +
-      '<div class="mini-label">Portfolio at this setting</div>' +
-      '<div class="delta-figure">' + esc(formatDollars(analysis.totalBest)) + '</div>' +
-      '<div class="section-copy">' + esc(surface.explain) + '</div>' +
-      '<div class="delta-bars">' +
-        '<div class="delta-bar"><span class="mini-label">Best</span><div class="delta-track"><div class="delta-fill" style="width:100%;background:var(--gold)"></div></div><span>' + esc(formatDollars(analysis.totalBest)) + '</span></div>' +
-        '<div class="delta-bar"><span class="mini-label">Floor</span><div class="delta-track"><div class="delta-fill" style="width:' + (analysis.totalBest > 0 ? round(analysis.totalFloor / analysis.totalBest * 100, 0) : 0) + '%;background:var(--accent)"></div></div><span>' + esc(formatDollars(analysis.totalFloor)) + '</span></div>' +
-      '</div>' +
-      '<div class="section-copy">' + esc('That puts about ' + formatDollars(analysis.totalGap) + ' of extra value above the cash-like floor.') + '</div>' +
-    '</div>' +
-  '</section>' + renderModeStrip(analysis.prefs);
-}
-
-function recCard(label, card, extraClass, featured) {
-  if (!card) return '';
-  var body = card.account ? explainRecommendation(card) : (card.body || '');
-  return '<article class="rec-card' + (featured ? ' featured' : '') + (extraClass ? ' ' + extraClass : '') + '">' +
-    '<div class="rec-label">' + esc(label) + '</div>' +
-    '<div class="rec-title">' + esc(card.label || card.title) + '</div>' +
-    (card.adjustedValue != null ? '<div class="rec-value">' + esc(formatDollars(card.adjustedValue)) + '</div>' : '') +
-    (card.modeScore != null ? '<div class="rec-score">' + esc(formatScoreLabel(card.modeScore)) + '</div>' : '') +
-    '<p class="section-copy">' + esc(body) + '</p>' +
-    (card.account ? '<p class="section-copy">' + esc(card.sweetSpot || ('About ' + round(card.liftRatio * 100, 0) + '% above the cash-like floor.')) + '</p>' : '') +
-  '</article>';
-}
-
-function renderRecommendations(analysis) {
-  var worthSaving = worthSavingCard(analysis);
-  return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Recommendations</div><h2>Plain-English options</h2><p class="section-copy">Start here if you just want the shortest answer before digging into the tables.</p></div></div>' +
-    '<div class="recommendation-grid">' +
-      recCard('Best Overall', analysis.bestOverall, '', true) +
-      recCard('Easy Option', analysis.bestSimple, '', false) +
-      recCard('Cash-like Option', analysis.bestNonTravel, '', false) +
-      '<article class="rec-card ' + (worthSaving.state === 'wait' ? 'wait' : '') + '">' +
-        '<div class="rec-label">Save or Use</div>' +
-        '<div class="rec-title">' + esc(worthSaving.title) + '</div>' +
-        (worthSaving.option ? '<div class="rec-value">' + esc(formatDollars(worthSaving.option.adjustedValue)) + '</div>' : '') +
-        '<p class="section-copy">' + esc(worthSaving.body) + '</p>' +
-      '</article>' +
-    '</div>' +
-  '</section>';
+function renderVerdictLine(analysis) {
+  return '<p class="verdict-line">' + esc(buildVerdictLine(analysis)) + '</p>';
 }
 
 function renderAccountOptions(item) {
@@ -1929,12 +1528,12 @@ function renderAccountDetails(item) {
     '<div class="metric-card"><div class="mini-label">Floor option</div><div class="value">' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div><div class="section-copy">' + esc(item.floorOption.label) + '</div></div>' +
   '</div>';
   if (item.householdBalance > 0) {
-    details += '<div class="metric-card" style="margin-top:12px"><div class="mini-label">Household balance</div><div class="value">' + esc(formatPoints(item.householdBalance)) + '</div><div class="section-copy">Additional balance in the same program from your household member.</div></div>';
+    details += '<div class="metric-card" style="margin-top:12px"><div class="mini-label">Household balance</div><div class="value">' + esc(formatPoints(item.householdBalance)) + '</div><div class="section-copy">From household member in same program.</div></div>';
   }
   details += '<div class="sweet-grid" style="margin-top:12px">' + item.options.slice(0, 4).map(function (option) {
     return '<div class="sweet-card">' +
       '<h3>' + esc(option.label) + '</h3>' +
-      '<p>' + esc(option.sweetSpot || 'Adjusted for WTP, surcharges, and booking complexity.') + '</p>' +
+      '<p>' + esc(option.sweetSpot || 'Adjusted for spending caps and booking friction.') + '</p>' +
       '<div class="tag-row">' +
         '<span class="tag">' + esc(option.kind.replace('_', ' ')) + '</span>' +
         '<span class="tag">' + esc(option.cabinType) + '</span>' +
@@ -1947,21 +1546,19 @@ function renderAccountDetails(item) {
 
 function renderByAccount(analysis) {
   return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Portfolio</div><h2>By account</h2><p class="section-copy">Open any account to see the plain-English why, the cash-like floor, and the next-best alternatives.</p></div></div>' +
     '<div class="account-list">' + analysis.accounts.map(function (item) {
       var expanded = !!state.expanded[item.account.id];
       return '<article class="account-card">' +
         '<div class="account-shell">' +
           '<div class="account-header">' +
             '<div><div class="account-name"><span class="type-dot ' + esc(item.account.type || 'other') + '"></span><span>' + esc(item.account.program) + '</span>' + renderExpirationBadge(item.expiration) + '</div>' +
-            '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best answer here: ' + esc(item.bestOption.label) + ' • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
-            '<div class="rec-score">' + esc(formatScoreLabel(item.bestOption.modeScore)) + '</div>' +
+            '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best: ' + esc(item.bestOption.label) + ' (' + esc(formatDollars(item.bestOption.adjustedValue)) + ') • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
           '</div>' +
           '<div class="option-list">' + renderAccountOptions(item) + '</div>' +
           renderTripBridge(item) +
         '</div>' +
         '<button type="button" class="expand-toggle" data-expand-account="' + esc(item.account.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '">' +
-          '<span>See detail and sweet spots</span><span>' + (expanded ? 'Hide' : 'Expand') + '</span></button>' +
+          '<span>Details</span><span>' + (expanded ? 'Hide' : 'Expand') + '</span></button>' +
         '<div class="detail-panel' + (expanded ? ' open' : '') + '">' + renderAccountDetails(item) + '</div>' +
       '</article>';
     }).join('') + '</div>' +
@@ -1969,7 +1566,7 @@ function renderByAccount(analysis) {
 }
 
 function renderFreshness() {
-  return '<div class="freshness">Program dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' • results auto-saved • household data stored separately</div>';
+  return '<div class="freshness">Dataset updated ' + esc(window.PROGRAMS.lastUpdated) + '</div>';
 }
 
 function renderEmptyState(title, copy, linkHref, linkLabel) {
@@ -1985,11 +1582,11 @@ function render() {
   var app = document.getElementById('app');
   var data = readRewardsData();
   if (data === 'corrupted') {
-    app.innerHTML = renderEmptyState('Data could not be read', 'Your tracker data couldn\u0027t be read. Go to the tracker page and export a backup, then try re-importing it.', 'index.html', 'Open tracker');
+    app.innerHTML = renderEmptyState('Data could not be read', 'Export a backup from the tracker, then re-import.', 'index.html', 'Open tracker');
     return;
   }
   if (!data || !data.accounts || !data.accounts.length) {
-    app.innerHTML = renderEmptyState('Add accounts in the tracker first', 'Head to the tracker page and add at least one loyalty program balance to get started.', 'index.html', 'Open tracker');
+    app.innerHTML = renderEmptyState('No accounts yet', 'Add a loyalty program in the tracker to get started.', 'index.html', 'Open tracker');
     return;
   }
   var prefs = readPrefs();
@@ -1997,66 +1594,25 @@ function render() {
   var analysis = buildAnalysis(data, prefs, household);
   writeAgentResults(data, prefs);
   if (!analysis.activeAccounts.length) {
-    app.innerHTML = renderEmptyState('No active balances to score', 'Your accounts are set up, but every balance is zero. Update your point totals in the tracker to see recommendations.', 'index.html', 'Update balances in tracker');
+    app.innerHTML = renderEmptyState('All balances are zero', 'Update your point totals in the tracker to see recommendations.', 'index.html', 'Update balances');
     return;
   }
   app.innerHTML = '' +
-    renderHero(analysis) +
-    renderRecommendations(analysis) +
+    renderVerdictLine(analysis) +
     renderByAccount(analysis) +
     renderFreshness();
-  bindModeStripScroll();
-}
-
-function handleModeChange(mode) {
-  var prefs = readPrefs();
-  prefs.surfaceMode = mode;
-  savePrefs(prefs);
-  render();
-}
-
-function bindModeStripScroll() {
-  var strip = document.querySelector('.mode-strip');
-  if (!strip) return;
-  function updateMask() {
-    var sl = strip.scrollLeft, max = strip.scrollWidth - strip.clientWidth;
-    if (max <= 0) { strip.className = 'mode-strip'; return; }
-    if (sl < 4) strip.className = 'mode-strip';
-    else if (sl > max - 4) strip.className = 'mode-strip scrolled-end';
-    else strip.className = 'mode-strip scrolled-mid';
-  }
-  strip.addEventListener('scroll', updateMask, { passive: true });
-  updateMask();
 }
 
 function bindEvents() {
   var app = document.getElementById('app');
   app.addEventListener('click', function (event) {
-    var modeButton = event.target.closest('[data-mode]');
     var expandButton = event.target.closest('[data-expand-account]');
-    if (modeButton) {
-      handleModeChange(modeButton.getAttribute('data-mode'));
-      return;
-    }
     if (expandButton) {
       var id = expandButton.getAttribute('data-expand-account');
       state.expanded[id] = !state.expanded[id];
       render();
       return;
     }
-  });
-  app.addEventListener('keydown', function (event) {
-    var tab = event.target.closest('[data-mode]');
-    if (!tab) return;
-    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-    event.preventDefault();
-    var index = SURFACE_MODES.findIndex(function (mode) { return mode.key === tab.getAttribute('data-mode'); });
-    var next = event.key === 'ArrowRight' ? (index + 1) % SURFACE_MODES.length : (index - 1 + SURFACE_MODES.length) % SURFACE_MODES.length;
-    handleModeChange(SURFACE_MODES[next].key);
-    window.setTimeout(function () {
-      var button = document.querySelector('[data-mode="' + SURFACE_MODES[next].key + '"]');
-      if (button) button.focus();
-    }, 20);
   });
   window.addEventListener('storage', function (event) {
     if (event.key === STORAGE_KEY || event.key === PREFS_KEY || event.key === HOUSEHOLD_KEY) render();
@@ -2065,8 +1621,6 @@ function bindEvents() {
 
 window.ChurnAdvisor = {
   DEFAULT_PREFS: DEFAULT_PREFS,
-  MODE_DEFS: MODE_DEFS,
-  SURFACE_MODES: SURFACE_MODES,
   readRewardsData: readRewardsData,
   readPrefs: readPrefs,
   savePrefs: savePrefs,
@@ -2076,7 +1630,7 @@ window.ChurnAdvisor = {
   calcNetCpp: calcNetCpp,
   scoreBFB: scoreBFB,
   rankByMode: rankByMode,
-  autoSelectMode: autoSelectMode,
+  detectAutoMode: detectAutoMode,
   scoreLabel: scoreLabel,
   checkExpiration: checkExpiration,
   buildAnalysis: buildAnalysis,

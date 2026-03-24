@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.16.0] - 2026-03-24
+
+### Changed
+- Radically simplified Advisor tab: removed mode selector (Stretch/Easy/Use soon), hero verdict card, and 4-card recommendation grid
+- Mode detection is now fully automatic based on account expiration status, travel preferences, and cabin/hotel settings
+- Verdict reduced from a screen-dominating hero card to a single inline sentence
+- Account cards now show best option value inline instead of a separate score badge
+- Tightened all Advisor copy: trip bridge descriptions, empty states, freshness line, and account detail labels
+
+### Removed
+- `SURFACE_MODES` array, `MODE_DEFS` array, and `LEGACY_MODE_TO_SURFACE` mapping (mode system internalized)
+- `renderHero`, `renderModeStrip`, `renderRecommendations`, `recCard`, `worthSavingCard`, `explainRecommendation`, `buildVerdict`, `handleModeChange`, `bindModeStripScroll` functions
+- Mode pill keyboard navigation and scroll mask behavior
+- ~200 lines of CSS for hero grid, delta card, mode strip, mode pills, and recommendation cards
+
 ## [0.1.15.0] - 2026-03-24
 
 ### Added
