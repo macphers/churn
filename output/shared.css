@@ -1,0 +1,56 @@
+:root {
+  --bg: #F5F2ED;
+  --surface: #FFFFFF;
+  --surface-2: #FAF8F5;
+  --border: #E8E4DF;
+  --border-strong: #D5D0CA;
+  --text: #1A1A1A;
+  --text-muted: #6B6560;
+  --text-dim: #9B9590;
+  --accent: #8B5E10;
+  --accent-hover: #6B4A0C;
+  --accent-decorative: #C4841D;
+  --accent-glow: rgba(139,94,16,0.12);
+  --danger: #A63D40;
+  --success: #2D7A4F;
+  --warning: #7A5A08;
+  --airline-color: #2563AA;
+  --hotel-color: #7C4D8A;
+  --card-color: #8B5E10;
+  --other-color: #6B6560;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --gold: var(--accent-decorative);
+  --error-bg: rgba(166,61,64,0.06);
+  --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
+  --nav-active-bg: rgba(139,94,16,0.06);
+}
+
+[data-theme="dark"] {
+  --bg: #0F0E0C;
+  --surface: #1A1815;
+  --surface-2: #141210;
+  --border: #2A2723;
+  --border-strong: #3A3632;
+  --text: #E8E4DF;
+  --text-muted: #9B9590;
+  --text-dim: #6B6560;
+  --accent: #8B5E10;
+  --accent-hover: #A47214;
+  --accent-decorative: #C4841D;
+  --accent-glow: rgba(139,94,16,0.18);
+  --danger: #D4585B;
+  --success: #4DAF72;
+  --warning: #C49A2E;
+  --airline-color: #5A9FD4;
+  --hotel-color: #A873B8;
+  --card-color: #8B5E10;
+  --other-color: #9B9590;
+  --gold: var(--accent-decorative);
+  --error-bg: rgba(212,88,91,0.1);
+  --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --nav-active-bg: rgba(139,94,16,0.12);
+}

@@ -8,39 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600;1,9..144,700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-:root {
-  --bg: #F5F2ED; --surface: #FFFFFF; --surface-2: #FAF8F5; --border: #E8E4DF;
-  --border-strong: #D5D0CA;
-  --text: #1A1A1A; --text-muted: #6B6560; --text-dim: #9B9590;
-  --accent: #8B5E10; --accent-hover: #6B4A0C;
-  --accent-decorative: #C4841D; --accent-glow: rgba(139,94,16,0.12); --danger: #A63D40; --success: #2D7A4F;
-  --warning: #7A5A08; --airline-color: #2563AA; --hotel-color: #7C4D8A;
-  --card-color: #8B5E10; --other-color: #6B6560; --radius: 12px; --radius-sm: 8px;
-  --gold: var(--accent-decorative);
-  --error-bg: rgba(166,61,64,0.06);
-  --panel-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
-  --nav-active-bg: rgba(139,94,16,0.06);
-}
-[data-theme="dark"] {
-  --bg: #0F0E0C; --surface: #1A1815; --surface-2: #141210; --border: #2A2723;
-  --border-strong: #3A3632;
-  --text: #E8E4DF; --text-muted: #9B9590; --text-dim: #6B6560;
-  --accent: #8B5E10; --accent-hover: #A47214;
-  --accent-decorative: #C4841D; --accent-glow: rgba(139,94,16,0.18); --danger: #D4585B; --success: #4DAF72;
-  --warning: #C49A2E; --airline-color: #5A9FD4; --hotel-color: #A873B8;
-  --card-color: #8B5E10; --other-color: #9B9590;
-  --gold: var(--accent-decorative);
-  --error-bg: rgba(212,88,91,0.1);
-  --panel-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
-  --nav-active-bg: rgba(139,94,16,0.12);
-}
 
 html { background: var(--bg); }
 body {
@@ -482,10 +453,27 @@ body {
 .account-name {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+.account-expiry-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(122,90,8,0.1);
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.account-expiry-badge.is-danger {
+  background: var(--error-bg);
+  color: var(--danger);
 }
 .type-dot {
   width: 8px;
@@ -512,6 +500,86 @@ body {
   display: grid;
   gap: 8px;
   margin-top: 14px;
+}
+.trip-bridge {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 12px;
+}
+.trip-bridge--danger {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(166,61,64,0.2);
+  border-radius: 12px;
+  background: var(--error-bg);
+}
+.trip-bridge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.trip-bridge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+}
+.trip-bridge-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+.trip-bridge-card.book-now { border-color: rgba(45,122,79,0.22); }
+.trip-bridge-card.almost-there { border-color: rgba(122,90,8,0.22); }
+.trip-bridge-card.not-enough { border-color: var(--border); }
+.trip-bridge-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.trip-bridge-top h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.trip-bridge-top p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.trip-bridge-status {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.trip-bridge-card.book-now .trip-bridge-status {
+  color: var(--success);
+  border-color: rgba(45,122,79,0.22);
+}
+.trip-bridge-card.almost-there .trip-bridge-status {
+  color: var(--warning);
+  border-color: rgba(122,90,8,0.22);
+}
+.trip-bridge-card.not-enough .trip-bridge-status {
+  color: var(--text-muted);
+}
+.trip-bridge-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 .option-row {
   display: grid;
@@ -749,6 +817,10 @@ body {
   .page-header { flex-direction: column; align-items: flex-start; padding-top: 28px; }
   .mode-pill { min-width: 128px; }
   .recommendation-grid, .caps-grid { grid-template-columns: 1fr; }
+  .trip-bridge-header, .trip-bridge-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
   .option-row, .comparison-row, .delta-bar {
     grid-template-columns: 1fr;
   }
@@ -794,6 +866,9 @@ var PREFS_KEY = 'valueAdvisorPrefs';
 var HOUSEHOLD_KEY = 'churn_household';
 var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var state = { expanded: {} };
+var sweetSpotsState = { status: 'loading', data: null, error: null };
+var sweetSpotsPromise = null;
+var sweetSpotsRequestId = 0;
 var DEFAULT_PREFS = {
   surfaceMode: 'auto',
   mode: 'max_value',
@@ -1080,6 +1155,67 @@ function findProgram(name, slug) {
 
 function programFromAccount(account) {
   return findProgram(account.program, account.programSlug);
+}
+
+function parseRatio(ratioStr) {
+  if (!ratioStr || typeof ratioStr !== 'string') return 1;
+  var parts = ratioStr.split(':');
+  if (parts.length !== 2) return 1;
+  var from = parseFloat(parts[0]);
+  var to = parseFloat(parts[1]);
+  if (!from || !to || isNaN(from) || isNaN(to)) return 1;
+  return to / from;
+}
+
+function normalizeSweetSpots(payload) {
+  return {
+    flights: payload && Array.isArray(payload.flights) ? payload.flights : [],
+    hotels: payload && Array.isArray(payload.hotels) ? payload.hotels : []
+  };
+}
+
+function flattenSweetSpots(payload) {
+  var normalized = normalizeSweetSpots(payload);
+  return normalized.flights.map(function (item) {
+    return Object.assign({ _type: 'flight' }, item);
+  }).concat(normalized.hotels.map(function (item) {
+    return Object.assign({ _type: 'hotel' }, item);
+  }));
+}
+
+function loadSweetSpots(fetchImpl, forceReload) {
+  if (sweetSpotsPromise && !forceReload && !fetchImpl) return sweetSpotsPromise;
+  var impl = fetchImpl || window.fetch;
+  var requestId = ++sweetSpotsRequestId;
+  if (typeof impl !== 'function') {
+    sweetSpotsState = { status: 'error', data: null, error: new Error('Fetch unavailable') };
+    sweetSpotsPromise = Promise.resolve(sweetSpotsState);
+    return sweetSpotsPromise;
+  }
+  sweetSpotsState = { status: 'loading', data: sweetSpotsState.data, error: null };
+  sweetSpotsPromise = Promise.resolve()
+    .then(function () {
+      return impl('./sweetSpots.json');
+    })
+    .then(function (response) {
+      if (!response || response.ok === false) {
+        throw new Error('Could not load sweetSpots.json');
+      }
+      return response.json();
+    })
+    .then(function (payload) {
+      if (requestId !== sweetSpotsRequestId) return sweetSpotsState;
+      sweetSpotsState = { status: 'ready', data: normalizeSweetSpots(payload), error: null };
+      if (document.getElementById('app')) render();
+      return sweetSpotsState;
+    })
+    .catch(function (error) {
+      if (requestId !== sweetSpotsRequestId) return sweetSpotsState;
+      sweetSpotsState = { status: 'error', data: null, error: error };
+      if (document.getElementById('app')) render();
+      return sweetSpotsState;
+    });
+  return sweetSpotsPromise;
 }
 
 function typeColor(type) {
@@ -1588,6 +1724,117 @@ function writeAgentResults(data, prefs) {
   return result;
 }
 
+function tripBridgeStatus(available, needed) {
+  var gap = Math.max(0, needed - available);
+  if (gap <= 0) return { key: 'book-now', label: 'Book now', gap: 0 };
+  if (gap <= needed * 0.3) return { key: 'almost-there', label: 'Almost there', gap: gap };
+  return { key: 'not-enough', label: 'Need more', gap: gap };
+}
+
+function findTripBridgePath(item, targetProgram) {
+  var balance = Math.max(0, Number(item && item.account && item.account.balance) || 0);
+  if (!balance) return null;
+  if (item.account.program === targetProgram) {
+    return {
+      account: item.account,
+      ratio: 1,
+      available: balance,
+      isDirect: true,
+      sourceName: item.account.program,
+      transferRatio: '1:1'
+    };
+  }
+  if (!item.program || !Array.isArray(item.program.transferPartners)) return null;
+  var bestPath = null;
+  item.program.transferPartners.forEach(function (partner) {
+    if (partner.partner !== targetProgram) return;
+    var ratio = parseRatio(partner.ratio);
+    var available = Math.floor(balance * ratio);
+    if (!bestPath || available > bestPath.available) {
+      bestPath = {
+        account: item.account,
+        ratio: ratio,
+        available: available,
+        isDirect: false,
+        sourceName: item.account.program,
+        transferRatio: partner.ratio
+      };
+    }
+  });
+  return bestPath;
+}
+
+function findTripBridgeMatches(item, sweetSpots) {
+  var statusOrder = { 'book-now': 0, 'almost-there': 1, 'not-enough': 2 };
+  return flattenSweetSpots(sweetSpots).map(function (spot) {
+    var path = findTripBridgePath(item, spot.program);
+    if (!path) return null;
+    var status = tripBridgeStatus(path.available, Number(spot.points_required) || 0);
+    return {
+      spot: spot,
+      path: path,
+      needed: Number(spot.points_required) || 0,
+      available: path.available,
+      status: status
+    };
+  }).filter(Boolean).sort(function (left, right) {
+    var leftOrder = statusOrder[left.status.key];
+    var rightOrder = statusOrder[right.status.key];
+    if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+    return (right.spot.cpp_estimate || 0) - (left.spot.cpp_estimate || 0);
+  });
+}
+
+function renderExpirationBadge(expiration) {
+  if (!expiration || !expiration.atRisk) return '';
+  return '<span class="account-expiry-badge' + (expiration.expired ? ' is-danger' : '') + '">' +
+    esc(expiration.expired ? 'Expired' : expiration.message) +
+  '</span>';
+}
+
+function renderTripBridge(item) {
+  var toneClass = item.expiration && item.expiration.atRisk ? ' trip-bridge--danger' : '';
+  if (sweetSpotsState.status === 'loading') {
+    return '<div class="trip-bridge' + toneClass + '">' +
+      '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">Checking current sweet spots for this balance.</div></div></div>' +
+    '</div>';
+  }
+  if (sweetSpotsState.status === 'error') {
+    return '<div class="trip-bridge' + toneClass + '">' +
+      '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">Trip ideas unavailable right now. Open the Trips page to retry.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
+    '</div>';
+  }
+  var matches = findTripBridgeMatches(item, sweetSpotsState.data);
+  if (!matches.length) {
+    return '<div class="trip-bridge' + toneClass + '">' +
+      '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">No current sweet spots matched to this account yet.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
+    '</div>';
+  }
+  return '<div class="trip-bridge' + toneClass + '">' +
+    '<div class="trip-bridge-header"><div><div class="mini-label">Trip bridge</div><div class="section-copy">Where this balance can go next, using the same trip sweet spots as the Trips page.</div></div><a href="trips.html" class="subnav-link">Open Trips &rarr;</a></div>' +
+    '<div class="trip-bridge-grid">' + matches.slice(0, 3).map(function (match) {
+      var descriptor = match.spot._type === 'hotel'
+        ? 'Cat ' + esc(match.spot.category) + ' hotel' + (match.spot.nights ? ' • ' + esc(match.spot.nights) + ' nights' : '')
+        : esc(match.spot.cabin || 'award') + ' • ' + esc(match.spot.route || '');
+      var access = match.path.isDirect
+        ? 'Direct balance in ' + match.spot.program
+        : 'Transfer from ' + match.path.sourceName + ' at ' + match.path.transferRatio;
+      var gapCopy = match.status.gap > 0
+        ? formatPoints(match.status.gap) + ' short'
+        : formatPoints(match.available) + ' available';
+      return '<article class="trip-bridge-card ' + match.status.key + '">' +
+        '<div class="trip-bridge-top"><div><h3>' + esc(match.spot.destination) + '</h3><p>' + descriptor + '</p></div><span class="trip-bridge-status">' + esc(match.status.label) + '</span></div>' +
+        '<div class="trip-bridge-meta">' +
+          '<span class="tag">' + esc(match.spot.program) + '</span>' +
+          '<span class="tag">' + esc(formatPoints(match.needed) + ' pts') + '</span>' +
+          '<span class="tag">' + esc(gapCopy) + '</span>' +
+        '</div>' +
+        '<p class="section-copy">' + esc(access + '. ' + (match.spot.caveat || '')) + '</p>' +
+      '</article>';
+    }).join('') + '</div>' +
+  '</div>';
+}
+
 function renderModeStrip(prefs) {
   var activeSurface = getSurfaceMode(prefs.surfaceMode) || SURFACE_MODES[0];
   return '<section class="panel modes-panel" aria-label="Advisor modes">' +
@@ -1629,38 +1876,6 @@ function renderHero(analysis) {
       '<div class="section-copy">' + esc('That puts about ' + formatDollars(analysis.totalGap) + ' of extra value above the cash-like floor.') + '</div>' +
     '</div>' +
   '</section>' + renderModeStrip(analysis.prefs);
-}
-
-function renderLeftOnTable(analysis) {
-  if (!analysis.activeAccounts.length) return '';
-  return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Opportunity</div><h2>Unrealized value</h2><p class="section-copy">If you defaulted to the cash-like floor instead, this is the upside you would leave behind.</p></div></div>' +
-    '<div class="lot-grid">' + analysis.activeAccounts.map(function (item) {
-      var bestPct = item.bestOption.adjustedValue > 0 ? 100 : 0;
-      var floorPct = item.bestOption.adjustedValue > 0 ? round(item.floorOption.adjustedValue / item.bestOption.adjustedValue * 100, 0) : 0;
-      return '<article class="lot-item">' +
-        '<h3><span>' + esc(item.account.program) + '</span><span>' + esc(formatDollars(item.leftOnTable.gap)) + '</span></h3>' +
-        '<p>' + esc(item.bestOption.label + ' is about ' + item.leftOnTable.gapPercent + '% better than the floor for this account.') + '</p>' +
-        '<div class="comparison-bar">' +
-          '<div class="comparison-row"><span class="mini-label">Winner</span><div class="comparison-track"><div class="comparison-fill" style="width:' + bestPct + '%;background:var(--gold)"></div></div><span>' + esc(formatDollars(item.bestOption.adjustedValue)) + '</span></div>' +
-          '<div class="comparison-row"><span class="mini-label">Floor</span><div class="comparison-track"><div class="comparison-fill" style="width:' + floorPct + '%;background:var(--accent)"></div></div><span>' + esc(formatDollars(item.floorOption.adjustedValue)) + '</span></div>' +
-        '</div>' +
-      '</article>';
-    }).join('') + '</div></section>';
-}
-
-function renderWarnings(analysis) {
-  if (!analysis.expiring.length) return '';
-  return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Urgency</div><h2>Expiration warnings</h2><p class="section-copy">These accounts need attention before you optimize anything else.</p></div></div>' +
-    '<div class="warning-list">' + analysis.expiring.map(function (item) {
-      var expiration = item.expiration;
-      return '<article class="warning-card">' +
-        '<h3><span>' + esc(item.account.program) + '</span>' + (expiration.expired ? '<span class="expired-badge">Expired</span>' : '<span class="expired-badge">' + esc(expiration.message) + '</span>') + '</h3>' +
-        '<p>' + esc('If you act now, the cleanest move is ' + item.bestOption.label + ' for about ' + formatDollars(item.bestOption.adjustedValue) + '.') + '</p>' +
-        '<p>' + esc('Last updated: ' + (item.account.lastUpdated || 'unknown') + (expiration.expiresAt ? ' • expected expiry ' + expiration.expiresAt : '')) + '</p>' +
-      '</article>';
-    }).join('') + '</div></section>';
 }
 
 function recCard(label, card, extraClass, featured) {
@@ -1738,90 +1953,18 @@ function renderByAccount(analysis) {
       return '<article class="account-card">' +
         '<div class="account-shell">' +
           '<div class="account-header">' +
-            '<div><div class="account-name"><span class="type-dot ' + esc(item.account.type || 'other') + '"></span>' + esc(item.account.program) + '</div>' +
+            '<div><div class="account-name"><span class="type-dot ' + esc(item.account.type || 'other') + '"></span><span>' + esc(item.account.program) + '</span>' + renderExpirationBadge(item.expiration) + '</div>' +
             '<div class="account-balance"><strong>' + esc(formatPoints(item.account.balance)) + ' ' + esc(item.account.currency || 'points') + '</strong><div class="section-copy">Best answer here: ' + esc(item.bestOption.label) + ' • floor ' + esc(formatDollars(item.floorOption.adjustedValue)) + '</div></div></div>' +
             '<div class="rec-score">' + esc(formatScoreLabel(item.bestOption.modeScore)) + '</div>' +
           '</div>' +
           '<div class="option-list">' + renderAccountOptions(item) + '</div>' +
+          renderTripBridge(item) +
         '</div>' +
         '<button type="button" class="expand-toggle" data-expand-account="' + esc(item.account.id) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '">' +
           '<span>See detail and sweet spots</span><span>' + (expanded ? 'Hide' : 'Expand') + '</span></button>' +
         '<div class="detail-panel' + (expanded ? ' open' : '') + '">' + renderAccountDetails(item) + '</div>' +
       '</article>';
     }).join('') + '</div>' +
-  '</section>';
-}
-
-function renderSweetSpots(analysis) {
-  if (!analysis.sweetSpots.length) return '';
-  return '<section class="panel section-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Sweet spots</div><h2>Transfer opportunities</h2><p class="section-copy">Only the high-value partners survive into this list.</p></div></div>' +
-    '<div class="sweet-grid">' + analysis.sweetSpots.slice(0, 8).map(function (item) {
-      return '<article class="sweet-card">' +
-        '<h3>' + esc(item.account.program + ' → ' + item.option.label) + '</h3>' +
-        '<p>' + esc(item.option.sweetSpot || 'High-value transfer partner.') + '</p>' +
-        '<div class="tag-row">' +
-          '<span class="tag">' + esc(item.option.netCpp.toFixed(2) + ' cpp') + '</span>' +
-          '<span class="tag">' + esc(formatDollars(item.option.adjustedValue)) + '</span>' +
-          '<span class="tag ' + (item.option.availability === 'high' ? 'success' : 'warn') + '">' + esc(item.option.availability + ' availability') + '</span>' +
-        '</div>' +
-      '</article>';
-    }).join('') + '</div>' +
-  '</section>';
-}
-
-function renderHouseholdList(household) {
-  if (!household.length) {
-    return '<div class="empty-state"><strong>Add a household member</strong>When two people hold points in the same program, pooling them can unlock better redemptions.</div>';
-  }
-  return '<div class="household-list">' + household.map(function (item) {
-    return '<article class="household-card">' +
-      '<h3><span>' + esc(item.memberName) + '</span><button type="button" class="btn btn-danger" data-remove-household="' + esc(item.id) + '">Remove</button></h3>' +
-      '<p>' + esc(item.program) + ' • ' + esc(formatPoints(item.balance)) + ' ' + esc(item.currency) + '</p>' +
-    '</article>';
-  }).join('') + '</div>';
-}
-
-function programSelectOptions() {
-  return getProgramEntries().map(function (entry) {
-    return '<option value="' + esc(entry.name) + '">' + esc(entry.name) + '</option>';
-  }).join('');
-}
-
-function renderSettings(analysis) {
-  var prefs = analysis.prefs;
-  return '<section class="panel section-panel settings-panel">' +
-    '<div class="section-header"><div><div class="mini-label">Tune recommendations</div><h2>Tune recommendations</h2><p class="section-copy">Travel preferences, spending caps, and household balances all change what counts as a good redemption.</p></div></div>' +
-    '<details>' +
-      '<summary>Spending caps, complexity, and household</summary>' +
-      '<div class="settings-body">' +
-        '<div class="settings-grid">' +
-          '<div class="setting-card field"><label for="pref-interestedInTravel">Interested in travel</label><select id="pref-interestedInTravel" data-pref="interestedInTravel"><option value="true"' + (prefs.interestedInTravel ? ' selected' : '') + '>Yes</option><option value="false"' + (!prefs.interestedInTravel ? ' selected' : '') + '>No</option></select></div>' +
-          '<div class="setting-card field"><label for="pref-complexityTolerance">How many steps you\u0027ll tolerate</label><select id="pref-complexityTolerance" data-pref="complexityTolerance"><option value="low"' + (prefs.complexityTolerance === 'low' ? ' selected' : '') + '>Low</option><option value="medium"' + (prefs.complexityTolerance === 'medium' ? ' selected' : '') + '>Medium</option><option value="high"' + (prefs.complexityTolerance === 'high' ? ' selected' : '') + '>High</option></select></div>' +
-          '<div class="setting-card field"><label for="pref-cabinPref">Cabin preference</label><select id="pref-cabinPref" data-pref="cabinPref"><option value="economy"' + (prefs.cabinPref === 'economy' ? ' selected' : '') + '>Economy</option><option value="premiumEconomy"' + (prefs.cabinPref === 'premiumEconomy' ? ' selected' : '') + '>Premium economy</option><option value="business"' + (prefs.cabinPref === 'business' ? ' selected' : '') + '>Business</option><option value="first"' + (prefs.cabinPref === 'first' ? ' selected' : '') + '>First</option></select></div>' +
-          '<div class="setting-card field"><label for="pref-hotelPref">Hotel preference</label><select id="pref-hotelPref" data-pref="hotelPref"><option value="budgetHotel"' + (prefs.hotelPref === 'budgetHotel' ? ' selected' : '') + '>Budget</option><option value="midrangeHotel"' + (prefs.hotelPref === 'midrangeHotel' ? ' selected' : '') + '>Midrange</option><option value="luxuryHotel"' + (prefs.hotelPref === 'luxuryHotel' ? ' selected' : '') + '>Luxury</option><option value="resort"' + (prefs.hotelPref === 'resort' ? ' selected' : '') + '>Resort</option></select></div>' +
-        '</div>' +
-        '<div class="setting-card">' +
-          '<div class="mini-label">Spending caps</div>' +
-          '<div class="section-copy">When a redemption\u0027s value depends on a cash price you\u0027d never actually pay, these caps bring the estimate back to earth.</div>' +
-          '<div class="caps-grid" style="margin-top:12px">' + Object.keys(prefs.wtpCaps).map(function (key) {
-            return '<div class="field"><label for="cap-' + esc(key) + '">' + esc(key) + '</label><input id="cap-' + esc(key) + '" type="number" min="1" step="10" data-wtp-key="' + esc(key) + '" value="' + esc(prefs.wtpCaps[key]) + '"></div>';
-          }).join('') + '</div>' +
-        '</div>' +
-        '<div class="setting-card">' +
-          '<div class="mini-label">Household</div>' +
-          '<div class="section-copy">Add your household member\u0027s loyalty balances here. They\u0027re stored separately from your main tracker data.</div>' +
-          '<form id="household-form" class="household-form-grid" style="margin-top:12px">' +
-            '<div class="field"><label for="household-name">Member</label><input id="household-name" name="memberName" type="text" placeholder="e.g. Partner, spouse"></div>' +
-            '<div class="field"><label for="household-program">Program</label><input id="household-program" name="program" type="text" list="household-program-list" placeholder="Chase Ultimate Rewards"></div>' +
-            '<div class="field"><label for="household-balance">Balance</label><input id="household-balance" name="balance" type="number" min="0" step="1" placeholder="25000"></div>' +
-            '<button type="submit" class="btn btn-primary">Add balance</button>' +
-          '</form>' +
-          '<datalist id="household-program-list">' + programSelectOptions() + '</datalist>' +
-          '<div style="margin-top:12px">' + renderHouseholdList(analysis.household) + '</div>' +
-        '</div>' +
-      '</div>' +
-    '</details>' +
   '</section>';
 }
 
@@ -1861,10 +2004,6 @@ function render() {
     renderHero(analysis) +
     renderRecommendations(analysis) +
     renderByAccount(analysis) +
-    renderLeftOnTable(analysis) +
-    renderWarnings(analysis) +
-    renderSweetSpots(analysis) +
-    renderSettings(analysis) +
     renderFreshness();
   bindModeStripScroll();
 }
@@ -1874,51 +2013,6 @@ function handleModeChange(mode) {
   prefs.surfaceMode = mode;
   savePrefs(prefs);
   render();
-}
-
-function handlePrefInput(target) {
-  var prefs = readPrefs();
-  var key = target.getAttribute('data-pref');
-  if (!key) return;
-  if (key === 'interestedInTravel') prefs[key] = target.value === 'true';
-  else prefs[key] = target.value;
-  savePrefs(prefs);
-  render();
-}
-
-function handleWtpInput(target) {
-  var prefs = readPrefs();
-  var key = target.getAttribute('data-wtp-key');
-  if (!key) return;
-  var value = Math.max(1, Math.floor(Number(target.value) || 0));
-  prefs.wtpCaps[key] = value;
-  savePrefs(prefs);
-  render();
-}
-
-function handleHouseholdSubmit(form) {
-  var memberName = form.memberName.value.trim() || 'Player two';
-  var programName = form.program.value.trim();
-  var balance = Math.max(0, Math.floor(Number(form.balance.value) || 0));
-  if (!programName || !balance) return false;
-  var program = findProgram(programName);
-  if (!program) {
-    window.alert('Choose a program from the shared dataset.');
-    return false;
-  }
-  var household = readHousehold();
-  household.push(normalizeHouseholdAccount({
-    id: genId(),
-    memberName: memberName,
-    program: program.name,
-    programSlug: program.slug,
-    balance: balance,
-    currency: program.currency,
-    type: program.type
-  }));
-  saveHousehold(household);
-  render();
-  return false;
 }
 
 function bindModeStripScroll() {
@@ -1940,7 +2034,6 @@ function bindEvents() {
   app.addEventListener('click', function (event) {
     var modeButton = event.target.closest('[data-mode]');
     var expandButton = event.target.closest('[data-expand-account]');
-    var removeHousehold = event.target.closest('[data-remove-household]');
     if (modeButton) {
       handleModeChange(modeButton.getAttribute('data-mode'));
       return;
@@ -1950,28 +2043,6 @@ function bindEvents() {
       state.expanded[id] = !state.expanded[id];
       render();
       return;
-    }
-    if (removeHousehold) {
-      var household = readHousehold().filter(function (item) {
-        return item.id !== removeHousehold.getAttribute('data-remove-household');
-      });
-      saveHousehold(household);
-      render();
-    }
-  });
-  app.addEventListener('change', function (event) {
-    if (event.target.matches('[data-pref]')) {
-      handlePrefInput(event.target);
-      return;
-    }
-    if (event.target.matches('[data-wtp-key]')) {
-      handleWtpInput(event.target);
-    }
-  });
-  app.addEventListener('submit', function (event) {
-    if (event.target.id === 'household-form') {
-      event.preventDefault();
-      handleHouseholdSubmit(event.target);
     }
   });
   app.addEventListener('keydown', function (event) {
@@ -2011,11 +2082,15 @@ window.ChurnAdvisor = {
   buildAnalysis: buildAnalysis,
   writeAgentResults: writeAgentResults,
   render: render,
-  findProgram: findProgram
+  findProgram: findProgram,
+  findTripBridgeMatches: findTripBridgeMatches,
+  renderTripBridge: renderTripBridge,
+  loadSweetSpots: loadSweetSpots
 };
 
 bindEvents();
 render();
+loadSweetSpots();
 
 /* ── Theme toggle ──────────────────────────────── */
 (function () {

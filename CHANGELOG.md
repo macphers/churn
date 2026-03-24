@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.15.0] - 2026-03-24
+
+### Added
+- Shared theme stylesheet (`output/shared.css`) so Tracker, Advisor, and Trips all consume one source of truth for core color and typography tokens
+- Advisor trip bridge cards that map each account to current sweet spots from the Trips dataset, including direct-balance and transfer-path matches
+- 24 browser test assertions covering tracker-side recommendation migration, non-destructive sidecar imports, advisor trip bridge rendering, and fetch-failure degradation
+
+### Changed
+- Moved advisor recommendation settings and household balance management into the Profile tab so the Advisor page now focuses on verdict, recommendations, and by-account guidance
+- Advisor account cards now show inline expiration badges and tint trip bridge cards for at-risk balances
+
+### Fixed
+- Export/import now round-trips `valueAdvisorPrefs` and `churn_household` sidecar data without wiping newer settings when importing an older backup
+- Profile edits now preserve legacy advisor preference objects instead of rewriting them with `surfaceMode: "auto"`
+
 ## [0.1.14.0] - 2026-03-23
 
 ### Added
