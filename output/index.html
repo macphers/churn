@@ -2593,7 +2593,7 @@ function renderBenefits(data) {
   var list = document.getElementById('benefits-list');
   var heroEl = document.getElementById('benefits-hero');
   if (!data.benefits.length) {
-    if (heroEl) heroEl.innerHTML = '<div class="benefits-hero-number">Card perks <span style="font-family:var(--font-body)">&amp;</span> <em>credits</em></div><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
+    if (heroEl) heroEl.innerHTML = '<div class="benefits-hero-number">Card perks &amp; <em>credits</em></div><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
     list.innerHTML = '<div class="empty-state"><strong>No benefits tracked</strong>Track card perks like lounge access, free night certificates, and travel credits. Benefits stay linked to accounts so nothing expires unnoticed.<br><button type="button" class="btn btn-secondary" id="empty-add-benefit">Track a benefit</button></div>';
     return;
   }
