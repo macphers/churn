@@ -323,6 +323,17 @@ body {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+.account-owner-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 2px;
+  letter-spacing: 0;
+}
 .type-dot {
   width: 6px;
   height: 6px;
@@ -1568,6 +1579,11 @@ body {
               <small>Used for expiration tracking. Updating a balance in Churn does not change this date.</small>
             </div>
             <div class="field span-2">
+              <label for="account-owner">Owner</label>
+              <input id="account-owner" type="text" maxlength="50" placeholder="e.g. Mike, Sarah">
+              <small>Who this account belongs to — helpful when tracking accounts for multiple people.</small>
+            </div>
+            <div class="field span-2">
               <label for="account-number">Account number</label>
               <input id="account-number" type="text" maxlength="50" placeholder="e.g. xxxx-1234">
             </div>
@@ -2198,6 +2214,7 @@ function repairAccount(account) {
   fixed.currency = validateCurrency(fixed.currency || (program ? program.currency : 'points'));
   fixed.balance = validateBalance(fixed.balance);
   fixed.cpp = validateCpp(fixed.cpp != null ? fixed.cpp : (program ? program.cpp : 1));
+  fixed.owner = sanitize(fixed.owner || '', 50);
   fixed.accountNumber = sanitize(fixed.accountNumber || '', 50);
   fixed.lastUpdated = validateDateInput(fixed.lastUpdated) || todayIsoDate();
   fixed.lastActivityDate = validateDateInput(fixed.lastActivityDate || fixed.lastUpdated);
@@ -2545,7 +2562,7 @@ function renderAccounts(data) {
         '<div class="account-main">' +
           '<div class="account-header">' +
             '<div>' +
-              '<div class="account-name"><span class="type-dot ' + getAccountGroupKey(account) + '"></span>' + esc(account.program) + '</div>' +
+              '<div class="account-name"><span class="type-dot ' + getAccountGroupKey(account) + '"></span>' + esc(account.program) + (account.owner ? '<span class="account-owner-tag">' + esc(account.owner) + '</span>' : '') + '</div>' +
               '<div class="account-balance"><strong>' + formatPoints(account.balance) + ' ' + account.currency + '</strong><div class="account-value">&asymp; ' + formatDollars(calculateAccountValue(account)) + '</div></div>' +
             '</div>' +
             '<span class="type-pill">' + label.label + '</span>' +
@@ -2576,7 +2593,7 @@ function renderBenefits(data) {
   var list = document.getElementById('benefits-list');
   var heroEl = document.getElementById('benefits-hero');
   if (!data.benefits.length) {
-    if (heroEl) heroEl.innerHTML = '<div class="benefits-hero-number">Card perks <em>&amp; credits</em></div><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
+    if (heroEl) heroEl.innerHTML = '<div class="benefits-hero-number">Card perks <span style="font-family:var(--font-body)">&amp;</span> <em>credits</em></div><p class="dash-subtitle">Track card perks like lounge access, free night certificates, and travel credits.</p>';
     list.innerHTML = '<div class="empty-state"><strong>No benefits tracked</strong>Track card perks like lounge access, free night certificates, and travel credits. Benefits stay linked to accounts so nothing expires unnoticed.<br><button type="button" class="btn btn-secondary" id="empty-add-benefit">Track a benefit</button></div>';
     return;
   }
@@ -2774,7 +2791,7 @@ function renderDashboard(data) {
     var expiration = getExpirationRisk(a);
     var dateStr = a.lastUpdated ? new Date(a.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
     tableHtml += '<tr>' +
-      '<td><div class="program-cell"><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + '</span>' +
+      '<td><div class="program-cell"><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + (a.owner ? '<span class="account-owner-tag">' + esc(a.owner) + '</span>' : '') + '</span>' +
       (expiration ? '<div class="program-badges"><span class="expiry-badge ' + esc(expiration.tone) + '">' + esc(expiration.label) + '</span></div>' : '') +
       '</div></td>' +
       '<td>' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</td>' +
@@ -3037,6 +3054,7 @@ function fillAccountForm(account) {
   document.getElementById('account-cpp').value = account ? validateCpp(account.cpp).toFixed(2) : '1.00';
   document.getElementById('account-balance').value = account ? validateBalance(account.balance) : '';
   document.getElementById('account-last-activity').value = account ? (validateDateInput(account.lastActivityDate) || validateDateInput(account.lastUpdated)) : todayIsoDate();
+  document.getElementById('account-owner').value = account ? account.owner || '' : '';
   document.getElementById('account-number').value = account ? account.accountNumber || '' : '';
   document.getElementById('account-notes').value = account ? account.notes || '' : '';
   document.getElementById('cards-details').open = false;
@@ -3099,6 +3117,7 @@ function collectAccountFormData() {
     currency: validateCurrency(document.getElementById('account-currency').value),
     cpp: validateCpp(document.getElementById('account-cpp').value),
     lastActivityDate: validateDateInput(document.getElementById('account-last-activity').value),
+    owner: sanitize(document.getElementById('account-owner').value, 50),
     accountNumber: sanitize(document.getElementById('account-number').value, 50),
     lastUpdated: todayIsoDate(),
     notes: sanitize(document.getElementById('account-notes').value, MAX_NOTES),
