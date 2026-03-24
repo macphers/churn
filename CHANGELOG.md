@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.17.0] - 2026-03-24
+
+### Added
+- Inline balance editing on the Dashboard tab — click any account balance to update it directly
+- Balances auto-save on Enter or blur, cancel with Escape
+- `lastUpdated` timestamp refreshes automatically when a balance is changed
+- Dirty-check prevents accidental timestamp updates from no-op edits
+- Non-numeric characters stripped from input to handle locale-formatted pastes safely
+
 ## [0.1.16.0] - 2026-03-24
 
 ### Changed
