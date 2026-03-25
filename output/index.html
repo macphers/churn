@@ -639,7 +639,7 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
-.recommendations-card, .household-card {
+.recommendations-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 16px;
@@ -654,40 +654,6 @@ body {
   letter-spacing: 0.06em;
   text-transform: none;
   font-size: 11px;
-}
-.household-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 0.8fr auto;
-  gap: 8px;
-  align-items: end;
-}
-.household-list {
-  display: grid;
-  gap: 8px;
-}
-.household-card h3 {
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-.household-card p {
-  color: var(--text-muted);
-  margin-top: 4px;
-  font-size: 13px;
-}
-.household-empty {
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-sm);
-  padding: 18px;
-  text-align: center;
-  color: var(--text-muted);
-}
-.household-empty strong {
-  display: block;
-  color: var(--text);
-  margin-bottom: 6px;
 }
 .profile-card, .data-card {
   border: 1px solid var(--border);
@@ -1187,6 +1153,35 @@ body {
   font-weight: 500;
   font-size: 13px;
 }
+.balance-clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: background 0.15s;
+}
+.balance-clickable:hover {
+  background: var(--hover, rgba(0,0,0,0.04));
+}
+.balance-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  border: 1px solid var(--border-strong, #D5D0CA);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -3px -5px;
+  width: 120px;
+  background: var(--surface, #FFFFFF);
+  color: var(--text, #1A1A1A);
+}
+.balance-input:focus {
+  outline: 2px solid rgba(139, 94, 16, 0.3);
+  outline-offset: -1px;
+  border-color: var(--accent, #8B5E10);
+}
 .dash-table tbody td:nth-child(3) {
   color: var(--text-dim);
   font-size: 11px;
@@ -1295,7 +1290,7 @@ body {
 
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; }
-  .form-grid, .detail-grid, .rate-grid, .recommendations-grid, .caps-grid, .household-form-grid { grid-template-columns: 1fr; }
+  .form-grid, .detail-grid, .rate-grid, .recommendations-grid, .caps-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767px) {
@@ -1769,8 +1764,6 @@ var STORAGE_KEY = 'churn_data';
 var LEGACY_STORAGE_KEY = 'osaka_data';
 var VALUE_RESULTS_KEY = 'valueAdvisorResults';
 var PREFS_KEY = 'valueAdvisorPrefs';
-var HOUSEHOLD_KEY = 'churn_household';
-var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var SCHEMA_VERSION = 3;
 var VALID_TYPES = ['flexible', 'airline', 'hotel', 'credit_card', 'other'];
 var VALID_CURRENCIES = ['points', 'miles'];
@@ -2097,45 +2090,6 @@ function getProgramBySlug(slug) {
   return name ? window.PROGRAMS.programs[name] : null;
 }
 
-function normalizeHouseholdAccount(item) {
-  if (!item || typeof item !== 'object') return null;
-  var rawProgramName = item.program || getProgramNameBySlug(item.programSlug) || '';
-  var guessedName = rawProgramName ? guessProgramName(rawProgramName) : '';
-  var programName = guessedName || rawProgramName;
-  var program = item.programSlug ? getProgramBySlug(item.programSlug) : (programName ? getProgramByName(programName) : null);
-  return {
-    id: typeof item.id === 'string' ? item.id : genId(),
-    memberName: typeof item.memberName === 'string' && item.memberName.trim() ? item.memberName.trim() : 'Player two',
-    program: programName || (program ? getProgramNameBySlug(program.slug) : ''),
-    programSlug: program ? program.slug : (item.programSlug || null),
-    balance: Math.max(0, Math.floor(Number(item.balance) || 0)),
-    currency: program ? program.currency : validateCurrency(item.currency),
-    type: program ? program.type : validateType(item.type)
-  };
-}
-
-function readHouseholdData() {
-  try {
-    var raw = localStorage.getItem(HOUSEHOLD_KEY);
-    if (!raw) {
-      raw = localStorage.getItem(LEGACY_HOUSEHOLD_KEY);
-      if (raw) { localStorage.setItem(HOUSEHOLD_KEY, raw); localStorage.removeItem(LEGACY_HOUSEHOLD_KEY); }
-    }
-    if (!raw) return [];
-    var parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed.map(normalizeHouseholdAccount).filter(Boolean);
-    if (parsed && Array.isArray(parsed.accounts)) return parsed.accounts.map(normalizeHouseholdAccount).filter(Boolean);
-    return [];
-  } catch (error) {
-    return [];
-  }
-}
-
-function saveHouseholdData(items) {
-  var list = Array.isArray(items) ? items : [];
-  localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify(list.map(normalizeHouseholdAccount).filter(Boolean)));
-  localStorage.removeItem(VALUE_RESULTS_KEY);
-}
 
 function guessProgramName(name) {
   var safe = sanitize(name, MAX_TEXT).toLowerCase();
@@ -2665,26 +2619,13 @@ function renderBenefits(data) {
   });
 }
 
-function renderHouseholdList(household) {
-  if (!household.length) {
-    return '<div class="household-empty"><strong>Add a household member</strong>Pooling balances here lets the advisor spot better redemption paths without changing your main tracker accounts.</div>';
-  }
-  return '<div class="household-list">' + household.map(function (item) {
-    return '<article class="household-card">' +
-      '<h3><span>' + esc(item.memberName) + '</span><button type="button" class="btn btn-danger" data-remove-household="' + esc(item.id) + '">Remove</button></h3>' +
-      '<p>' + esc(item.program) + ' • ' + formatPoints(item.balance) + ' ' + esc(item.currency || 'points') + '</p>' +
-    '</article>';
-  }).join('') + '</div>';
-}
-
 function renderRecommendationSettings() {
   var prefs = readAdvisorPrefs();
-  var household = readHouseholdData();
   return '<details class="recommendations-panel" open>' +
     '<summary>' +
       '<div class="mini-label">Recommendations</div>' +
       '<div style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;margin-top:8px">Advisor inputs</div>' +
-      '<p class="section-copy">Travel interest, booking complexity, spending caps, and household balances all feed the Advisor page.</p>' +
+      '<p class="section-copy">Travel interest, booking complexity, and spending caps all feed the Advisor page.</p>' +
     '</summary>' +
     '<div class="recommendations-body">' +
       '<div class="recommendations-grid">' +
@@ -2699,20 +2640,6 @@ function renderRecommendationSettings() {
         '<div class="caps-grid" style="margin-top:12px">' + Object.keys(prefs.wtpCaps).map(function (key) {
           return '<div class="field"><label for="cap-' + esc(key) + '">' + esc(key) + '</label><input id="cap-' + esc(key) + '" type="number" min="1" step="10" data-advisor-cap="' + esc(key) + '" value="' + esc(prefs.wtpCaps[key]) + '"></div>';
         }).join('') + '</div>' +
-      '</div>' +
-      '<div class="recommendations-card">' +
-        '<div class="mini-label">Household</div>' +
-        '<p class="section-copy">Store shared balances here so the advisor can factor in pooled points without altering your own tracked accounts.</p>' +
-        '<form id="profile-household-form" class="household-form-grid" style="margin-top:12px">' +
-          '<div class="field"><label for="profile-household-name">Member</label><input id="profile-household-name" name="memberName" type="text" placeholder="e.g. Partner, spouse"></div>' +
-          '<div class="field"><label for="profile-household-program">Program</label><input id="profile-household-program" name="program" type="text" list="profile-household-program-list" placeholder="Chase Ultimate Rewards"></div>' +
-          '<div class="field"><label for="profile-household-balance">Balance</label><input id="profile-household-balance" name="balance" type="number" min="0" step="1" placeholder="25000"></div>' +
-          '<button type="submit" class="btn btn-primary">Add balance</button>' +
-        '</form>' +
-        '<datalist id="profile-household-program-list">' + getProgramEntries().map(function (entry) {
-          return '<option value="' + esc(entry.name) + '">' + esc(entry.name) + '</option>';
-        }).join('') + '</datalist>' +
-        '<div style="margin-top:12px">' + renderHouseholdList(household) + '</div>' +
       '</div>' +
     '</div>' +
   '</details>';
@@ -2819,12 +2746,51 @@ function renderDashboard(data) {
       '<td><div class="program-cell"><span class="program-name"><span class="type-dot ' + getAccountGroupKey(a) + '"></span>' + esc(a.program) + (a.owner ? '<span class="account-owner-tag">' + esc(a.owner) + '</span>' : '') + '</span>' +
       (expiration ? '<div class="program-badges"><span class="expiry-badge ' + esc(expiration.tone) + '">' + esc(expiration.label) + '</span></div>' : '') +
       '</div></td>' +
-      '<td>' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</td>' +
+      '<td><span class="balance-clickable" data-account-id="' + esc(a.id) + '" data-raw-balance="' + esc(validateBalance(a.balance)) + '">' + formatPoints(a.balance) + ' ' + esc(a.currency || 'pts') + '</span></td>' +
       '<td>' + dateStr + '</td>' +
     '</tr>';
   });
   tableHtml += '</tbody></table>';
   accountTable.innerHTML = tableHtml;
+
+  // Inline balance editing
+  accountTable.querySelectorAll('.balance-clickable').forEach(function (span) {
+    span.addEventListener('click', function () {
+      var accountId = span.getAttribute('data-account-id');
+      var rawBalance = span.getAttribute('data-raw-balance');
+      var td = span.parentNode;
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'balance-input';
+      input.value = rawBalance;
+      input.setAttribute('inputmode', 'numeric');
+      td.innerHTML = '';
+      td.appendChild(input);
+      input.focus();
+      input.select();
+
+      var committed = false;
+      function commit() {
+        if (committed) return;
+        committed = true;
+        var newVal = validateBalance(input.value.replace(/[^0-9]/g, ''));
+        if (newVal === Number(rawBalance)) { render(); return; }
+        var d = loadData();
+        var acct = d.accounts.find(function (a) { return a.id === accountId; });
+        if (acct) {
+          acct.balance = newVal;
+          acct.lastUpdated = new Date().toISOString().slice(0, 10);
+          saveData(d);
+        }
+        render();
+      }
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { committed = true; render(); }
+      });
+      input.addEventListener('blur', commit);
+    });
+  });
 }
 
 function switchTab(tabName) {
@@ -3389,44 +3355,10 @@ function handleAdvisorCapInput(target) {
   render();
 }
 
-function handleHouseholdSubmit(event) {
-  event.preventDefault();
-  var form = event.target;
-  var memberName = form.memberName.value.trim() || 'Player two';
-  var programName = form.program.value.trim();
-  var balance = Math.max(0, Math.floor(Number(form.balance.value) || 0));
-  if (!programName || !balance) return;
-  var guessedName = guessProgramName(programName);
-  var program = guessedName ? getProgramByName(guessedName) : null;
-  if (!program) {
-    window.alert('Choose a program from the shared dataset.');
-    return;
-  }
-  var household = readHouseholdData();
-  household.push(normalizeHouseholdAccount({
-    id: genId(),
-    memberName: memberName,
-    program: guessedName,
-    programSlug: program.slug,
-    balance: balance,
-    currency: program.currency,
-    type: program.type
-  }));
-  saveHouseholdData(household);
-  render();
-}
-
-function removeHouseholdMember(id) {
-  saveHouseholdData(readHouseholdData().filter(function (item) {
-    return item.id !== id;
-  }));
-  render();
-}
 
 function exportData() {
   var backup = loadData();
   backup.valueAdvisorPrefs = readStoredAdvisorPrefs();
-  backup.churn_household = readHouseholdData();
   var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var link = document.createElement('a');
@@ -3443,15 +3375,6 @@ function applyImportedSidecarData(parsed) {
   if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'valueAdvisorPrefs')) {
     if (parsed.valueAdvisorPrefs == null) localStorage.removeItem(PREFS_KEY);
     else saveStoredAdvisorPrefs(parsed.valueAdvisorPrefs);
-  }
-  if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'churn_household')) {
-    if (parsed.churn_household == null) {
-      localStorage.removeItem(HOUSEHOLD_KEY);
-      localStorage.removeItem(LEGACY_HOUSEHOLD_KEY);
-      localStorage.removeItem(VALUE_RESULTS_KEY);
-    } else {
-      saveHouseholdData(parsed.churn_household);
-    }
   }
 }
 
@@ -3701,14 +3624,6 @@ function bindEvents() {
     }
     if (event.target.matches('[data-advisor-cap]')) handleAdvisorCapInput(event.target);
   });
-  document.getElementById('profile-recommendations').addEventListener('submit', function (event) {
-    if (event.target.id === 'profile-household-form') handleHouseholdSubmit(event);
-  });
-  document.getElementById('profile-recommendations').addEventListener('click', function (event) {
-    var remove = event.target.closest('[data-remove-household]');
-    if (!remove) return;
-    removeHouseholdMember(remove.getAttribute('data-remove-household'));
-  });
   document.getElementById('export-button').addEventListener('click', exportData);
   document.getElementById('import-button').addEventListener('click', function () {
     document.getElementById('import-file').click();
@@ -3823,7 +3738,7 @@ function bindEvents() {
     }
   });
   window.addEventListener('storage', function (event) {
-    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY || event.key === HOUSEHOLD_KEY) render();
+    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY) render();
   });
   window.addEventListener('hashchange', applyRouteFromHash);
 }
