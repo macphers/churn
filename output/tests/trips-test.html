@@ -66,6 +66,8 @@ document.getElementById('trips-frame').addEventListener('load', function () {
   var win = frame.contentWindow;
   var TR = win.TripResolver;
   var PROGRAMS = win.PROGRAMS;
+  assert('trips nav has refresh button', !!win.document.getElementById('nav-refresh-btn'));
+  assert('trips nav has export button', !!win.document.getElementById('nav-export-btn'));
 
   // ─── Test Data ───────────────────────────────
   var testSweetSpots = {
@@ -297,7 +299,7 @@ document.getElementById('trips-frame').addEventListener('load', function () {
 
   // Check nav links
   var navLinks = doc.querySelectorAll('.nav-links a');
-  assert('nav has 6 links', navLinks.length === 6);
+  assert('nav has 7 links', navLinks.length === 7);
   var tripsLink = doc.querySelector('.nav-links a.active');
   assert('Trips nav link is active', tripsLink && tripsLink.textContent.trim() === 'Trips');
 

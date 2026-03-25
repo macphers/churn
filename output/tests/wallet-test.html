@@ -153,6 +153,8 @@ document.getElementById('wallet-frame').addEventListener('load', function () {
   assertEqual('buildCardEntries hydrates Freedom Flex network', entries[0].card.network, 'Mastercard');
   assertEqual('getProgramBestCpp on Chase returns adjusted ceiling 2.27', Wallet.getProgramBestCpp(win.PROGRAMS.programs['Chase Ultimate Rewards'], testData.accounts[0]), 2.27);
   assert('available categories include hyatt', Wallet.getAvailableCategories(entries).indexOf('hyatt') >= 0);
+  assert('wallet nav has refresh button', !!win.document.getElementById('nav-refresh-btn'));
+  assert('wallet nav has export button', !!win.document.getElementById('nav-export-btn'));
   assert('render inserts recommendation card', !!win.document.querySelector('[data-recommendation-card]'));
   assert('render recommends Gold for groceries', win.document.body.textContent.indexOf('Gold') >= 0);
   assertEqual('render shows five dense card rows', win.document.querySelectorAll('[data-card-row]').length, 5);
@@ -165,6 +167,8 @@ document.getElementById('wallet-frame').addEventListener('load', function () {
   }));
   Wallet.render();
   assert('empty state shown when no cards are attached', win.document.body.textContent.indexOf('No cards attached yet') >= 0);
+  assert('empty state includes direct attach-cards CTA', win.document.body.textContent.indexOf('Attach cards to World of Hyatt') >= 0);
+  assertEqual('empty state direct attach CTA targets account edit route', win.document.querySelector('.account-action-list a').getAttribute('href'), 'index.html#accounts-edit:acct-empty');
 
   win.localStorage.setItem(Wallet.STORAGE_KEY, '{broken json');
   Wallet.render();

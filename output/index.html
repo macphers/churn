@@ -900,6 +900,11 @@ body {
   display: grid;
   gap: 10px;
 }
+.cards-help {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
 .known-card-option {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -1609,10 +1614,11 @@ body {
             <div class="field span-2">
               <details id="cards-details" class="cards-details">
                 <summary>
-                  <span>Cards</span>
-                  <span class="mini-label">Collapsed by default</span>
+                  <span>Cards held in this program</span>
+                  <span class="mini-label">Expand to attach cards</span>
                 </summary>
                 <div class="cards-body">
+                  <p class="cards-help">Check the cards you actually hold for this program so Wallet can compare the right earn rates. If a product is missing, add it as a custom card below.</p>
                   <div id="known-card-options"></div>
                   <button type="button" class="btn btn-ghost" id="add-custom-card-button">Add custom card</button>
                   <div id="custom-card-list" class="custom-card-list"></div>
@@ -2842,6 +2848,49 @@ function switchTab(tabName) {
   });
 }
 
+function applyRouteFromHash() {
+  var rawHash = (window.location.hash || '').replace(/^#/, '');
+  var hash = rawHash.toLowerCase();
+  var tabName = hash;
+  var openAccount = false;
+  var openCards = false;
+  var openRefresh = false;
+  var accountId = '';
+  if (!rawHash) return;
+  if (hash === 'accounts-add' || hash === 'add-account') {
+    tabName = 'accounts';
+    openAccount = true;
+  }
+  if (hash === 'refresh') {
+    tabName = 'dashboard';
+    openRefresh = true;
+  }
+  if (hash.indexOf('accounts-edit:') === 0) {
+    tabName = 'accounts';
+    openAccount = true;
+    openCards = true;
+    accountId = decodeURIComponent(rawHash.slice('accounts-edit:'.length));
+  }
+  if (['dashboard', 'accounts', 'benefits', 'profile'].indexOf(tabName) === -1) return;
+  switchTab(tabName);
+  if (openAccount) {
+    window.setTimeout(function () {
+      openAccountModal(accountId || null, { openCards: openCards });
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#accounts');
+      }
+    }, 0);
+  }
+  if (openRefresh) {
+    window.setTimeout(function () {
+      openRefreshModal();
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#dashboard');
+      }
+    }, 0);
+  }
+}
+
 function render() {
   var data = loadData();
   renderHero(data);
@@ -2934,8 +2983,12 @@ function setProgramMode(mode) {
 
 function renderProgramHint(program) {
   var hint = document.getElementById('program-hint');
-  if (!program || state.programPicker.mode === 'custom') {
+  if (state.programPicker.mode === 'custom') {
     hint.innerHTML = '<div class="program-hint"><strong>Custom program.</strong> All fields are editable — set your own cents-per-point value and details.</div>';
+    return;
+  }
+  if (!program) {
+    hint.innerHTML = '<div class="program-hint"><strong>Select a known program first.</strong> Churn will fill in the default value and show suggested cards for that rewards currency.</div>';
     return;
   }
   hint.innerHTML = '<div class="program-hint"><strong>' + esc(program.type) + '</strong> program • ' + esc(program.currency) + ' • ' + program.cpp.toFixed(2) + ' cpp • ' + (program.cards || []).length + ' card option' + ((program.cards || []).length === 1 ? '' : 's') + '</div>';
@@ -3005,7 +3058,11 @@ function readCardSelections() {
 function renderKnownCards(cards) {
   var container = document.getElementById('known-card-options');
   if (!cards.length) {
-    container.innerHTML = '<div class="empty-state"><strong>No known cards for this program</strong>Use the custom-card flow below if you want to track a different issuer product.</div>';
+    if (state.programPicker.mode === 'custom') {
+      container.innerHTML = '<div class="empty-state"><strong>No known cards for a custom program</strong>Use the custom-card flow below to add the issuer products you actually hold.</div>';
+    } else {
+      container.innerHTML = '<div class="empty-state"><strong>Select a program first</strong>Known cards will appear here after you choose a rewards program above. Or add a custom card below.</div>';
+    }
     return;
   }
   var selectedCards = readCardSelections();
@@ -3108,7 +3165,8 @@ function fillAccountForm(account) {
   }
 }
 
-function openAccountModal(accountId) {
+function openAccountModal(accountId, options) {
+  options = options || {};
   var data = loadData();
   var account = accountId ? data.accounts.find(function (item) { return item.id === accountId; }) : null;
   state.customCards = [];
@@ -3120,6 +3178,25 @@ function openAccountModal(accountId) {
   renderProgramOptions();
   openModal('account-modal');
   window.setTimeout(function () {
+    var cardsDetails = document.getElementById('cards-details');
+    if (options.openCards) {
+      cardsDetails.open = true;
+      if (cardsDetails.scrollIntoView) cardsDetails.scrollIntoView({ block: 'start' });
+      var firstCheckbox = cardsDetails.querySelector('[data-known-card-checkbox]');
+      var firstCustom = cardsDetails.querySelector('[data-card-name="0"]');
+      var addCustom = document.getElementById('add-custom-card-button');
+      var summary = cardsDetails.querySelector('summary');
+      if (firstCheckbox) {
+        firstCheckbox.focus();
+      } else if (firstCustom) {
+        firstCustom.focus();
+      } else if (addCustom) {
+        addCustom.focus();
+      } else if (summary) {
+        summary.focus();
+      }
+      return;
+    }
     document.getElementById('program-picker-input').focus();
   }, 20);
 }
@@ -3748,6 +3825,7 @@ function bindEvents() {
   window.addEventListener('storage', function (event) {
     if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY || event.key === HOUSEHOLD_KEY) render();
   });
+  window.addEventListener('hashchange', applyRouteFromHash);
 }
 
 window.ChurnTracker = {
@@ -3792,6 +3870,7 @@ window.ChurnTracker = {
 
 bindEvents();
 render();
+applyRouteFromHash();
 
 /* ── Theme toggle ──────────────────────────────── */
 (function () {
