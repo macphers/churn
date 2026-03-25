@@ -16,16 +16,121 @@
     return result;
   }
 
-  function makeCard(name, annualFee, rates, extras) {
+  function makeRotatingCategory(quarter, multiplier, categories, note) {
+    return {
+      quarter: quarter,
+      multiplier: Number(multiplier) || 1,
+      categories: Array.isArray(categories) ? categories.slice() : [],
+      note: note || ''
+    };
+  }
+
+  function makeCard(name, annualFee, rates, extras, options) {
+    options = options || {};
     return {
       name: name,
       annualFee: annualFee,
-      earnRates: makeEarnRates(rates, extras)
+      network: options.network || '',
+      earnRates: makeEarnRates(rates, extras),
+      rotatingCategories: Array.isArray(options.rotatingCategories) ? options.rotatingCategories.slice() : []
     };
   }
 
   var PROGRAMS = {
-    lastUpdated: '2026-03-17',
+    lastUpdated: '2026-03-24',
+    categoryAliases: {
+      dining: 'dining',
+      restaurant: 'dining',
+      restaurants: 'dining',
+      food: 'dining',
+      takeout: 'dining',
+      takeaway: 'dining',
+      cafe: 'dining',
+      cafes: 'dining',
+      coffee: 'dining',
+      groceries: 'groceries',
+      grocery: 'groceries',
+      supermarket: 'groceries',
+      supermarkets: 'groceries',
+      supermarketspurchases: 'groceries',
+      gas: 'gas',
+      fuel: 'gas',
+      'gas station': 'gas',
+      'gas stations': 'gas',
+      'ev charging': 'gas',
+      travel: 'travel',
+      'travel and transit': 'travel',
+      'travel & transit': 'travel',
+      transit: 'transit',
+      commuting: 'transit',
+      commute: 'transit',
+      rideshare: 'transit',
+      rideshares: 'transit',
+      subway: 'transit',
+      train: 'transit',
+      bus: 'transit',
+      parking: 'transit',
+      tolls: 'transit',
+      airline: 'airline',
+      airfare: 'airline',
+      flight: 'airline',
+      flights: 'airline',
+      air: 'airline',
+      hotel: 'hotel',
+      hotels: 'hotel',
+      lodging: 'hotel',
+      stay: 'hotel',
+      stays: 'hotel',
+      streaming: 'streaming',
+      netflix: 'streaming',
+      hulu: 'streaming',
+      spotify: 'streaming',
+      'online shopping': 'onlineShopping',
+      shopping: 'onlineShopping',
+      ecommerce: 'onlineShopping',
+      'e-commerce': 'onlineShopping',
+      amazon: 'onlineShopping',
+      pharmacy: 'drugstores',
+      pharmacies: 'drugstores',
+      drugstore: 'drugstores',
+      drugstores: 'drugstores',
+      entertainment: 'entertainment',
+      concerts: 'entertainment',
+      movies: 'entertainment',
+      movie: 'entertainment',
+      rent: 'rent',
+      renter: 'rent',
+      'phone bill': 'phone',
+      phone: 'phone',
+      internet: 'phone',
+      cable: 'phone',
+      wireless: 'phone',
+      delta: 'delta',
+      skymiles: 'delta',
+      'sky miles': 'delta',
+      united: 'united',
+      mileageplus: 'united',
+      'american airlines': 'americanAirlines',
+      american: 'americanAirlines',
+      aa: 'americanAirlines',
+      aadvantage: 'americanAirlines',
+      southwest: 'southwest',
+      'rapid rewards': 'southwest',
+      alaska: 'alaska',
+      hawaiian: 'alaska',
+      jetblue: 'jetblue',
+      trueblue: 'jetblue',
+      marriott: 'marriott',
+      bonvoy: 'marriott',
+      hilton: 'hilton',
+      hyatt: 'hyatt',
+      ihg: 'ihg',
+      kimpton: 'ihg',
+      intercontinental: 'ihg',
+      wyndham: 'wyndham',
+      vacasa: 'wyndham',
+      other: 'other'
+    },
     programs: {
       'Chase Ultimate Rewards': {
         slug: 'chase-ur',
@@ -51,10 +156,15 @@
           { partner: 'IHG One Rewards', ratio: '1:1', bestCpp: 0.6, sweetSpot: 'Low-category hotels when cash rates spike.', surcharges: 'low', flexibility: 'medium', availability: 'high', cabinType: 'midrangeHotel' }
         ],
         cards: [
-          makeCard('Sapphire Preferred', 95, { dining: 3, travel: 2, streaming: 3 }),
-          makeCard('Sapphire Reserve', 550, { dining: 3, travel: 3, streaming: 3 }),
-          makeCard('Freedom Unlimited', 0, { dining: 3, other: 1.5 }),
-          makeCard('Freedom Flex', 0, { dining: 3 }, { drugstores: 3 })
+          makeCard('Sapphire Preferred', 95, { dining: 3, travel: 2, streaming: 3 }, null, { network: 'Visa' }),
+          makeCard('Sapphire Reserve', 550, { dining: 3, travel: 3, streaming: 3 }, null, { network: 'Visa' }),
+          makeCard('Freedom Unlimited', 0, { dining: 3, other: 1.5 }, { drugstores: 3 }, { network: 'Visa' }),
+          makeCard('Freedom Flex', 0, { dining: 3 }, { drugstores: 3 }, {
+            network: 'Mastercard',
+            rotatingCategories: [
+              makeRotatingCategory(1, 5, ['groceries'], 'Quarterly bonus categories require activation.')
+            ]
+          })
         ]
       },
       'American Express Membership Rewards': {
@@ -81,9 +191,9 @@
           { partner: 'Marriott Bonvoy', ratio: '1:1', bestCpp: 1.0, sweetSpot: 'Selective off-peak and resort nights.', surcharges: 'low', flexibility: 'medium', availability: 'medium', cabinType: 'resort' }
         ],
         cards: [
-          makeCard('Gold', 250, { dining: 4, groceries: 4, travel: 3 }),
-          makeCard('Platinum', 695, { travel: 5 }),
-          makeCard('Green', 150, { dining: 3, travel: 3 }, { transit: 3 })
+          makeCard('Gold', 250, { dining: 4, groceries: 4, travel: 3 }, null, { network: 'Amex' }),
+          makeCard('Platinum', 695, { travel: 5 }, null, { network: 'Amex' }),
+          makeCard('Green', 150, { dining: 3, travel: 3 }, { transit: 3 }, { network: 'Amex' })
         ]
       },
       'Capital One Miles': {
@@ -104,9 +214,9 @@
           { partner: 'Wyndham Rewards', ratio: '1:1', bestCpp: 1.2, sweetSpot: 'Vacasa rentals and all-inclusive stays.', surcharges: 'low', flexibility: 'medium', availability: 'medium', cabinType: 'resort' }
         ],
         cards: [
-          makeCard('Venture X', 395, { travel: 2, other: 2 }),
-          makeCard('Venture', 95, { travel: 2, other: 2 }),
-          makeCard('Savor', 95, { dining: 4, groceries: 3, streaming: 4 }, { entertainment: 4 })
+          makeCard('Venture X', 395, { travel: 2, other: 2 }, null, { network: 'Visa' }),
+          makeCard('Venture', 95, { travel: 2, other: 2 }, null, { network: 'Visa' }),
+          makeCard('Savor', 95, { dining: 4, groceries: 3, streaming: 4 }, { entertainment: 4 }, { network: 'Mastercard' })
         ]
       },
       'Citi ThankYou Points': {
@@ -127,8 +237,8 @@
           { partner: 'Virgin Atlantic Flying Club', ratio: '1:1', bestCpp: 2.8, sweetSpot: 'ANA first or business class.', surcharges: 'high', flexibility: 'medium', availability: 'low', cabinType: 'first' }
         ],
         cards: [
-          makeCard('Premier', 95, { travel: 3, dining: 3, groceries: 3, gas: 3 }),
-          makeCard('Double Cash', 0, { other: 2 })
+          makeCard('Premier', 95, { travel: 3, dining: 3, groceries: 3, gas: 3 }, null, { network: 'Mastercard' }),
+          makeCard('Double Cash', 0, { other: 2 }, null, { network: 'Mastercard' })
         ]
       },
       'Bilt Rewards': {
@@ -151,7 +261,7 @@
           { partner: 'IHG One Rewards', ratio: '1:1', bestCpp: 0.6, sweetSpot: 'Cheap airport hotels or last-minute stays.', surcharges: 'low', flexibility: 'medium', availability: 'high', cabinType: 'budgetHotel' }
         ],
         cards: [
-          makeCard('Bilt Mastercard', 0, { dining: 3, travel: 2 }, { rent: 1 })
+          makeCard('Bilt Mastercard', 0, { dining: 3, travel: 2 }, { rent: 1 }, { network: 'Mastercard' })
         ]
       },
       'Delta SkyMiles': {
@@ -167,7 +277,9 @@
           { type: 'merchandise', cpp: 0.7, label: 'Marketplace' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('Delta SkyMiles Platinum', 350, { dining: 2, groceries: 2 }, { delta: 3, hotel: 3 }, { network: 'Amex' })
+        ]
       },
       'United MileagePlus': {
         slug: 'united-mp',
@@ -181,7 +293,9 @@
           { type: 'merchandise', cpp: 0.6, label: 'Merchandise' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('United Explorer', 150, { dining: 2, hotel: 2 }, { united: 2 }, { network: 'Visa' })
+        ]
       },
       'American Airlines AAdvantage': {
         slug: 'aa-aadvantage',
@@ -195,7 +309,9 @@
           { type: 'merchandise', cpp: 0.5, label: 'Merchandise' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('AAdvantage Platinum Select', 99, { dining: 2, gas: 2 }, { americanAirlines: 2 }, { network: 'Mastercard' })
+        ]
       },
       'Southwest Rapid Rewards': {
         slug: 'southwest-rr',
@@ -208,7 +324,9 @@
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('Southwest Priority', 229, { transit: 2, streaming: 2 }, { southwest: 4, phone: 2 }, { network: 'Visa' })
+        ]
       },
       'Alaska Mileage Plan': {
         slug: 'alaska-mp',
@@ -221,7 +339,9 @@
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('Alaska Visa Signature', 95, { dining: 3, gas: 3, transit: 3, streaming: 3 }, { alaska: 3 }, { network: 'Visa' })
+        ]
       },
       'JetBlue TrueBlue': {
         slug: 'jetblue-trueblue',
@@ -234,7 +354,9 @@
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('JetBlue Plus', 99, { dining: 2, groceries: 2 }, { jetblue: 6 }, { network: 'Mastercard' })
+        ]
       },
       'Marriott Bonvoy': {
         slug: 'marriott-bonvoy',
@@ -250,7 +372,9 @@
         transferPartners: [
           { partner: 'Airline transfers', ratio: '3:1', bestCpp: 1.0, sweetSpot: 'Transfer 60k Marriott for 25k airline miles.', surcharges: 'low', flexibility: 'medium', availability: 'high', cabinType: 'economy' }
         ],
-        cards: []
+        cards: [
+          makeCard('Marriott Bonvoy Boundless', 95, { dining: 3, gas: 3, groceries: 3 }, { marriott: 6 }, { network: 'Visa' })
+        ]
       },
       'Hilton Honors': {
         slug: 'hilton-honors',
@@ -264,7 +388,9 @@
           { type: 'experiences', cpp: 0.4, label: 'Experiences' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('Hilton Honors Surpass', 150, { dining: 6, groceries: 6, gas: 6 }, { hilton: 12 }, { network: 'Amex' })
+        ]
       },
       'World of Hyatt': {
         slug: 'hyatt-woh',
@@ -277,7 +403,9 @@
           { type: 'gift_cards', cpp: 0.8, label: 'Gift cards' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('World of Hyatt', 95, { dining: 2, airline: 2, transit: 2 }, { hyatt: 4 }, { network: 'Visa' })
+        ]
       },
       'IHG One Rewards': {
         slug: 'ihg-one',
@@ -290,7 +418,9 @@
           { type: 'merchandise', cpp: 0.4, label: 'Merchandise' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('IHG One Rewards Premier', 99, { travel: 5, gas: 5, dining: 5 }, { ihg: 10 }, { network: 'Mastercard' })
+        ]
       },
       'Wyndham Rewards': {
         slug: 'wyndham-rewards',
@@ -303,7 +433,9 @@
           { type: 'gift_cards', cpp: 0.7, label: 'Gift cards' }
         ],
         transferPartners: [],
-        cards: []
+        cards: [
+          makeCard('Wyndham Rewards Earner Plus', 75, { gas: 6, dining: 4, groceries: 4 }, { wyndham: 6 }, { network: 'Mastercard' })
+        ]
       }
     },
     expirationRules: {
@@ -325,6 +457,12 @@
       'Bilt Rewards': { expires: false }
     }
   };
+
+  /*
+    `bestCpp` is an optimistic upside figure for a transfer path, not a guaranteed realized value.
+    Wallet and Advisor both route through the shared adjusted ceiling model before recommending
+    a card or redemption path, so raw `bestCpp` should be treated as an upper-bound input only.
+  */
 
   window.PROGRAMS = PROGRAMS;
 })();

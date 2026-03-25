@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Churn Wallet Tests</title>
+<style>
+body { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #F5F2ED; color: #1A1A1A; padding: 24px; }
+h1 { margin-bottom: 8px; }
+.muted { color: #6B6560; margin-bottom: 18px; }
+.pass { color: #2D7A4F; }
+.fail { color: #A63D40; }
+.test { padding: 4px 0; }
+.summary { margin-top: 20px; font-size: 18px; font-weight: 700; padding: 12px 14px; border-radius: 8px; }
+.summary.all-pass { background: rgba(45,122,79,0.12); color: #2D7A4F; }
+.summary.has-fail { background: rgba(166,61,64,0.12); color: #A63D40; }
+iframe { width: 0; height: 0; border: 0; position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<h1>Churn Wallet Test Suite</h1>
+<p class="muted">Exercises the wallet engine and rendered wallet page inside a hidden iframe.</p>
+<div id="results"></div>
+<div id="summary"></div>
+<iframe id="wallet-frame" src="../wallet.html" title="wallet test frame"></iframe>
+<script>
+'use strict';
+
+var passed = 0;
+var failed = 0;
+var results = [];
+
+function assert(name, condition, detail) {
+  if (condition) {
+    passed += 1;
+    results.push('<div class="test pass">\u2713 ' + name + '</div>');
+  } else {
+    failed += 1;
+    results.push('<div class="test fail">\u2717 ' + name + (detail ? ' (' + detail + ')' : '') + '</div>');
+  }
+}
+
+function assertEqual(name, actual, expected) {
+  assert(name, actual === expected, 'got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected));
+}
+
+function renderResults() {
+  document.getElementById('results').innerHTML = results.join('');
+  var summary = document.getElementById('summary');
+  summary.className = 'summary ' + (failed ? 'has-fail' : 'all-pass');
+  summary.textContent = passed + ' passed, ' + failed + ' failed';
+}
+
+document.getElementById('wallet-frame').addEventListener('load', function () {
+  var frame = document.getElementById('wallet-frame');
+  var win = frame.contentWindow;
+  var Engine = win.WalletEngine;
+  var Wallet = win.ChurnWallet;
+
+  var testData = {
+    _version: 3,
+    accounts: [
+      {
+        id: 'acct-chase',
+        program: 'Chase Ultimate Rewards',
+        programSlug: 'chase-ur',
+        type: 'flexible',
+        balance: 120000,
+        currency: 'points',
+        cpp: 2,
+        cards: [
+          { name: 'Freedom Flex', annualFee: 0, earnRates: { dining: 3, drugstores: 3 } },
+          { name: 'Sapphire Reserve', annualFee: 550, earnRates: { dining: 3, travel: 3, streaming: 3 } }
+        ]
+      },
+      {
+        id: 'acct-amex',
+        program: 'American Express Membership Rewards',
+        programSlug: 'amex-mr',
+        type: 'flexible',
+        balance: 85000,
+        currency: 'points',
+        cpp: 2,
+        cards: [
+          { name: 'Gold', annualFee: 250, earnRates: { dining: 4, groceries: 4, travel: 3 } }
+        ]
+      },
+      {
+        id: 'acct-hyatt',
+        program: 'World of Hyatt',
+        programSlug: 'hyatt-woh',
+        type: 'hotel',
+        balance: 40000,
+        currency: 'points',
+        cpp: 2,
+        cards: [
+          { name: 'World of Hyatt', annualFee: 95, earnRates: { dining: 2, airline: 2, transit: 2, hyatt: 4 } }
+        ]
+      },
+      {
+        id: 'acct-southwest',
+        program: 'Southwest Rapid Rewards',
+        programSlug: 'southwest-rr',
+        type: 'airline',
+        balance: 30000,
+        currency: 'points',
+        cpp: 1.4,
+        cards: [
+          { name: 'Southwest Priority', annualFee: 229, earnRates: { transit: 2, streaming: 2, southwest: 4, phone: 2 } }
+        ]
+      }
+    ],
+    benefits: [],
+    profile: {}
+  };
+
+  win.localStorage.setItem(Wallet.STORAGE_KEY, JSON.stringify(testData));
+  Wallet.setState({ categoryInput: 'groceries', amount: 600 });
+  Wallet.render();
+
+  var entries = Wallet.buildCardEntries(Wallet.readRewardsData());
+  var groceryResult = Engine.whichCard(entries, 'groceries', {
+    categoryAliases: win.PROGRAMS.categoryAliases,
+    quarter: 1
+  });
+  var hyattResult = Engine.whichCard(entries, 'hyatt', {
+    categoryAliases: win.PROGRAMS.categoryAliases
+  });
+  var groceryGaps = Engine.gapAnalysis(entries, 'groceries', 600, {
+    categoryAliases: win.PROGRAMS.categoryAliases,
+    quarter: 1
+  });
+
+  assert('wallet engine exported', !!Engine);
+  assert('wallet page API exported', !!Wallet);
+  assertEqual('resolveCategory maps restaurants to dining', Engine.resolveCategory('restaurants', win.PROGRAMS.categoryAliases), 'dining');
+  assertEqual('resolveCategory maps rideshare to transit', Engine.resolveCategory('rideshare', win.PROGRAMS.categoryAliases), 'transit');
+  assertEqual('resolveCategory maps hyatt to hyatt', Engine.resolveCategory('hyatt', win.PROGRAMS.categoryAliases), 'hyatt');
+  assertEqual('resolveCategory falls back to other', Engine.resolveCategory('unknown spend', win.PROGRAMS.categoryAliases), 'other');
+  assertEqual('getCurrentQuarter maps January to Q1', Engine.getCurrentQuarter('2026-01-15'), 1);
+  assertEqual('getCurrentQuarter maps August to Q3', Engine.getCurrentQuarter('2026-08-15'), 3);
+  assertEqual('Gold dining multiplier is 4x', Engine.getEffectiveMultiplier(entries[2], 'dining', { categoryAliases: win.PROGRAMS.categoryAliases }), 4);
+  assertEqual('Freedom Flex groceries in Q1 is 5x', Engine.getEffectiveMultiplier(entries[0], 'groceries', { categoryAliases: win.PROGRAMS.categoryAliases, quarter: 1 }), 5);
+  assertEqual('Freedom Flex groceries in Q2 falls back to 1x', Engine.getEffectiveMultiplier(entries[0], 'groceries', { categoryAliases: win.PROGRAMS.categoryAliases, quarter: 2 }), 1);
+  assertEqual('Gold dining effective return uses adjusted program ceiling', Engine.effectiveReturn(entries[2], 'dining', { categoryAliases: win.PROGRAMS.categoryAliases }), 11.36);
+  assertEqual('whichCard picks Gold for groceries under adjusted ceiling model', groceryResult.best.card.name, 'Gold');
+  assertEqual('whichCard picks World of Hyatt for Hyatt spend', hyattResult.best.card.name, 'World of Hyatt');
+  assertEqual('gapAnalysis best row fills 100%', groceryGaps[0].barPercent, 100);
+  assert('gapAnalysis lower-ranked row shows a positive gap', groceryGaps.slice(1).some(function (item) { return item.gapCpp > 0; }));
+
+  assertEqual('readRewardsData returns four accounts', Wallet.readRewardsData().accounts.length, 4);
+  assertEqual('buildCardEntries flattens to five cards', entries.length, 5);
+  assertEqual('buildCardEntries hydrates Freedom Flex network', entries[0].card.network, 'Mastercard');
+  assertEqual('getProgramBestCpp on Chase returns adjusted ceiling 2.27', Wallet.getProgramBestCpp(win.PROGRAMS.programs['Chase Ultimate Rewards'], testData.accounts[0]), 2.27);
+  assert('available categories include hyatt', Wallet.getAvailableCategories(entries).indexOf('hyatt') >= 0);
+  assert('render inserts recommendation card', !!win.document.querySelector('[data-recommendation-card]'));
+  assert('render recommends Gold for groceries', win.document.body.textContent.indexOf('Gold') >= 0);
+  assertEqual('render shows five dense card rows', win.document.querySelectorAll('[data-card-row]').length, 5);
+  assertEqual('render shows five gap rows', win.document.querySelectorAll('.gap-row').length, 5);
+
+  win.localStorage.setItem(Wallet.STORAGE_KEY, JSON.stringify({
+    _version: 3,
+    accounts: [{ id: 'acct-empty', program: 'World of Hyatt', programSlug: 'hyatt-woh', cards: [] }],
+    benefits: []
+  }));
+  Wallet.render();
+  assert('empty state shown when no cards are attached', win.document.body.textContent.indexOf('No cards attached yet') >= 0);
+
+  win.localStorage.setItem(Wallet.STORAGE_KEY, '{broken json');
+  Wallet.render();
+  assert('corrupted storage shows repair state', win.document.body.textContent.indexOf('Stored data could not be read') >= 0);
+
+  renderResults();
+});
+</script>
+</body>
+</html>

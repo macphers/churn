@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme:light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Churn - Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600;1,9..144,700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+html { background: var(--bg); }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.container { width: min(1100px, calc(100vw - 40px)); margin: 0 auto; }
+.app-nav {
+  position: relative;
+  z-index: 40;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.app-nav-inner {
+  width: min(1100px, calc(100vw - 40px));
+  margin: 0 auto;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.nav-brand {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.nav-links {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: color 120ms ease, background 120ms ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active {
+  color: var(--text);
+  background: var(--nav-active-bg);
+  font-weight: 600;
+}
+.nav-end {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.theme-toggle-btn:hover { color: var(--text); border-color: var(--accent); }
+[data-theme="dark"] .eyebrow,
+[data-theme="dark"] .section-label { color: #C4841D; }
+[data-theme="dark"] .btn-primary { background: #A47214; }
+[data-theme="dark"] .btn-primary:hover { background: #B8860B; }
+
+.page-header {
+  padding: 40px 0 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-top: 8px;
+  color: var(--text);
+}
+.page-header p {
+  color: var(--text-muted);
+  margin-top: 8px;
+  max-width: 40rem;
+  font-size: 15px;
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 48px;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 20px;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--panel-shadow);
+}
+.section-panel {
+  padding: 24px;
+  animation: fadeInUp 220ms ease-out;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.section-copy {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.section-label, .mini-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+
+.which-card-panel {
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+}
+.input-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.7fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+.field { display: grid; gap: 6px; }
+.field label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+.field input, .field select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 11px 12px;
+  font-size: 14px;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139,94,16,0.1);
+}
+.resolved-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip-btn {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.chip-btn:hover { color: var(--text); border-color: var(--accent); }
+.chip-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  font-weight: 600;
+}
+
+.recommendation-card {
+  border: 1px solid rgba(139,94,16,0.18);
+  border-radius: 14px;
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(196,132,29,0.06), rgba(139,94,16,0.02));
+  display: grid;
+  gap: 14px;
+}
+.recommendation-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+.recommendation-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+.recommendation-line {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.recommendation-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.metric-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.55);
+  padding: 14px;
+}
+[data-theme="dark"] .metric-card { background: rgba(20,18,16,0.9); }
+.metric-card strong {
+  display: block;
+  font-size: 20px;
+  font-family: var(--font-display);
+  line-height: 1.05;
+}
+.metric-card span {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.recommendation-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.65);
+  font-size: 12px;
+  color: var(--text);
+}
+[data-theme="dark"] .pill { background: rgba(20,18,16,0.8); }
+.pill-muted { color: var(--text-muted); }
+
+.snapshot-panel {
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.snapshot-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--surface-2);
+}
+.snapshot-card strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+.snapshot-card span {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.snapshot-note {
+  border: 1px dashed rgba(139,94,16,0.24);
+  border-radius: 10px;
+  background: rgba(139,94,16,0.04);
+  padding: 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.snapshot-note strong { color: var(--text); }
+
+.dense-list {
+  display: grid;
+  gap: 8px;
+}
+.dense-header, .card-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.3fr) 90px 110px;
+  gap: 12px;
+  align-items: center;
+}
+.dense-header {
+  padding: 0 14px 8px;
+  color: var(--text-dim);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+.card-row {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+}
+.card-row.best {
+  border-color: rgba(139,94,16,0.4);
+  background: linear-gradient(180deg, rgba(139,94,16,0.06), rgba(139,94,16,0.02));
+}
+.card-main strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+.card-main span, .card-bonus, .card-meta {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.network-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.card-bonus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.bonus-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+.rate-cell, .return-cell {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.gap-list {
+  display: grid;
+  gap: 10px;
+}
+.gap-row {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.gap-meta strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+.gap-meta span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.gap-track {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.gap-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-decorative));
+}
+.gap-values {
+  min-width: 120px;
+  text-align: right;
+}
+.gap-values strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+.gap-values span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 11px 16px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.empty-state strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.freshness {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 4px 0 12px;
+}
+
+@media (max-width: 980px) {
+  .hero-grid,
+  .recommendation-metrics,
+  .input-grid,
+  .snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .container, .app-nav-inner { width: calc(100vw - 24px); }
+  .page-header { flex-direction: column; align-items: flex-start; padding-top: 28px; }
+  .dense-header { display: none; }
+  .card-row { grid-template-columns: 1fr; }
+  .rate-cell, .return-cell { text-align: left; }
+  .gap-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<nav class="app-nav">
+  <div class="app-nav-inner">
+    <span class="nav-brand">Churn</span>
+    <div class="nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="index.html#accounts">Accounts</a>
+      <a href="index.html#benefits">Benefits</a>
+      <a href="index.html#profile">Profile</a>
+      <a href="wallet.html" class="active">Wallet</a>
+      <a href="value.html">Advisor</a>
+      <a href="trips.html">Trips</a>
+    </div>
+    <div class="nav-end">
+      <button type="button" class="theme-toggle-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">&#9790;</button>
+    </div>
+  </div>
+</nav>
+
+<header class="container page-header">
+  <div>
+    <div class="eyebrow">Wallet</div>
+    <h1>Which card wins this swipe?</h1>
+    <p>Compare the cards you actually hold, using the reward ceilings in your current portfolio data. Pick a category, set an amount, and see the opportunity cost immediately.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="index.html#accounts">Manage cards</a>
+    <a class="btn btn-secondary" href="value.html">Open Advisor</a>
+  </div>
+</header>
+
+<main class="container stack" id="app"></main>
+
+<script src="programs.js"></script>
+<script src="engine.js"></script>
+<script src="wallet-engine.js"></script>
+<script>
+'use strict';
+
+var STORAGE_KEY = 'churn_data';
+var LEGACY_STORAGE_KEY = 'osaka_data';
+var CATEGORY_ORDER = [
+  'dining',
+  'groceries',
+  'gas',
+  'travel',
+  'airline',
+  'hotel',
+  'transit',
+  'drugstores',
+  'streaming',
+  'onlineShopping',
+  'entertainment',
+  'rent',
+  'phone',
+  'delta',
+  'united',
+  'americanAirlines',
+  'southwest',
+  'alaska',
+  'jetblue',
+  'marriott',
+  'hilton',
+  'hyatt',
+  'ihg',
+  'wyndham',
+  'other'
+];
+var CATEGORY_LABELS = {
+  dining: 'Dining',
+  groceries: 'Groceries',
+  gas: 'Gas',
+  travel: 'Travel',
+  airline: 'Airline',
+  hotel: 'Hotel',
+  transit: 'Transit',
+  drugstores: 'Drugstores',
+  streaming: 'Streaming',
+  onlineShopping: 'Online shopping',
+  entertainment: 'Entertainment',
+  rent: 'Rent',
+  phone: 'Phone / internet',
+  delta: 'Delta',
+  united: 'United',
+  americanAirlines: 'American Airlines',
+  southwest: 'Southwest',
+  alaska: 'Alaska',
+  jetblue: 'JetBlue',
+  marriott: 'Marriott',
+  hilton: 'Hilton',
+  hyatt: 'Hyatt',
+  ihg: 'IHG',
+  wyndham: 'Wyndham',
+  other: 'Everything else'
+};
+var state = {
+  categoryInput: 'dining',
+  amount: 500
+};
+
+function esc(value) {
+  var node = document.createElement('span');
+  node.textContent = value == null ? '' : String(value);
+  return node.innerHTML;
+}
+
+function round(value, digits) {
+  var scale = Math.pow(10, digits || 0);
+  return Math.round((Number(value) || 0) * scale) / scale;
+}
+
+function formatDollars(number) {
+  return '$' + Number(number || 0).toLocaleString(undefined, {
+    minimumFractionDigits: number % 1 ? 2 : 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatPercent(centsPerDollar) {
+  return round(centsPerDollar, 2).toFixed(centsPerDollar % 1 ? 1 : 0) + '%';
+}
+
+function formatQuarter(quarter) {
+  return 'Q' + quarter + ' ' + new Date().getFullYear();
+}
+
+function normalizeBalance(value) {
+  var amount = Number(value);
+  if (!isFinite(amount) || amount < 0) return 0;
+  return Math.floor(amount);
+}
+
+function normalizeAnnualFee(value) {
+  var amount = Number(value);
+  if (!isFinite(amount) || amount < 0) return 0;
+  return round(amount, 2);
+}
+
+function getProgramForAccount(account) {
+  if (!window.PROGRAMS || !window.PROGRAMS.programs) return null;
+  if (account && account.programSlug) {
+    var bySlug = Object.keys(window.PROGRAMS.programs).find(function (name) {
+      return window.PROGRAMS.programs[name].slug === account.programSlug;
+    });
+    if (bySlug) return Object.assign({ name: bySlug }, window.PROGRAMS.programs[bySlug]);
+  }
+  if (account && account.program && window.PROGRAMS.programs[account.program]) {
+    return Object.assign({ name: account.program }, window.PROGRAMS.programs[account.program]);
+  }
+  return null;
+}
+
+function getProgramBestCpp(program, account) {
+  if (window.ChurnEngine && typeof window.ChurnEngine.getProgramCeilingCpp === 'function') {
+    return window.ChurnEngine.getProgramCeilingCpp(program, account);
+  }
+  return round(Number(account && account.cpp) || Number(program && program.cpp) || 1, 2);
+}
+
+function hydrateCard(program, rawCard) {
+  if (!rawCard || typeof rawCard !== 'object') return null;
+  var knownCards = program && Array.isArray(program.cards) ? program.cards : [];
+  var rawName = String(rawCard.name || '').trim();
+  var match = knownCards.find(function (card) {
+    return String(card.name || '').toLowerCase() === rawName.toLowerCase();
+  });
+  var earnRates = {};
+  if (match && match.earnRates) {
+    Object.keys(match.earnRates).forEach(function (key) {
+      earnRates[key] = Number(match.earnRates[key]) || 1;
+    });
+  }
+  if (rawCard.earnRates && typeof rawCard.earnRates === 'object') {
+    Object.keys(rawCard.earnRates).forEach(function (key) {
+      earnRates[key] = Number(rawCard.earnRates[key]) || 1;
+    });
+  }
+  return {
+    name: rawName || (match ? match.name : 'Custom card'),
+    annualFee: normalizeAnnualFee(rawCard.annualFee != null ? rawCard.annualFee : (match ? match.annualFee : 0)),
+    network: rawCard.network || (match ? match.network : '') || '',
+    earnRates: earnRates,
+    rotatingCategories: Array.isArray(rawCard.rotatingCategories) && rawCard.rotatingCategories.length ? rawCard.rotatingCategories : (match && Array.isArray(match.rotatingCategories) ? match.rotatingCategories : []),
+    custom: !!rawCard.custom
+  };
+}
+
+function readRewardsData() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!raw) return { accounts: [] };
+    var data = JSON.parse(raw);
+    if (!data || !Array.isArray(data.accounts)) return { accounts: [] };
+    return data;
+  } catch (error) {
+    return 'corrupted';
+  }
+}
+
+function buildCardEntries(data) {
+  var entries = [];
+  var accounts = data && Array.isArray(data.accounts) ? data.accounts : [];
+  accounts.forEach(function (account) {
+    var cards = Array.isArray(account.cards) ? account.cards : [];
+    if (!cards.length) return;
+    var program = getProgramForAccount(account);
+    var programName = program ? program.name : (account.program || 'Custom program');
+    var programBestCpp = getProgramBestCpp(program, account);
+    cards.forEach(function (rawCard) {
+      var card = hydrateCard(program, rawCard);
+      if (!card) return;
+      entries.push({
+        id: (account.id || programName) + ':' + card.name,
+        accountId: account.id || '',
+        accountBalance: normalizeBalance(account.balance),
+        accountProgram: programName,
+        programSlug: program ? program.slug : (account.programSlug || null),
+        programBestCpp: programBestCpp,
+        card: card
+      });
+    });
+  });
+  return entries;
+}
+
+function categoryLabel(category) {
+  return CATEGORY_LABELS[category] || category;
+}
+
+function compareCategoryOrder(left, right) {
+  var leftIndex = CATEGORY_ORDER.indexOf(left);
+  var rightIndex = CATEGORY_ORDER.indexOf(right);
+  if (leftIndex === -1 && rightIndex === -1) return left.localeCompare(right);
+  if (leftIndex === -1) return 1;
+  if (rightIndex === -1) return -1;
+  return leftIndex - rightIndex;
+}
+
+function getAvailableCategories(entries) {
+  var keys = {};
+  entries.forEach(function (entry) {
+    Object.keys(entry.card.earnRates || {}).forEach(function (key) {
+      if (Number(entry.card.earnRates[key]) > 1) keys[key] = true;
+    });
+    (entry.card.rotatingCategories || []).forEach(function (bonus) {
+      (bonus.categories || []).forEach(function (category) {
+        var resolved = window.WalletEngine.resolveCategory(category, window.PROGRAMS.categoryAliases);
+        keys[resolved] = true;
+      });
+    });
+  });
+  keys.dining = true;
+  keys.groceries = true;
+  keys.travel = true;
+  keys.other = true;
+  return Object.keys(keys).sort(compareCategoryOrder);
+}
+
+function getCardHighlights(entry) {
+  var items = [];
+  Object.keys(entry.card.earnRates || {}).forEach(function (key) {
+    var multiplier = Number(entry.card.earnRates[key]);
+    if (multiplier > 1) {
+      items.push({
+        key: key,
+        label: categoryLabel(key),
+        multiplier: multiplier
+      });
+    }
+  });
+  (entry.card.rotatingCategories || []).forEach(function (bonus) {
+    if (Number(bonus.quarter) !== window.WalletEngine.getCurrentQuarter()) return;
+    (bonus.categories || []).forEach(function (category) {
+      var resolved = window.WalletEngine.resolveCategory(category, window.PROGRAMS.categoryAliases);
+      items.push({
+        key: resolved,
+        label: 'Q' + bonus.quarter + ' ' + categoryLabel(resolved),
+        multiplier: Number(bonus.multiplier) || 1
+      });
+    });
+  });
+  items.sort(function (left, right) {
+    if (right.multiplier !== left.multiplier) return right.multiplier - left.multiplier;
+    return left.label.localeCompare(right.label);
+  });
+  var seen = {};
+  return items.filter(function (item) {
+    if (seen[item.label]) return false;
+    seen[item.label] = true;
+    return true;
+  }).slice(0, 4);
+}
+
+function renderRecommendation(result, category, amount) {
+  if (!result.best) return '';
+  var best = result.best;
+  var runnerUp = result.runnerUp;
+  var amountValue = Number(amount) || 0;
+  var bestValue = round(best.returnCpp * amountValue / 100, 2);
+  var gapValue = runnerUp ? round((best.returnCpp - runnerUp.returnCpp) * amountValue / 100, 2) : 0;
+  return '' +
+    '<div class="recommendation-card" data-recommendation-card>' +
+      '<div class="recommendation-head">' +
+        '<div>' +
+          '<div class="section-label">Best pick for ' + esc(categoryLabel(category)) + '</div>' +
+          '<h2>' + esc(best.card.name) + '</h2>' +
+          '<div class="recommendation-line">' + esc(best.accountProgram) + (best.card.network ? ' - ' + esc(best.card.network) : '') + '</div>' +
+        '</div>' +
+        '<div class="pill">' + esc(formatQuarter(window.WalletEngine.getCurrentQuarter())) + '</div>' +
+      '</div>' +
+      '<div class="recommendation-metrics">' +
+        '<div class="metric-card"><strong>' + esc(best.multiplier + 'x') + '</strong><span>Effective multiplier</span></div>' +
+        '<div class="metric-card"><strong>' + esc(formatPercent(best.returnCpp)) + '</strong><span>Ceiling return</span></div>' +
+        '<div class="metric-card"><strong>' + esc(formatDollars(bestValue)) + '</strong><span>Value on ' + esc(formatDollars(amountValue)) + '</span></div>' +
+      '</div>' +
+      '<div class="recommendation-footer">' +
+        '<span class="pill">Program ceiling ' + esc(best.programBestCpp.toFixed(1)) + ' cpp</span>' +
+        (runnerUp ? '<span class="pill">Beats ' + esc(runnerUp.card.name) + ' by ' + esc(formatDollars(gapValue)) + '</span>' : '<span class="pill pill-muted">Only eligible card on file</span>') +
+      '</div>' +
+    '</div>';
+}
+
+function renderDenseList(gaps) {
+  var rows = gaps.map(function (entry, index) {
+    var highlights = getCardHighlights(entry);
+    return '' +
+      '<div class="card-row' + (index === 0 ? ' best' : '') + '" data-card-row="' + esc(entry.id) + '">' +
+        '<div class="card-main">' +
+          '<strong>' + esc(entry.card.name) + '</strong>' +
+          '<span>' + esc(entry.accountProgram) + '</span>' +
+          '<div class="card-meta">' +
+            (entry.card.network ? '<span class="network-badge">' + esc(entry.card.network) + '</span>' : '') +
+            (entry.card.annualFee ? '<span>' + esc(formatDollars(entry.card.annualFee)) + ' annual fee</span>' : '<span>No annual fee</span>') +
+          '</div>' +
+        '</div>' +
+        '<div class="card-bonus">' + (highlights.length ? highlights.map(function (item) {
+          return '<span class="bonus-pill">' + esc(item.label + ' ' + item.multiplier + 'x') + '</span>';
+        }).join('') : '<span class="bonus-pill">Everything else 1x</span>') + '</div>' +
+        '<div class="rate-cell">' + esc(entry.multiplier + 'x') + '</div>' +
+        '<div class="return-cell">' + esc(formatPercent(entry.returnCpp)) + '</div>' +
+      '</div>';
+  }).join('');
+
+  return '' +
+    '<section class="panel section-panel">' +
+      '<div class="section-header">' +
+        '<div>' +
+          '<div class="section-label">Dense cards list</div>' +
+          '<h2>All attached cards, ranked</h2>' +
+          '<p class="section-copy">Compact enough to scan, detailed enough to trust.</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dense-list">' +
+        '<div class="dense-header"><span>Card</span><span>Best bonus categories</span><span>Rate</span><span>Return</span></div>' +
+        rows +
+      '</div>' +
+    '</section>';
+}
+
+function renderGapBars(gaps, amount) {
+  return '' +
+    '<section class="panel section-panel">' +
+      '<div class="section-header">' +
+        '<div>' +
+          '<div class="section-label">Gap bars</div>' +
+          '<h2>Opportunity cost on ' + esc(formatDollars(amount)) + '</h2>' +
+          '<p class="section-copy">Shorter bars show how much value you leave behind versus the best card for this category.</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="gap-list">' +
+        gaps.map(function (entry, index) {
+          var subtitle = index === 0 ? 'Best available return' : (entry.missedValue > 0 ? 'Lose ' + formatDollars(entry.missedValue) + ' vs best' : 'Tied');
+          return '' +
+            '<div class="gap-row">' +
+              '<div class="gap-meta">' +
+                '<strong>' + esc(entry.card.name) + '</strong>' +
+                '<span>' + esc(entry.accountProgram) + '</span>' +
+              '</div>' +
+              '<div class="gap-track"><div class="gap-fill" style="width:' + Math.max(entry.barPercent, 6) + '%"></div></div>' +
+              '<div class="gap-values">' +
+                '<strong>' + esc(formatPercent(entry.returnCpp)) + '</strong>' +
+                '<span>' + esc(subtitle) + '</span>' +
+              '</div>' +
+            '</div>';
+        }).join('') +
+      '</div>' +
+    '</section>';
+}
+
+function renderSnapshot(entries, categories, result) {
+  var totalFees = entries.reduce(function (sum, entry) {
+    return sum + normalizeAnnualFee(entry.card.annualFee);
+  }, 0);
+  var uniquePrograms = {};
+  entries.forEach(function (entry) { uniquePrograms[entry.accountProgram] = true; });
+  return '' +
+    '<aside class="panel snapshot-panel">' +
+      '<div>' +
+        '<div class="section-label">Snapshot</div>' +
+        '<h2 style="font-family:var(--font-display);font-size:1.3rem;letter-spacing:-0.02em">Wallet coverage</h2>' +
+        '<p class="section-copy">Built from cards already attached to your portfolio.</p>' +
+      '</div>' +
+      '<div class="snapshot-grid">' +
+        '<div class="snapshot-card"><strong>' + esc(entries.length) + '</strong><span>attached cards</span></div>' +
+        '<div class="snapshot-card"><strong>' + esc(Object.keys(uniquePrograms).length) + '</strong><span>reward programs</span></div>' +
+        '<div class="snapshot-card"><strong>' + esc(categories.length) + '</strong><span>mapped categories</span></div>' +
+        '<div class="snapshot-card"><strong>' + esc(formatDollars(totalFees)) + '</strong><span>annual fees in wallet view</span></div>' +
+      '</div>' +
+      '<div class="snapshot-note">' +
+        '<strong>' + (result.best ? esc(result.best.card.name) : 'No winner yet') + '</strong>' +
+        (result.best ? ' leads this category because it combines ' + esc(result.best.multiplier + 'x') + ' earnings with a ' + esc(result.best.programBestCpp.toFixed(1)) + ' cpp program ceiling.' : ' Add cards on the dashboard to unlock wallet comparisons.') +
+      '</div>' +
+    '</aside>';
+}
+
+function renderEmptyState(kind) {
+  var app = document.getElementById('app');
+  if (kind === 'corrupted') {
+    app.innerHTML = '<div class="empty-state"><strong>Stored data could not be read</strong><p>Open the dashboard to re-import or repair your Churn data.</p><a class="btn btn-primary" href="index.html">Open Dashboard</a></div>';
+    return;
+  }
+  if (kind === 'no-accounts') {
+    app.innerHTML = '<div class="empty-state"><strong>No rewards accounts yet</strong><p>Add your first program in the dashboard before using the Wallet view.</p><a class="btn btn-primary" href="index.html">Add account</a></div>';
+    return;
+  }
+  app.innerHTML = '<div class="empty-state"><strong>No cards attached yet</strong><p>Edit an account on the dashboard and check the cards you actually have. Wallet only compares cards that are attached to your portfolio.</p><a class="btn btn-primary" href="index.html#accounts">Manage cards</a></div>';
+}
+
+function bindEvents(categories) {
+  var categoryInput = document.getElementById('wallet-category-input');
+  var amountInput = document.getElementById('wallet-amount-input');
+  if (categoryInput) {
+    categoryInput.addEventListener('change', function () {
+      state.categoryInput = categoryInput.value || categories[0] || 'dining';
+      render();
+    });
+    categoryInput.addEventListener('blur', function () {
+      state.categoryInput = categoryInput.value || categories[0] || 'dining';
+      render();
+    });
+  }
+  if (amountInput) {
+    amountInput.addEventListener('input', function () {
+      state.amount = Math.max(0, Number(amountInput.value) || 0);
+      render();
+    });
+  }
+  Array.prototype.slice.call(document.querySelectorAll('[data-category-chip]')).forEach(function (button) {
+    button.addEventListener('click', function () {
+      state.categoryInput = button.getAttribute('data-category-chip');
+      render();
+    });
+  });
+}
+
+function render() {
+  var app = document.getElementById('app');
+  var data = readRewardsData();
+  if (data === 'corrupted') {
+    renderEmptyState('corrupted');
+    return;
+  }
+  if (!data.accounts || !data.accounts.length) {
+    renderEmptyState('no-accounts');
+    return;
+  }
+
+  var entries = buildCardEntries(data);
+  if (!entries.length) {
+    renderEmptyState('no-cards');
+    return;
+  }
+
+  var categories = getAvailableCategories(entries);
+  if (!categories.length) categories = ['other'];
+  var resolvedCategory = window.WalletEngine.resolveCategory(state.categoryInput, window.PROGRAMS.categoryAliases);
+  if (resolvedCategory === 'other' && state.categoryInput !== 'other' && categories.indexOf('other') === -1) {
+    resolvedCategory = categories[0];
+    state.categoryInput = resolvedCategory;
+  }
+  if (!state.categoryInput) state.categoryInput = categories[0];
+
+  var result = window.WalletEngine.whichCard(entries, state.categoryInput, {
+    categoryAliases: window.PROGRAMS.categoryAliases
+  });
+  var gaps = window.WalletEngine.gapAnalysis(entries, state.categoryInput, state.amount, {
+    categoryAliases: window.PROGRAMS.categoryAliases
+  });
+
+  app.innerHTML = '' +
+    '<div class="hero-grid">' +
+      '<section class="panel which-card-panel">' +
+        '<div>' +
+          '<div class="section-label">Which Card?</div>' +
+          '<div class="section-copy">Use freeform category names like "restaurants", "hyatt", or "rideshare". The alias system maps them into the wallet taxonomy before ranking cards.</div>' +
+        '</div>' +
+        '<div class="input-grid">' +
+          '<div class="field">' +
+            '<label for="wallet-category-input">Spend category</label>' +
+            '<input id="wallet-category-input" list="wallet-categories" value="' + esc(state.categoryInput) + '" placeholder="dining, hyatt, rideshare">' +
+            '<datalist id="wallet-categories">' + categories.map(function (category) {
+              return '<option value="' + esc(category) + '">' + esc(categoryLabel(category)) + '</option>';
+            }).join('') + '</datalist>' +
+          '</div>' +
+          '<div class="field">' +
+            '<label for="wallet-amount-input">Amount</label>' +
+            '<input id="wallet-amount-input" type="number" min="0" step="25" value="' + esc(state.amount) + '">' +
+          '</div>' +
+          '<div class="resolved-chip">Resolved to <strong>' + esc(categoryLabel(result.category)) + '</strong></div>' +
+        '</div>' +
+        '<div class="chip-row">' + categories.slice(0, 10).map(function (category) {
+          return '<button type="button" class="chip-btn' + (result.category === category ? ' active' : '') + '" data-category-chip="' + esc(category) + '">' + esc(categoryLabel(category)) + '</button>';
+        }).join('') + '</div>' +
+        renderRecommendation(result, result.category, state.amount) +
+      '</section>' +
+      renderSnapshot(entries, categories, result) +
+    '</div>' +
+    renderDenseList(gaps) +
+    renderGapBars(gaps, state.amount) +
+    '<div class="freshness">Dataset updated ' + esc(window.PROGRAMS.lastUpdated) + ' - wallet comparisons use the shared adjusted ceiling cpp model from engine.js</div>';
+
+  bindEvents(categories);
+}
+
+function setState(patch) {
+  if (!patch || typeof patch !== 'object') return;
+  Object.keys(patch).forEach(function (key) {
+    state[key] = patch[key];
+  });
+}
+
+window.ChurnWallet = {
+  STORAGE_KEY: STORAGE_KEY,
+  state: state,
+  readRewardsData: readRewardsData,
+  getProgramBestCpp: getProgramBestCpp,
+  buildCardEntries: buildCardEntries,
+  getAvailableCategories: getAvailableCategories,
+  setState: setState,
+  render: render
+};
+
+render();
+
+/* Theme toggle */
+(function () {
+  var THEME_KEY = 'churn-theme';
+  var html = document.documentElement;
+  var btn = document.getElementById('theme-toggle');
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+      html.style.colorScheme = 'dark';
+      if (btn) btn.textContent = '\u2600';
+    } else {
+      html.removeAttribute('data-theme');
+      html.style.colorScheme = 'light';
+      if (btn) btn.textContent = '\u263E';
+    }
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+  if (saved === 'dark' || saved === 'light') {
+    applyTheme(saved);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    applyTheme('dark');
+  }
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    });
+  }
+})();
+</script>
+</body>
+</html>

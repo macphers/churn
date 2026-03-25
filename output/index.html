@@ -1415,6 +1415,7 @@ body {
       <button type="button" class="nav-tab" data-tab="accounts">Accounts</button>
       <button type="button" class="nav-tab" data-tab="benefits">Benefits</button>
       <button type="button" class="nav-tab" data-tab="profile">Profile</button>
+      <button type="button" class="nav-tab" data-tab="wallet">Wallet</button>
       <button type="button" class="nav-tab" data-tab="advisor">Advisor</button>
       <button type="button" class="nav-tab" data-tab="trips">Trips</button>
     </div>
@@ -2803,6 +2804,10 @@ function renderDashboard(data) {
 }
 
 function switchTab(tabName) {
+  if (tabName === 'wallet') {
+    window.location.href = 'wallet.html';
+    return;
+  }
   if (tabName === 'advisor') {
     window.location.href = 'value.html';
     return;
