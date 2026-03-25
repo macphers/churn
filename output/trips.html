@@ -421,6 +421,26 @@ body {
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 600px) {
   .container, .app-nav-inner { width: calc(100vw - 24px); }
+  .app-nav-inner {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 12px;
+  }
+  .nav-links {
+    width: 100%;
+    order: 3;
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .nav-links a {
+    justify-content: center;
+    flex: 1 1 calc(33.333% - 6px);
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .nav-end { margin-left: auto; }
   .trip-card {
     grid-template-columns: 1fr;
     padding: 16px 20px;
@@ -429,8 +449,6 @@ body {
     text-align: left;
     min-width: unset;
   }
-  .nav-links { gap: 2px; }
-  .nav-links a { padding: 8px 8px; font-size: 12px; }
   .page-header h1 { font-size: 26px; }
 }
 </style>
