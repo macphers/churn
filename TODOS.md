@@ -15,14 +15,6 @@
 **Context:** CEO review (2026-03-23) decided to cut Trips from Phase 1 to ship Advisor UX simplification + Dashboard integration first. Trips was prototyped on branch realmm13/oh-design-session (53 tests, 98/100 QA) but not merged. That prototype can serve as a starting point. Key design decision: destinations derive dynamically from programs.js transfer partners, not a static route database.
 **Added:** 2026-03-23
 
-## P2 — Engine Extraction to Shared Module
-**What:** Extract the scoring engine functions (applyWTP, calcNetCpp, scoreBFB, rankByMode, buildAnalysis, checkExpiration) from value.html into a shared engine.js file that both value.html and trips.html can import.
-**Why:** Currently the engine lives inline in value.html. The Trips tab (Phase 2) needs to run buildAnalysis() directly. Duplicating 300+ lines of engine code across pages would be a DRY violation.
-**Effort:** S (human: ~2 hrs / CC: ~10 min)
-**Depends on:** Nothing — can be done before or alongside Trips Phase 2.
-**Context:** CEO review (2026-03-23) identified this as a prerequisite for clean Trips integration. The engine functions are already pure (no DOM side effects) so extraction is mechanical — move functions to engine.js, add <script src="engine.js"> to both pages, update window.ChurnAdvisor exports.
-**Added:** 2026-03-23
-
 ## P3 — Redemption Journal
 **What:** Let users log past redemptions (program, points used, what they got, actual cash value). System learns real WTP thresholds over time.
 **Why:** Closes the feedback loop — advisor gets smarter with use.
@@ -68,6 +60,15 @@
 **Depends on:** Nothing — can be done anytime
 **Added:** 2026-03-18
 **Completed:** v0.1.12.0 (2026-03-18) — DESIGN.md created with full design system spec
+
+### P2 — Engine Extraction to Shared Module
+**What:** Extract the scoring engine functions (applyWTP, calcNetCpp, scoreBFB, rankByMode, buildAnalysis, checkExpiration) from value.html into a shared engine.js file that both value.html and trips.html can import.
+**Why:** Currently the engine lives inline in value.html. The Trips tab (Phase 2) needs to run buildAnalysis() directly. Duplicating 300+ lines of engine code across pages would be a DRY violation.
+**Effort:** S (human: ~2 hrs / CC: ~10 min)
+**Depends on:** Nothing — can be done before or alongside Trips Phase 2.
+**Context:** CEO review (2026-03-23) identified this as a prerequisite for clean Trips integration. The engine functions are already pure (no DOM side effects) so extraction is mechanical — move functions to engine.js, add <script src="engine.js"> to both pages, update window.ChurnAdvisor exports.
+**Added:** 2026-03-23
+**Completed:** v0.1.18.0 (2026-03-25) — Shared engine.js now powers Advisor and Wallet, replacing the inline scoring implementation
 
 ## Deferred from osaka-v2 CEO Review (2026-03-17)
 - Card application & approval tracking (5/24 status, signup bonus, minimum spend deadlines)

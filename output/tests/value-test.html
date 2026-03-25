@@ -153,6 +153,8 @@ async function run() {
     return;
   }
   await api.loadSweetSpots(makeFetch(sweetSpotsStub), true);
+  assert('advisor nav has refresh button', !!win.document.getElementById('nav-refresh-btn'));
+  assert('advisor nav has export button', !!win.document.getElementById('nav-export-btn'));
   var defaultPrefs = api.readPrefs();
   assertEqual('auto-detect picks expiring for expiring account', defaultPrefs.mode, 'expiring');
   assertEqual('default prefs travel enabled', defaultPrefs.interestedInTravel, true);

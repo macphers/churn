@@ -14,6 +14,7 @@ A personal dashboard for tracking credit card points, miles, and benefits across
 
 ### Shipped Since v1
 - **Value Advisor** (value.html) — personalized redemption recommendations with scoring engine, WTP caps, and household support
+- **Wallet** (wallet.html) — category-based card picker that ranks the cards you actually hold using the shared rewards engine
 - **Trip Planner** (trips.html) — shows bookable flights and hotels based on your balances and transfer paths
 - **Transfer partner mapping** — built into programs.js with ratios, sweet spots, and path resolution
 - **Points expiration tracking** — staleness badges, activity dates, and expiration warnings across all views
@@ -73,13 +74,14 @@ The app stores all data in a structured JSON format in localStorage. An AI agent
 - Pure HTML/CSS/JS — no frameworks, no build step
 - All data stored in localStorage (no backend)
 - Must work well on mobile (responsive, touch-friendly)
-- Minimal file count (currently 3 pages + shared data files)
+- Minimal file count (currently 4 pages + shared data files)
 - Clean, modern UI — dark mode preferred
 
 ## Pages / Views
 1. **Rewards Tracker** (index.html) — dashboard with accounts, benefits, profile, balance refresh, advisor verdict banner
-2. **Value Advisor** (value.html) — scoring engine with WTP caps, recommendation cards, household support, expiration tracking
-3. **Trip Planner** (trips.html) — resolver engine showing bookable flights/hotels from your points via sweet spots and transfer paths
+2. **Wallet** (wallet.html) — ranks the best attached card for a spend category and shows the gap to the runner-up
+3. **Value Advisor** (value.html) — scoring engine with WTP caps, recommendation cards, household support, expiration tracking
+4. **Trip Planner** (trips.html) — resolver engine showing bookable flights/hotels from your points via sweet spots and transfer paths
 
 ## Non-Goals (v1)
 - No backend or authentication

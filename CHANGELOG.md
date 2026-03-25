@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.18.0] - 2026-03-25
+
+### Added
+- Wallet tab for card-choice decisions, with a dedicated `wallet-engine.js`, freeform category resolution, ranked card recommendations, and gap bars for missed value
+- Shared `engine.js` module used by Wallet and Advisor so both pages read from the same adjusted ceiling CPP model
+- Expanded rewards metadata in `programs.js`, including category aliases, card networks, rotating categories, and co-branded airline and hotel cards
+- Browser-side wallet regression suite plus new route/nav assertions across tracker, advisor, and trips
+
+### Changed
+- Wallet empty states now jump straight into the matching account's card section instead of sending users through the generic account list first
+- Wallet, Advisor, and Trips now use the same action cluster as the tracker header, including refresh, export, and theme controls
+
+### Fixed
+- Mobile navigation now wraps correctly after adding the Wallet tab, preventing header actions from clipping on narrow screens
+- Tracker household sidecar import/export survives the master merge, preserving backup and restore behavior for `churn_household`
+
 ## [0.1.17.0] - 2026-03-24
 
 ### Added

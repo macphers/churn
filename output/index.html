@@ -866,6 +866,11 @@ body {
   display: grid;
   gap: 10px;
 }
+.cards-help {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
 .known-card-option {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -1290,6 +1295,24 @@ body {
 
 @media (max-width: 767px) {
   .container, .app-nav-inner { width: calc(100vw - 24px); }
+  .app-nav-inner {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 12px;
+  }
+  .nav-links {
+    width: 100%;
+    order: 3;
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .nav-links a, .nav-links button {
+    justify-content: center;
+    flex: 1 1 calc(33.333% - 6px);
+  }
+  .nav-end { margin-left: auto; }
   .page-header { flex-direction: column; align-items: flex-start; padding-top: 28px; }
   .cards-grid { grid-template-columns: 1fr; }
   .modal-backdrop { padding: 0; }
@@ -1410,6 +1433,7 @@ body {
       <button type="button" class="nav-tab" data-tab="accounts">Accounts</button>
       <button type="button" class="nav-tab" data-tab="benefits">Benefits</button>
       <button type="button" class="nav-tab" data-tab="profile">Profile</button>
+      <button type="button" class="nav-tab" data-tab="wallet">Wallet</button>
       <button type="button" class="nav-tab" data-tab="advisor">Advisor</button>
       <button type="button" class="nav-tab" data-tab="trips">Trips</button>
     </div>
@@ -1585,10 +1609,11 @@ body {
             <div class="field span-2">
               <details id="cards-details" class="cards-details">
                 <summary>
-                  <span>Cards</span>
-                  <span class="mini-label">Collapsed by default</span>
+                  <span>Cards held in this program</span>
+                  <span class="mini-label">Expand to attach cards</span>
                 </summary>
                 <div class="cards-body">
+                  <p class="cards-help">Check the cards you actually hold for this program so Wallet can compare the right earn rates. If a product is missing, add it as a custom card below.</p>
                   <div id="known-card-options"></div>
                   <button type="button" class="btn btn-ghost" id="add-custom-card-button">Add custom card</button>
                   <div id="custom-card-list" class="custom-card-list"></div>
@@ -1739,6 +1764,8 @@ var STORAGE_KEY = 'churn_data';
 var LEGACY_STORAGE_KEY = 'osaka_data';
 var VALUE_RESULTS_KEY = 'valueAdvisorResults';
 var PREFS_KEY = 'valueAdvisorPrefs';
+var HOUSEHOLD_KEY = 'churn_household';
+var LEGACY_HOUSEHOLD_KEY = 'osaka_household';
 var SCHEMA_VERSION = 3;
 var VALID_TYPES = ['flexible', 'airline', 'hotel', 'credit_card', 'other'];
 var VALID_CURRENCIES = ['points', 'miles'];
@@ -2063,6 +2090,46 @@ function getProgramNameBySlug(slug) {
 function getProgramBySlug(slug) {
   var name = getProgramNameBySlug(slug);
   return name ? window.PROGRAMS.programs[name] : null;
+}
+
+function normalizeHouseholdAccount(item) {
+  if (!item || typeof item !== 'object') return null;
+  var rawProgramName = item.program || getProgramNameBySlug(item.programSlug) || '';
+  var guessedName = rawProgramName ? guessProgramName(rawProgramName) : '';
+  var programName = guessedName || rawProgramName;
+  var program = item.programSlug ? getProgramBySlug(item.programSlug) : (programName ? getProgramByName(programName) : null);
+  return {
+    id: typeof item.id === 'string' ? item.id : genId(),
+    memberName: typeof item.memberName === 'string' && item.memberName.trim() ? item.memberName.trim() : 'Player two',
+    program: programName || (program ? getProgramNameBySlug(program.slug) : ''),
+    programSlug: program ? program.slug : (item.programSlug || null),
+    balance: Math.max(0, Math.floor(Number(item.balance) || 0)),
+    currency: program ? program.currency : validateCurrency(item.currency),
+    type: program ? program.type : validateType(item.type)
+  };
+}
+
+function readHouseholdData() {
+  try {
+    var raw = localStorage.getItem(HOUSEHOLD_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_HOUSEHOLD_KEY);
+      if (raw) { localStorage.setItem(HOUSEHOLD_KEY, raw); localStorage.removeItem(LEGACY_HOUSEHOLD_KEY); }
+    }
+    if (!raw) return [];
+    var parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.map(normalizeHouseholdAccount).filter(Boolean);
+    if (parsed && Array.isArray(parsed.accounts)) return parsed.accounts.map(normalizeHouseholdAccount).filter(Boolean);
+    return [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveHouseholdData(items) {
+  var list = Array.isArray(items) ? items : [];
+  localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify(list.map(normalizeHouseholdAccount).filter(Boolean)));
+  localStorage.removeItem(VALUE_RESULTS_KEY);
 }
 
 
@@ -2769,6 +2836,10 @@ function renderDashboard(data) {
 }
 
 function switchTab(tabName) {
+  if (tabName === 'wallet') {
+    window.location.href = 'wallet.html';
+    return;
+  }
   if (tabName === 'advisor') {
     window.location.href = 'value.html';
     return;
@@ -2783,6 +2854,49 @@ function switchTab(tabName) {
   document.querySelectorAll('.view').forEach(function (view) {
     view.classList.toggle('active', view.id === 'view-' + tabName);
   });
+}
+
+function applyRouteFromHash() {
+  var rawHash = (window.location.hash || '').replace(/^#/, '');
+  var hash = rawHash.toLowerCase();
+  var tabName = hash;
+  var openAccount = false;
+  var openCards = false;
+  var openRefresh = false;
+  var accountId = '';
+  if (!rawHash) return;
+  if (hash === 'accounts-add' || hash === 'add-account') {
+    tabName = 'accounts';
+    openAccount = true;
+  }
+  if (hash === 'refresh') {
+    tabName = 'dashboard';
+    openRefresh = true;
+  }
+  if (hash.indexOf('accounts-edit:') === 0) {
+    tabName = 'accounts';
+    openAccount = true;
+    openCards = true;
+    accountId = decodeURIComponent(rawHash.slice('accounts-edit:'.length));
+  }
+  if (['dashboard', 'accounts', 'benefits', 'profile'].indexOf(tabName) === -1) return;
+  switchTab(tabName);
+  if (openAccount) {
+    window.setTimeout(function () {
+      openAccountModal(accountId || null, { openCards: openCards });
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#accounts');
+      }
+    }, 0);
+  }
+  if (openRefresh) {
+    window.setTimeout(function () {
+      openRefreshModal();
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '#dashboard');
+      }
+    }, 0);
+  }
 }
 
 function render() {
@@ -2877,8 +2991,12 @@ function setProgramMode(mode) {
 
 function renderProgramHint(program) {
   var hint = document.getElementById('program-hint');
-  if (!program || state.programPicker.mode === 'custom') {
+  if (state.programPicker.mode === 'custom') {
     hint.innerHTML = '<div class="program-hint"><strong>Custom program.</strong> All fields are editable — set your own cents-per-point value and details.</div>';
+    return;
+  }
+  if (!program) {
+    hint.innerHTML = '<div class="program-hint"><strong>Select a known program first.</strong> Churn will fill in the default value and show suggested cards for that rewards currency.</div>';
     return;
   }
   hint.innerHTML = '<div class="program-hint"><strong>' + esc(program.type) + '</strong> program • ' + esc(program.currency) + ' • ' + program.cpp.toFixed(2) + ' cpp • ' + (program.cards || []).length + ' card option' + ((program.cards || []).length === 1 ? '' : 's') + '</div>';
@@ -2948,7 +3066,11 @@ function readCardSelections() {
 function renderKnownCards(cards) {
   var container = document.getElementById('known-card-options');
   if (!cards.length) {
-    container.innerHTML = '<div class="empty-state"><strong>No known cards for this program</strong>Use the custom-card flow below if you want to track a different issuer product.</div>';
+    if (state.programPicker.mode === 'custom') {
+      container.innerHTML = '<div class="empty-state"><strong>No known cards for a custom program</strong>Use the custom-card flow below to add the issuer products you actually hold.</div>';
+    } else {
+      container.innerHTML = '<div class="empty-state"><strong>Select a program first</strong>Known cards will appear here after you choose a rewards program above. Or add a custom card below.</div>';
+    }
     return;
   }
   var selectedCards = readCardSelections();
@@ -3051,7 +3173,8 @@ function fillAccountForm(account) {
   }
 }
 
-function openAccountModal(accountId) {
+function openAccountModal(accountId, options) {
+  options = options || {};
   var data = loadData();
   var account = accountId ? data.accounts.find(function (item) { return item.id === accountId; }) : null;
   state.customCards = [];
@@ -3063,6 +3186,25 @@ function openAccountModal(accountId) {
   renderProgramOptions();
   openModal('account-modal');
   window.setTimeout(function () {
+    var cardsDetails = document.getElementById('cards-details');
+    if (options.openCards) {
+      cardsDetails.open = true;
+      if (cardsDetails.scrollIntoView) cardsDetails.scrollIntoView({ block: 'start' });
+      var firstCheckbox = cardsDetails.querySelector('[data-known-card-checkbox]');
+      var firstCustom = cardsDetails.querySelector('[data-card-name="0"]');
+      var addCustom = document.getElementById('add-custom-card-button');
+      var summary = cardsDetails.querySelector('summary');
+      if (firstCheckbox) {
+        firstCheckbox.focus();
+      } else if (firstCustom) {
+        firstCustom.focus();
+      } else if (addCustom) {
+        addCustom.focus();
+      } else if (summary) {
+        summary.focus();
+      }
+      return;
+    }
     document.getElementById('program-picker-input').focus();
   }, 20);
 }
@@ -3259,6 +3401,7 @@ function handleAdvisorCapInput(target) {
 function exportData() {
   var backup = loadData();
   backup.valueAdvisorPrefs = readStoredAdvisorPrefs();
+  backup.churn_household = readHouseholdData();
   var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var link = document.createElement('a');
@@ -3275,6 +3418,15 @@ function applyImportedSidecarData(parsed) {
   if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'valueAdvisorPrefs')) {
     if (parsed.valueAdvisorPrefs == null) localStorage.removeItem(PREFS_KEY);
     else saveStoredAdvisorPrefs(parsed.valueAdvisorPrefs);
+  }
+  if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'churn_household')) {
+    if (parsed.churn_household == null) {
+      localStorage.removeItem(HOUSEHOLD_KEY);
+      localStorage.removeItem(LEGACY_HOUSEHOLD_KEY);
+      localStorage.removeItem(VALUE_RESULTS_KEY);
+    } else {
+      saveHouseholdData(parsed.churn_household);
+    }
   }
 }
 
@@ -3640,6 +3792,7 @@ function bindEvents() {
   window.addEventListener('storage', function (event) {
     if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY) render();
   });
+  window.addEventListener('hashchange', applyRouteFromHash);
 }
 
 window.ChurnTracker = {
@@ -3684,6 +3837,7 @@ window.ChurnTracker = {
 
 bindEvents();
 render();
+applyRouteFromHash();
 
 /* ── Theme toggle ──────────────────────────────── */
 (function () {

@@ -455,8 +455,14 @@ function run() {
 
   // Refresh modal exists
   assert('refresh modal element exists', !!win.document.getElementById('refresh-modal'));
-
-  renderResults();
+  win.location.hash = '#accounts-edit:acct-1';
+  win.dispatchEvent(new win.Event('hashchange'));
+  setTimeout(function () {
+    assertEqual('hash route switches to accounts view', win.document.querySelector('.view.active').id, 'view-accounts');
+    assert('hash route opens account modal', win.document.getElementById('account-modal').classList.contains('active'));
+    assert('hash route expands cards section', win.document.getElementById('cards-details').open);
+    renderResults();
+  }, 60);
 }
 
 document.getElementById('tracker-frame').addEventListener('load', function () {
