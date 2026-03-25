@@ -13,6 +13,7 @@ Current product capabilities include:
 - Tracking loyalty accounts across airlines, hotels, and flexible bank programs
 - Storing balances, account metadata, and benefit details in a local-first model
 - Estimating cash-equivalent value for rewards balances
+- Recommending which attached card to use for a spend category in the Wallet view
 - Providing a separate Value Advisor view for redemption guidance
 - Trip Planner showing which flights and hotels your points can unlock right now
 - Keeping everything browser-local with no required backend
@@ -82,8 +83,12 @@ If you want stable local data while developing, keep using the same URL consiste
 .
 ├── output/
 │   ├── index.html             # Rewards Tracker
+│   ├── wallet.html            # Wallet card picker
 │   ├── value.html             # Value Advisor
 │   ├── trips.html             # Trip Planner
+│   ├── engine.js              # Shared valuation engine
+│   ├── wallet-engine.js       # Wallet ranking helpers
+│   ├── nav-actions.js         # Shared standalone nav actions
 │   ├── shared.css             # Shared design tokens (colors, typography)
 │   ├── programs.js            # Shared reward-program data
 │   ├── sweetSpots.json        # Curated flight/hotel redemptions
@@ -102,8 +107,11 @@ If you want stable local data while developing, keep using the same URL consiste
 The user-facing app is intentionally static and browser-native.
 
 - `output/index.html` is the main rewards tracker
+- `output/wallet.html` is the wallet/card-choice view
 - `output/value.html` is the advisor view
 - `output/trips.html` is the trip planner (what can I book with my points?)
+- `output/engine.js` is the shared valuation/scoring engine for Wallet and Advisor
+- `output/wallet-engine.js` is the pure Wallet ranking layer
 - `output/shared.css` is the shared design token stylesheet (colors, typography)
 - `output/programs.js` contains shared reward-program metadata
 - `output/sweetSpots.json` contains curated flight and hotel sweet spots
@@ -132,6 +140,7 @@ The product lives in `output/`. In practice, that is where most UI and feature w
 Current testing is lightweight and practical:
 
 - `output/tests/test.html` — Tracker tests (schema migration, import/export, account management)
+- `output/tests/wallet-test.html` — Wallet tests (category resolution, card ranking, empty states, nav actions)
 - `output/tests/value-test.html` — Advisor tests (scoring engine, WTP, household, recommendations)
 - `output/tests/trips-test.html` — Trip Planner tests (resolver engine, filters, rendering)
 - Local manual verification on a fixed port
