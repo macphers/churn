@@ -1115,6 +1115,246 @@ body {
 }
 .advisor-verdict-link:hover { text-decoration: underline; }
 
+/* ── Opportunities ───────────────────────────── */
+.opps-section {
+  margin-top: 24px;
+  animation: fadeInUp 280ms ease-out;
+}
+.opps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.opps-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.opps-header h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.opps-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  padding: 0 6px;
+}
+.opps-dismiss-all {
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 120ms ease, background 120ms ease;
+}
+.opps-dismiss-all:hover { color: var(--text-muted); background: var(--accent-glow); }
+.opps-grid {
+  display: grid;
+  gap: 12px;
+}
+.opp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+  position: relative;
+  transition: border-color 150ms ease;
+}
+.opp-card:hover { border-color: var(--border-strong); }
+.opp-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.opp-card-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.opp-card-program {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.opp-card-arrow {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.opp-card-partner {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.opp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.opp-badge.sweet-spot {
+  background: rgba(45,122,79,0.10);
+  color: var(--success);
+  border: 1px solid rgba(45,122,79,0.20);
+}
+.opp-badge.expiring {
+  background: rgba(122,90,8,0.08);
+  color: var(--warning);
+  border: 1px solid rgba(122,90,8,0.20);
+}
+.opp-badge.danger {
+  background: rgba(166,61,64,0.08);
+  color: var(--danger);
+  border: 1px solid rgba(166,61,64,0.20);
+}
+.opp-badge.benefit {
+  background: rgba(124,77,138,0.08);
+  color: var(--hotel-color);
+  border: 1px solid rgba(124,77,138,0.20);
+}
+.opp-card-body {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: end;
+}
+.opp-metric-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.opp-metric-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.opp-metric-value.highlight {
+  color: var(--success);
+}
+.opp-chevrons {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  padding-bottom: 4px;
+}
+.opp-chevron {
+  color: var(--success);
+  font-size: 14px;
+  font-weight: 700;
+}
+.opp-card-footer {
+  background: rgba(45,122,79,0.06);
+  margin: -20px;
+  margin-top: 0;
+  padding: 10px 20px;
+  border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
+  border-top: 1px solid rgba(45,122,79,0.12);
+}
+.opp-card-footer p {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
+  text-align: center;
+}
+.opp-card-footer.warn {
+  background: rgba(122,90,8,0.05);
+  border-top-color: rgba(122,90,8,0.12);
+}
+.opp-card-footer.warn p { color: var(--warning); }
+.opp-card-footer.danger {
+  background: rgba(166,61,64,0.05);
+  border-top-color: rgba(166,61,64,0.12);
+}
+.opp-card-footer.danger p { color: var(--danger); }
+.opp-card-footer.benefit {
+  background: rgba(124,77,138,0.05);
+  border-top-color: rgba(124,77,138,0.12);
+}
+.opp-card-footer.benefit p { color: var(--hotel-color); }
+.opp-card-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+.opp-card:hover .opp-card-dismiss { opacity: 1; }
+.opp-card-dismiss:hover { color: var(--text-muted); }
+.opp-card-description {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.opp-card-simple {
+  display: grid;
+  gap: 8px;
+}
+@media (max-width: 767px) {
+  .opp-card-body { grid-template-columns: 1fr; gap: 8px; }
+  .opp-chevrons { display: none; }
+  .opp-card-dismiss { opacity: 1; }
+}
+[data-theme="dark"] .opp-badge.sweet-spot {
+  background: rgba(77,175,114,0.12);
+  color: var(--success);
+  border-color: rgba(77,175,114,0.25);
+}
+[data-theme="dark"] .opp-badge.expiring {
+  background: rgba(196,154,46,0.10);
+  color: var(--warning);
+  border-color: rgba(196,154,46,0.22);
+}
+[data-theme="dark"] .opp-badge.danger {
+  background: rgba(212,88,91,0.10);
+  color: var(--danger);
+  border-color: rgba(212,88,91,0.22);
+}
+[data-theme="dark"] .opp-badge.benefit {
+  background: rgba(168,115,184,0.10);
+  color: var(--hotel-color);
+  border-color: rgba(168,115,184,0.22);
+}
+[data-theme="dark"] .opp-card-footer { background: rgba(77,175,114,0.08); border-top-color: rgba(77,175,114,0.15); }
+[data-theme="dark"] .opp-card-footer.warn { background: rgba(196,154,46,0.06); border-top-color: rgba(196,154,46,0.15); }
+[data-theme="dark"] .opp-card-footer.danger { background: rgba(212,88,91,0.06); border-top-color: rgba(212,88,91,0.15); }
+[data-theme="dark"] .opp-card-footer.benefit { background: rgba(168,115,184,0.06); border-top-color: rgba(168,115,184,0.15); }
+
 /* ── Dashboard account table ───────────────── */
 .dash-table {
   width: 100%;
@@ -1467,6 +1707,7 @@ body {
     </div>
     <div id="dash-stat-cards" class="stat-cards-grid"></div>
     <div id="dash-verdict-banner"></div>
+    <div id="dash-opportunities"></div>
     <div id="dash-account-table"></div>
     <div id="hero-card" style="display:none"></div>
     <div id="chart-card" style="display:none"></div>
@@ -2705,6 +2946,248 @@ function renderProfile(data) {
   if (recommendations) recommendations.innerHTML = renderRecommendationSettings();
 }
 
+var DISMISSED_OPPS_KEY = 'churn_dismissed_opps';
+
+function getDismissedOpps() {
+  try {
+    var raw = localStorage.getItem(DISMISSED_OPPS_KEY);
+    if (!raw) return {};
+    var parsed = JSON.parse(raw);
+    var now = Date.now();
+    var maxAge = 7 * 86400000;
+    var pruned = {};
+    var changed = false;
+    Object.keys(parsed).forEach(function (key) {
+      if ((now - parsed[key]) <= maxAge) {
+        pruned[key] = parsed[key];
+      } else {
+        changed = true;
+      }
+    });
+    if (changed) {
+      try { localStorage.setItem(DISMISSED_OPPS_KEY, JSON.stringify(pruned)); } catch (e) { /* quota */ }
+    }
+    return pruned;
+  } catch (e) { return {}; }
+}
+
+function dismissOpp(oppId) {
+  var dismissed = getDismissedOpps();
+  dismissed[oppId] = Date.now();
+  try { localStorage.setItem(DISMISSED_OPPS_KEY, JSON.stringify(dismissed)); } catch (e) { /* quota */ }
+  render();
+}
+
+function scanOpportunities(data) {
+  var opps = [];
+  var dismissed = getDismissedOpps();
+  var now = Date.now();
+  var dayMs = 86400000;
+
+  // 1. Unused benefits expiring soon (within 90 days)
+  data.benefits.forEach(function (b) {
+    if (b.used === true || b.used === 'true') return;
+    if (!b.renewalDate) return;
+    var renewalDate = new Date(b.renewalDate);
+    if (isNaN(renewalDate.getTime())) return;
+    var daysLeft = Math.ceil((renewalDate.getTime() - now) / dayMs);
+    if (daysLeft < 0 || daysLeft > 90) return;
+    var account = data.accounts.find(function (a) { return a.id === b.cardId; });
+    var valueStr = b.value || '';
+    var valueNum = parseFloat(valueStr.replace(/[^0-9.]/g, ''));
+    opps.push({
+      id: 'benefit-' + b.id,
+      type: 'benefit',
+      priority: daysLeft <= 14 ? 100 : (daysLeft <= 30 ? 80 : 60),
+      program: account ? account.program : 'Unknown card',
+      title: b.name,
+      description: 'This benefit renews in ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + ' — use it or lose it.',
+      footerText: isFinite(valueNum) && valueNum > 0
+        ? valueStr + ' credit expires ' + renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : 'Expires ' + renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      footerTone: daysLeft <= 14 ? 'danger' : 'benefit',
+      badge: daysLeft <= 14 ? 'danger' : 'expiring',
+      badgeLabel: daysLeft + 'd left',
+      valueLabel: isFinite(valueNum) && valueNum > 0 ? esc(valueStr) : null
+    });
+  });
+
+  // 2. Points at risk of expiration
+  data.accounts.forEach(function (a) {
+    var risk = getExpirationRisk(a);
+    if (!risk) return;
+    var daysRemaining = risk.expiresAt ? Math.ceil((new Date(risk.expiresAt).getTime() - now) / dayMs) : 0;
+    var value = calculateAccountValue(a);
+    opps.push({
+      id: 'expiry-' + a.id,
+      type: 'expiration',
+      priority: risk.expired ? 110 : (daysRemaining <= 30 ? 95 : 70),
+      program: a.program,
+      title: risk.expired ? 'Points may have expired' : 'Points expiring soon',
+      description: risk.expired
+        ? formatPoints(a.balance) + ' ' + (a.currency || 'points') + ' (' + formatDollars(value) + ') may have expired due to inactivity.'
+        : formatPoints(a.balance) + ' ' + (a.currency || 'points') + ' (' + formatDollars(value) + ') expire in ' + daysRemaining + ' days without activity.',
+      footerText: risk.expired
+        ? 'Log in now — some programs restore expired points'
+        : 'Any account activity resets the clock',
+      footerTone: risk.expired ? 'danger' : 'warn',
+      badge: risk.expired ? 'danger' : 'expiring',
+      badgeLabel: risk.expired ? 'Expired' : daysRemaining + 'd left',
+      valueLabel: formatDollars(value) + ' at risk'
+    });
+  });
+
+  // 3. High-value transfer sweet spots
+  data.accounts.forEach(function (a) {
+    var program = getProgramForAccount(a);
+    if (!program || !Array.isArray(program.transferPartners)) return;
+    if (validateBalance(a.balance) < 5000) return;
+    program.transferPartners.forEach(function (partner) {
+      var bestCpp = Number(partner.bestCpp) || 0;
+      if (!isFinite(bestCpp) || bestCpp < 1.8) return;
+      var partnerName = partner.partner || 'Unknown';
+      var cashValue = Math.round(validateBalance(a.balance) * validateCpp(a.cpp) / 100);
+      var transferValue = Math.round(validateBalance(a.balance) * bestCpp / 100);
+      var uplift = transferValue - cashValue;
+      if (uplift < 50) return;
+      var pctGain = Math.round((uplift / Math.max(1, cashValue)) * 100);
+      opps.push({
+        id: 'transfer-' + a.id + '-' + partnerName.replace(/\s+/g, '-'),
+        type: 'sweet-spot',
+        priority: 40 + Math.min(pctGain, 40),
+        program: a.program,
+        partner: partnerName,
+        title: partner.sweetSpot || 'High-value transfer opportunity',
+        description: partner.cabinType ? partner.cabinType.charAt(0).toUpperCase() + partner.cabinType.slice(1) + ' cabin · ' + partner.ratio + ' transfer · ' + partner.availability + ' availability' : '',
+        cashValue: cashValue,
+        transferValue: transferValue,
+        uplift: uplift,
+        pctGain: pctGain,
+        footerText: 'Transfer could unlock +' + formatDollars(uplift) + ' in value (' + pctGain + '% more)',
+        footerTone: 'success',
+        badge: 'sweet-spot',
+        badgeLabel: '+' + pctGain + '%',
+        valueLabel: null
+      });
+    });
+  });
+
+  // Filter dismissed (dismissed opps expire after 7 days)
+  opps = opps.filter(function (opp) {
+    if (!dismissed[opp.id]) return true;
+    return (now - dismissed[opp.id]) > 7 * dayMs;
+  });
+
+  // Sort by priority descending
+  opps.sort(function (a, b) { return b.priority - a.priority; });
+
+  // Limit to top 5
+  return opps.slice(0, 5);
+}
+
+function renderOppCard(opp) {
+  if (opp.type === 'sweet-spot') {
+    return '<div class="opp-card">' +
+      '<button type="button" class="opp-card-dismiss" data-dismiss-opp="' + esc(opp.id) + '" title="Dismiss">&times;</button>' +
+      '<div class="opp-card-top">' +
+        '<div class="opp-card-route">' +
+          '<span class="opp-card-program">' + esc(opp.program) + '</span>' +
+          '<span class="opp-card-arrow">&rsaquo;</span>' +
+          '<span class="opp-card-partner">' + esc(opp.partner) + '</span>' +
+        '</div>' +
+        '<span class="opp-badge sweet-spot">' + esc(opp.badgeLabel) + '</span>' +
+      '</div>' +
+      '<div class="opp-card-body">' +
+        '<div>' +
+          '<div class="opp-metric-label">Cash back value</div>' +
+          '<div class="opp-metric-value">' + formatDollars(opp.cashValue) + '</div>' +
+        '</div>' +
+        '<div class="opp-chevrons">' +
+          '<span class="opp-chevron">&rsaquo;</span>' +
+          '<span class="opp-chevron">&rsaquo;</span>' +
+          '<span class="opp-chevron">&rsaquo;</span>' +
+        '</div>' +
+        '<div>' +
+          '<div class="opp-metric-label">Transfer value</div>' +
+          '<div class="opp-metric-value highlight">' + formatDollars(opp.transferValue) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="opp-card-description">' + esc(opp.description) + '</div>' +
+      '<div class="opp-card-footer">' +
+        '<p>' + esc(opp.footerText) + '</p>' +
+      '</div>' +
+    '</div>';
+  }
+  // Simple card for benefits, expirations
+  var badgeClass = opp.badge || 'expiring';
+  var footerClass = opp.footerTone || 'warn';
+  return '<div class="opp-card">' +
+    '<button type="button" class="opp-card-dismiss" data-dismiss-opp="' + esc(opp.id) + '" title="Dismiss">&times;</button>' +
+    '<div class="opp-card-top">' +
+      '<div class="opp-card-route">' +
+        '<span class="opp-card-program">' + esc(opp.program) + '</span>' +
+      '</div>' +
+      '<span class="opp-badge ' + badgeClass + '">' + esc(opp.badgeLabel) + '</span>' +
+    '</div>' +
+    '<div class="opp-card-simple">' +
+      '<strong style="font-size:15px;letter-spacing:-0.01em">' + esc(opp.title) + '</strong>' +
+      '<div class="opp-card-description">' + esc(opp.description) + '</div>' +
+      (opp.valueLabel ? '<div class="opp-metric-value" style="font-size:22px">' + esc(opp.valueLabel) + '</div>' : '') +
+    '</div>' +
+    '<div class="opp-card-footer ' + footerClass + '">' +
+      '<p>' + esc(opp.footerText) + '</p>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderOpportunities(data) {
+  var container = document.getElementById('dash-opportunities');
+  if (!container) return;
+
+  var opps = scanOpportunities(data);
+  if (!opps.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  var html = '<div class="opps-section">' +
+    '<div class="opps-header">' +
+      '<div class="opps-header-left">' +
+        '<h3>Hey, we found something</h3>' +
+        '<span class="opps-count">' + opps.length + '</span>' +
+      '</div>' +
+      '<button type="button" class="opps-dismiss-all" id="opps-dismiss-all">Dismiss all</button>' +
+    '</div>' +
+    '<div class="opps-grid">';
+
+  opps.forEach(function (opp) {
+    html += renderOppCard(opp);
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('[data-dismiss-opp]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      dismissOpp(btn.getAttribute('data-dismiss-opp'));
+    });
+  });
+
+  var dismissAllBtn = document.getElementById('opps-dismiss-all');
+  if (dismissAllBtn) {
+    dismissAllBtn.addEventListener('click', function () {
+      var dismissed = getDismissedOpps();
+      var now = Date.now();
+      opps.forEach(function (opp) {
+        dismissed[opp.id] = now;
+      });
+      try { localStorage.setItem(DISMISSED_OPPS_KEY, JSON.stringify(dismissed)); } catch (e) { /* quota */ }
+      render();
+    });
+  }
+}
+
 function renderVerdictBanner(results) {
   if (!results || !results.verdict) return '';
   var verdict = results.verdict;
@@ -2739,6 +3222,8 @@ function renderDashboard(data) {
     dashHero.innerHTML = '<div class="dash-welcome"><h1>Track your loyalty points in real dollars.</h1><p>Add a program like Chase Ultimate Rewards or Delta SkyMiles. Churn fills in valuations, transfer partners, and card details automatically.</p></div>';
     statCards.innerHTML = '';
     if (verdictBanner) verdictBanner.innerHTML = '';
+    var oppContainer = document.getElementById('dash-opportunities');
+    if (oppContainer) oppContainer.innerHTML = '';
     accountTable.innerHTML = '';
     return;
   }
@@ -2777,6 +3262,7 @@ function renderDashboard(data) {
   });
   statCards.innerHTML = cardsHtml;
   if (verdictBanner) verdictBanner.innerHTML = renderVerdictBanner(readAdvisorResults(data));
+  renderOpportunities(data);
 
   // Account table
   var sorted = data.accounts.slice().sort(function (a, b) { return calculateAccountValue(b) - calculateAccountValue(a); });
@@ -3790,7 +4276,7 @@ function bindEvents() {
     }
   });
   window.addEventListener('storage', function (event) {
-    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY) render();
+    if (event.key === STORAGE_KEY || event.key === VALUE_RESULTS_KEY || event.key === PREFS_KEY || event.key === DISMISSED_OPPS_KEY) render();
   });
   window.addEventListener('hashchange', applyRouteFromHash);
 }
